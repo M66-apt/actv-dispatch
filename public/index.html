@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angthong Cable TV — ระบบจัดการงาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C4982A;--gold-2:#E2B840;--gold-3:#FBF0CC;--gold-pale:#FDF8EC;--gold-dark:#8A6B10;
+  --navy:#0D1B2E;--navy-2:#152235;--navy-3:#1E3048;--navy-4:#2A4060;
+  --surface:#FFFFFF;--surface-2:#F7F8FA;--surface-3:#EDEEF1;
+  --border:#E4E6EA;--border-2:#CDD0D7;
+  --text:#0D1B2E;--text-2:#374558;--text-3:#8792A0;--text-4:#B4BDC9;
+  --success:#0F9B6A;--success-bg:#EBF9F4;--success-border:#9FDFCB;
+  --warning:#E07B1A;--warning-bg:#FFF5EB;--warning-border:#FFD49B;
+  --danger:#D93025;--danger-bg:#FEF1F0;--danger-border:#FBCCC9;
+  --info:#1A6ED8;--info-bg:#EBF3FF;--info-border:#A8CCFA;
+  --purple:#6C3FC5;--purple-bg:#F2EDFD;--purple-border:#C9B5F5;
+  --r:8px;--r-sm:6px;--r-lg:12px;--r-xl:16px;--r-2xl:20px;
+  --shadow-xs:0 1px 2px rgba(0,0,0,.06);
+  --shadow:0 1px 4px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.05);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
+  --transition:160ms cubic-bezier(.4,0,.2,1);
+  --fast:100ms cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:'Sarabun',system-ui,sans-serif;background:var(--surface-2);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+.app{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;background:var(--navy);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:300}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;flex-shrink:0}
+.logo-info strong{display:block;font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em;line-height:1.2}
+.logo-info span{font-size:10.5px;color:rgba(255,255,255,.4);font-weight:400}
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:0 8px;margin:16px 0 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;transition:var(--transition);color:rgba(255,255,255,.5);font-size:13.5px;font-weight:500;border:1px solid transparent;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.nav-item.active{background:rgba(196,152,42,.14);color:var(--gold-2);border-color:rgba(196,152,42,.2)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon{opacity:1}
+.nav-pill{margin-left:auto;background:var(--gold);color:var(--navy);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;line-height:1.4}
+.nav-item.active .nav-pill{background:var(--gold-2)}
+.sidebar-footer{padding:12px 10px;border-top:1px solid rgba(255,255,255,.06)}
+.sidebar-user{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r)}
+.user-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold-2));color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;flex-shrink:0}
+.user-info span{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.8)}
+.user-info small{font-size:10.5px;color:rgba(255,255,255,.35)}
+
+/* ── MAIN AREA ── */
+.main-wrap{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-xs)}
+.topbar-title{font-size:16px;font-weight:700;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-date{font-size:12px;color:var(--text-3);padding:5px 10px;background:var(--surface-2);border-radius:var(--r-sm);border:1px solid var(--border)}
+.main{padding:24px 28px;flex:1}
+.section{display:none;animation:fadeIn .2s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── PAGE HEADER ── */
+.ph-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.ph-top h1{font-size:20px;font-weight:800;color:var(--text)}
+.ph-top p{font-size:13px;color:var(--text-3);margin-top:3px}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;position:relative;overflow:hidden;transition:var(--transition)}
+.stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0}
+.stat-card.c-gold::before{background:linear-gradient(to bottom,var(--gold),var(--gold-2))}
+.stat-card.c-warn::before{background:linear-gradient(to bottom,var(--warning),#F5A030)}
+.stat-card.c-success::before{background:linear-gradient(to bottom,var(--success),#30C89A)}
+.stat-card.c-info::before{background:linear-gradient(to bottom,var(--info),#4A9AE8)}
+.stat-card.c-purple::before{background:linear-gradient(to bottom,var(--purple),#8B60DC)}
+.stat-icon{width:32px;height:32px;border-radius:var(--r-sm);display:grid;place-items:center;margin-bottom:10px}
+.stat-card.c-gold .stat-icon{background:var(--gold-pale);color:var(--gold-dark)}
+.stat-card.c-warn .stat-icon{background:var(--warning-bg);color:var(--warning)}
+.stat-card.c-success .stat-icon{background:var(--success-bg);color:var(--success)}
+.stat-card.c-info .stat-icon{background:var(--info-bg);color:var(--info)}
+.stat-card.c-purple .stat-icon{background:var(--purple-bg);color:var(--purple)}
+.stat-label{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.stat-val{font-size:19px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.01em}
+.stat-sub{font-size:11.5px;color:var(--text-3);margin-top:4px}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none}
+.search-wrap input{width:100%;padding:9px 10px 9px 36px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);font-family:inherit;font-size:13px;color:var(--text);outline:none;transition:var(--transition);height:38px}
+.search-wrap input::placeholder{color:var(--text-4)}
+.search-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,152,42,.1)}
+.filter-select{padding:0 32px 0 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);font-family:inherit;font-size:13px;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238792A0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;height:38px}
+.filter-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,152,42,.1);outline:none}
+.filter-count{font-size:12px;color:var(--text-3);padding:0 4px;white-space:nowrap;align-self:center}
+
+/* ── CARD / TABLE ── */
+.card{background:var(--surface);border-radius:var(--r-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface-2);padding:10px 16px;text-align:left;font-weight:700;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background var(--fast)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#FAFBFD}
+tbody td{padding:13px 16px;vertical-align:middle;color:var(--text-2)}
+.td-mono{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:var(--navy)}
+.td-name{font-weight:600;color:var(--text)}
+.td-sub{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.td-actions{display:flex;gap:3px;align-items:center}
+.empty-row td{text-align:center;padding:52px 16px;color:var(--text-3)}
+.empty-icon{width:40px;height:40px;border-radius:50%;background:var(--surface-3);display:grid;place-items:center;margin:0 auto 10px;color:var(--text-4)}
+
+/* ── LOADING SKELETON ── */
+.skeleton-row td{padding:14px 16px}
+.skel{height:14px;border-radius:4px;background:linear-gradient(90deg,var(--surface-3) 25%,var(--border) 50%,var(--surface-3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;display:inline-block;border-radius:4px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:0 16px;border-radius:var(--r);border:1px solid transparent;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;height:36px;line-height:1}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn-primary:hover{background:#B88A20;border-color:#B88A20;box-shadow:0 2px 8px rgba(196,152,42,.35)}
+.btn-primary:active{transform:scale(.98)}
+.btn-outline{background:var(--surface);border-color:var(--border-2);color:var(--text-2)}
+.btn-outline:hover{background:var(--surface-2)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text-3);height:32px;padding:0 10px}
+.btn-ghost:hover{background:var(--surface-3);color:var(--text)}
+.btn-danger-ghost{background:transparent;border-color:transparent;color:var(--text-4);height:32px;padding:0 10px}
+.btn-danger-ghost:hover{background:var(--danger-bg);color:var(--danger)}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:var(--r-sm)}
+
+/* ── BADGES & CHIPS ── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 8px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge-pending{background:var(--surface-3);color:var(--text-3);border:1px solid var(--border)}.badge-pending .badge-dot{background:var(--text-4)}
+.badge-active{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border)}.badge-active .badge-dot{background:var(--warning)}
+.badge-done{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}.badge-done .badge-dot{background:var(--success)}
+.badge-info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-border)}.badge-info .badge-dot{background:var(--info)}
+.chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.chip-gold{background:var(--gold-3);color:var(--gold-dark)}
+
+/* ── VERIFY DOTS ── */
+.verify-track{display:flex;gap:3px;align-items:center}
+.vdot{width:7px;height:7px;border-radius:50%;background:var(--border-2);transition:var(--transition)}
+.vdot.ok{background:var(--success)}
+
+/* ── COMM ── */
+.comm-val{font-weight:700;color:var(--success);font-size:13px}
+.comm-na{color:var(--text-4);font-size:12px;font-style:italic}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3)}
+.page-btns{display:flex;gap:3px}
+.page-btn{width:28px;height:28px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--text-2);transition:var(--transition);font-family:inherit}
+.page-btn:hover{border-color:var(--gold);color:var(--gold)}
+.page-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(13,27,46,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r-2xl);box-shadow:var(--shadow-lg);width:100%;max-width:700px;max-height:92vh;overflow-y:auto;animation:modalIn .2s cubic-bezier(.34,1.4,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(16px)}to{opacity:1;transform:none}}
+.modal-header{padding:22px 26px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;border-bottom:1px solid var(--border)}
+.modal-title{font-size:17px;font-weight:700;color:var(--text)}
+.modal-subtitle{font-size:12px;color:var(--text-3);margin-top:1px}
+.modal-body{padding:22px 26px}
+.modal-footer{padding:16px 26px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surface);z-index:1}
+.close-btn{width:32px;height:32px;border-radius:var(--r-sm);border:none;background:var(--surface-3);cursor:pointer;display:grid;place-items:center;color:var(--text-3);transition:var(--transition)}
+.close-btn:hover{background:var(--border);color:var(--text)}
+
+/* ── FORM ── */
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:11px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.span-2{grid-column:span 2}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:700;color:var(--text-2)}
+.form-label .req{color:var(--danger);margin-left:2px}
+.form-input,.form-select,.form-textarea{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:13px;color:var(--text);background:var(--surface);outline:none;transition:var(--transition);width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,152,42,.1)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-4)}
+.form-textarea{resize:vertical;min-height:72px;line-height:1.6}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238792A0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.form-input[type="file"]{padding:5px 8px;cursor:pointer;font-size:12px;color:var(--text-3)}
+.form-hint{font-size:11.5px;color:var(--text-3);margin-top:2px;line-height:1.4}
+.assignees-select{height:88px;padding:6px;font-size:13px;border-radius:var(--r)}
+
+/* ── VERIFY ── */
+.verify-block{background:linear-gradient(135deg,var(--surface-2),var(--surface));border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-top:2px}
+.verify-block-title{font-size:12px;font-weight:800;color:var(--text-2);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.verify-progress{font-size:11px;font-weight:600;color:var(--text-3);background:var(--surface-3);padding:2px 8px;border-radius:20px}
+.verify-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.verify-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:var(--transition);user-select:none}
+.verify-item:hover{border-color:var(--gold)}
+.verify-item.checked{border-color:var(--success-border);background:var(--success-bg)}
+.vcb{width:17px;height:17px;border-radius:5px;border:2px solid var(--border-2);background:var(--surface);display:grid;place-items:center;flex-shrink:0;transition:var(--transition)}
+.verify-item.checked .vcb{background:var(--success);border-color:var(--success)}
+.vcb-label{font-size:12px;font-weight:600;color:var(--text-2)}
+.verify-item.checked .vcb-label{color:var(--success)}
+.comm-preview-box{margin-top:12px;padding:12px 16px;border-radius:var(--r);font-size:13px;text-align:center;font-weight:600;transition:var(--transition);background:var(--surface-3);color:var(--text-3);border:1.5px solid var(--border)}
+.comm-preview-box.active{background:var(--success-bg);color:var(--success);border-color:var(--success-border)}
+.file-preview{margin-top:7px;padding:9px 12px;background:var(--success-bg);border:1.5px solid var(--success-border);border-radius:var(--r-sm);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--success);font-weight:600}
+
+/* ── SUMMARY CARDS ── */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.summary-card{background:var(--surface);border-radius:var(--r-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:var(--transition)}
+.summary-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.summary-card-top{padding:18px 20px 14px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-3) 100%);position:relative;overflow:hidden}
+.summary-card-top::after{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.04)}
+.sc-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold-2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px;border:2px solid rgba(255,255,255,.2);margin-bottom:10px}
+.sc-name{font-size:16px;font-weight:700;color:#fff}
+.sc-role{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.summary-card-body{padding:16px 20px}
+.sc-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.sc-row:last-of-type{border-bottom:none}
+.sc-row-label{font-size:12.5px;color:var(--text-3)}
+.sc-row-val{font-weight:700;font-size:13px;color:var(--text)}
+.sc-total{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:#fff;border-radius:var(--r);padding:12px 16px;margin-top:14px;display:flex;align-items:center;justify-content:space-between}
+.sc-total-label{font-size:11px;font-weight:600;opacity:.8}
+.sc-total-val{font-size:16px;font-weight:800}
+
+/* ── DETAIL MODAL ── */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.detail-item .dl{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.detail-item .dv{font-size:13.5px;color:var(--text);font-weight:500}
+.detail-box{background:var(--surface-2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--text-2);line-height:1.6;border:1px solid var(--border)}
+.detail-sep{height:1px;background:var(--border);margin:16px 0}
+.detail-metric-row{display:flex;gap:12px}
+.detail-metric{flex:1;text-align:center;padding:14px;background:var(--surface-2);border-radius:var(--r-lg);border:1px solid var(--border)}
+.detail-metric .dm-val{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
+.detail-metric .dm-label{font-size:11px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--navy-2);border-radius:var(--r-lg);color:#fff;font-size:13px;box-shadow:var(--shadow-lg);max-width:300px;animation:toastIn .22s cubic-bezier(.34,1.4,.64,1);font-weight:500}
+.toast-icon{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.toast.success .toast-icon{background:rgba(15,155,106,.25);color:#3DCCA0}
+.toast.error .toast-icon{background:rgba(217,48,37,.2);color:#FA7B73}
+.toast.loading .toast-icon{background:rgba(196,152,42,.2);color:var(--gold-2)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px) scale(.95)}to{opacity:1;transform:none}}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:0 8px 4px}
+  .mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 4px;cursor:pointer;color:var(--text-3);transition:var(--transition);font-size:10px;font-weight:600;border:none;background:transparent;font-family:inherit}
+  .mob-nav-item.active{color:var(--gold)}
+  .mob-nav-item svg{width:20px;height:20px}
+  .main-wrap{margin-left:0}
+  .main{padding:16px 16px 80px}
+  .topbar{padding:0 16px}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .span-2{grid-column:span 1}
+  .verify-grid{grid-template-columns:1fr}
+  .summary-grid{grid-template-columns:1fr}
+  .modal{border-radius:var(--r-2xl) var(--r-2xl) 0 0;position:fixed;bottom:0;left:0;right:0;max-height:95vh;max-width:100%}
+  .overlay{align-items:flex-end;padding:0}
+}
+@media(min-width:901px){.mobile-nav{display:none}}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr};.ph-top{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#C4982A"/><stop offset="100%" stop-color="#E8C547"/></linearGradient></defs>
+          <path d="M17 3 C8 3 4 12 4 20 L7 20 C7 13 11 6.5 17 6.5 C23 6.5 27 13 27 20 L30 20 C30 12 26 3 17 3Z" fill="url(#lg1)"/>
+          <path d="M10 20 C10 15 13 10 17 10 C21 10 24 15 24 20" stroke="url(#lg1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M14 20 L14 30 M20 20 L20 30" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="12" y="29" width="10" height="2" rx="1" fill="url(#lg1)" opacity=".6"/>
+        </svg>
+      </div>
+      <div class="logo-info">
+        <strong>Angthong Cable</strong>
+        <span>TV Co., Ltd.</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-label">เมนูหลัก</div>
+    <div class="nav-item active" onclick="showSection('jobs')" id="nav-jobs">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      จ่ายงานช่าง
+      <span class="nav-pill" id="badge-jobs">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('sales')" id="nav-sales">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m5-9v9m4-9v9m5-9l2 9"/></svg>
+      งานขาย
+      <span class="nav-pill" id="badge-sales">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('commission')" id="nav-commission">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      สรุปค่าคอม
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-av">A</div>
+      <div class="user-info"><span>แอดมิน</span><small>Administrator</small></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main-wrap">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">จ่ายงานช่าง</span>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+    </div>
+  </div>
+  <div class="main">
+
+    <!-- SECTION 1: JOBS -->
+    <div class="section active" id="section-jobs">
+      <div class="ph-top">
+        <div><h1>ตารางจ่ายงานช่าง</h1><p>จัดการและติดตามงานช่างทั้งหมด</p></div>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="exportSnapshot()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+            บันทึกรายงาน
+          </button>
+          <button class="btn btn-primary" onclick="openJobModal()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            เพิ่มงานใหม่
+          </button>
+        </div>
+      </div>
+      <div class="stat-row" id="jobs-stats"></div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="ค้นหาชื่อลูกค้า, เลขงาน..." id="jobs-search" oninput="renderJobs()">
+        </div>
+        <select class="filter-select" id="jobs-status-filter" onchange="renderJobs()">
+          <option value="">ทุกสถานะ</option>
+          <option value="pending">รอดำเนินการ</option>
+          <option value="active">กำลังดำเนินการ</option>
+          <option value="done">เสร็จสิ้น</option>
+        </select>
+        <select class="filter-select" id="jobs-tech-filter" onchange="renderJobs()">
+          <option value="">ทุกช่าง</option>
+        </select>
+        <span class="filter-count" id="jobs-count-label"></span>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>เลขที่งาน</th><th>วันที่</th><th>ลูกค้า</th><th>รายละเอียด</th>
+              <th>ผู้รับผิดชอบ</th><th>สถานะ</th><th>ตรวจสอบ</th>
+              <th>ค่าบริการ</th><th>ค่าคอม/คน</th><th>ใบงาน</th><th></th>
+            </tr></thead>
+            <tbody id="jobs-tbody"><tr class="skeleton-row"><td colspan="11" style="padding:48px;text-align:center;color:var(--text-3)">กำลังโหลด...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="jobs-pagination"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: SALES -->
+    <div class="section" id="section-sales">
+      <div class="ph-top">
+        <div><h1>รายงานงานขาย</h1><p>บันทึกงานขายและคำนวณค่าคอมมิชชั่น</p></div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="openSaleModal()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            เพิ่มงานขาย
+          </button>
+        </div>
+      </div>
+      <div class="stat-row" id="sales-stats"></div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="ค้นหาชื่อลูกค้า, พนักงาน..." id="sales-search" oninput="renderSales()">
+        </div>
+        <select class="filter-select" id="sales-type-filter" onchange="renderSales()">
+          <option value="">ทุกประเภท</option>
+          <option value="project">งานโปรเจก (1%)</option>
+          <option value="net-cable">เนต+เคเบิล (300฿)</option>
+        </select>
+        <span class="filter-count" id="sales-count-label"></span>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>วันที่</th><th>ลูกค้า</th><th>เบอร์</th><th>รายละเอียด</th>
+              <th>มูลค่า</th><th>ประเภทคอม</th><th>พนักงาน</th>
+              <th>ใบเสร็จ</th><th>ค่าคอม</th><th></th>
+            </tr></thead>
+            <tbody id="sales-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="sales-pagination"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: COMMISSION -->
+    <div class="section" id="section-commission">
+      <div class="ph-top">
+        <div><h1>สรุปค่าคอมมิชชั่น</h1><p>สรุปรายได้ค่าคอมมิชชั่นของแต่ละคน</p></div>
+        <div class="page-actions">
+          <select class="filter-select" id="comm-month-filter" onchange="renderCommission()">
+            <option value="">ทุกเดือน</option>
+          </select>
+        </div>
+      </div>
+      <div class="stat-row" id="comm-stats"></div>
+      <div class="summary-grid" id="comm-grid"></div>
+      <div class="card">
+        <div style="padding:14px 20px 12px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800;color:var(--text)">รายละเอียดทั้งหมด</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ชื่อ</th><th>ประเภท</th><th>เลขที่งาน</th><th>วันที่</th><th>ค่าบริการ</th><th>ค่าคอม</th></tr></thead>
+            <tbody id="comm-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav class="mobile-nav">
+  <button class="mob-nav-item active" onclick="showSection('jobs')" id="mob-jobs">
+    <svg fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>จ่ายงาน
+  </button>
+  <button class="mob-nav-item" onclick="showSection('sales')" id="mob-sales">
+    <svg fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/></svg>งานขาย
+  </button>
+  <button class="mob-nav-item" onclick="showSection('commission')" id="mob-commission">
+    <svg fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>ค่าคอม
+  </button>
+</nav>
+
+<!-- ══ MODAL: JOB ══ -->
+<div class="overlay" id="job-modal-overlay" onclick="closeOnOverlay(event,'job-modal-overlay')">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div class="modal-title" id="job-modal-title">เพิ่มงานใหม่</div><div class="modal-subtitle">กรอกข้อมูลงานและตรวจสอบก่อนบันทึก</div></div>
+      <button class="close-btn" onclick="closeModal('job-modal-overlay')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>ข้อมูลงาน</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">เลขที่งาน <span class="req">*</span></label><input type="text" class="form-input" id="job-number" placeholder="MTC25691101001"><div class="form-hint">ขึ้นต้น MTC — ใบงานตรง = ปิดงานอัตโนมัติ</div></div>
+          <div class="form-group"><label class="form-label">วันที่แจ้ง</label><input type="date" class="form-input" id="job-report-date"></div>
+          <div class="form-group"><label class="form-label">ชื่อลูกค้า <span class="req">*</span></label><input type="text" class="form-input" id="job-customer"></div>
+          <div class="form-group"><label class="form-label">เบอร์ติดต่อ</label><input type="text" class="form-input" id="job-phone" placeholder="0XX-XXXXXXX"></div>
+          <div class="form-group span-2"><label class="form-label">รายละเอียดงาน</label><textarea class="form-textarea" id="job-details"></textarea></div>
+          <div class="form-group"><label class="form-label">กำหนดส่งงาน</label><input type="date" class="form-input" id="job-due"></div>
+          <div class="form-group"><label class="form-label">สถานะ</label>
+            <select class="form-select" id="job-status" onchange="toggleCompletionDate()">
+              <option value="pending">รอดำเนินการ</option>
+              <option value="active">กำลังดำเนินการ</option>
+              <option value="done">เสร็จสิ้น</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>ผู้รับผิดชอบ</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">ผู้รับมอบหมาย</label><select class="form-select assignees-select" id="job-assignees" multiple onchange="updateCommPreview()"></select><div class="form-hint">กด Ctrl/Cmd เพื่อเลือกหลายคน</div></div>
+          <div class="form-group"><label class="form-label">รายงานช่าง</label><textarea class="form-textarea" id="job-tech-report" style="min-height:88px"></textarea></div>
+          <div class="form-group" id="completion-date-group" style="display:none"><label class="form-label">วันที่เสร็จ</label><input type="date" class="form-input" id="job-completion-date"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>ค่าบริการ &amp; เอกสาร</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">ค่าบริการ (บาท)</label><input type="number" class="form-input" id="job-service-fee" placeholder="0" min="0" oninput="updateCommPreview()"></div>
+          <div class="form-group"><label class="form-label">แนบใบเสร็จ</label><input type="file" class="form-input" id="job-receipt" accept="image/*,.pdf" onchange="handleFileUpload(this,'job-receipt-preview')"><div id="job-receipt-preview"></div></div>
+          <div class="form-group span-2"><label class="form-label">อัพโหลดใบงาน</label><input type="file" class="form-input" id="job-form-file" accept="image/*,.pdf" onchange="handleJobFormUpload(this)"><div id="job-form-preview"></div><div class="form-hint" id="job-form-hint">ชื่อไฟล์ตรง MTC... = ปิดงานอัตโนมัติ</div></div>
+        </div>
+      </div>
+      <div class="form-section" style="margin-bottom:0">
+        <div class="form-section-title"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>ตรวจสอบก่อนคิดค่าคอม</div>
+        <div class="verify-block">
+          <div class="verify-block-title">ต้องผ่านครบ 5 ข้อ<span class="verify-progress" id="verify-progress">0/5</span></div>
+          <div class="verify-grid">
+            <div class="verify-item" onclick="toggleVerify('v1')" id="vi-v1"><div class="vcb" id="vcb-v1"><svg width="9" height="9" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><span class="vcb-label">1. เวลาเดินทาง</span></div>
+            <div class="verify-item" onclick="toggleVerify('v2')" id="vi-v2"><div class="vcb" id="vcb-v2"><svg width="9" height="9" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><span class="vcb-label">2. ส่งใบงาน</span></div>
+            <div class="verify-item" onclick="toggleVerify('v3')" id="vi-v3"><div class="vcb" id="vcb-v3"><svg width="9" height="9" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><span class="vcb-label">3. ภาพปิดงาน</span></div>
+            <div class="verify-item" onclick="toggleVerify('v4')" id="vi-v4"><div class="vcb" id="vcb-v4"><svg width="9" height="9" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><span class="vcb-label">4. รายงานตำแหน่ง</span></div>
+            <div class="verify-item" onclick="toggleVerify('v5')" id="vi-v5"><div class="vcb" id="vcb-v5"><svg width="9" height="9" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><span class="vcb-label">5. เอกสารอื่นๆ</span></div>
+          </div>
+          <div class="comm-preview-box" id="comm-preview">ยังไม่ครบเงื่อนไข</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('job-modal-overlay')">ยกเลิก</button>
+      <button class="btn btn-primary" id="job-save-btn" onclick="saveJob()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        บันทึก
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: SALE ══ -->
+<div class="overlay" id="sale-modal-overlay" onclick="closeOnOverlay(event,'sale-modal-overlay')">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div><div class="modal-title" id="sale-modal-title">เพิ่มงานขาย</div><div class="modal-subtitle">บันทึกงานขายและอัพโหลดใบเสร็จ</div></div>
+      <button class="close-btn" onclick="closeModal('sale-modal-overlay')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">วันที่ <span class="req">*</span></label><input type="date" class="form-input" id="sale-date"></div>
+        <div class="form-group"><label class="form-label">พนักงานขาย</label><select class="form-select" id="sale-staff"></select></div>
+        <div class="form-group"><label class="form-label">ชื่อลูกค้า <span class="req">*</span></label><input type="text" class="form-input" id="sale-customer"></div>
+        <div class="form-group"><label class="form-label">เบอร์ติดต่อ</label><input type="text" class="form-input" id="sale-phone"></div>
+        <div class="form-group span-2"><label class="form-label">รายละเอียดงาน</label><textarea class="form-textarea" id="sale-details"></textarea></div>
+        <div class="form-group"><label class="form-label">ประเภทค่าคอม</label>
+          <select class="form-select" id="sale-comm-type" onchange="updateSaleCommPreview()">
+            <option value="project">งานโปรเจก (1%)</option>
+            <option value="net-cable">งานเนต+เคเบิล (300฿)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">มูลค่างาน (บาท)</label><input type="number" class="form-input" id="sale-amount" placeholder="0" min="0" oninput="updateSaleCommPreview()"></div>
+        <div class="form-group span-2"><label class="form-label">อัพโหลดใบเสร็จ</label><input type="file" class="form-input" id="sale-receipt" accept="image/*,.pdf" onchange="handleFileUpload(this,'sale-receipt-preview')"><div id="sale-receipt-preview"></div><div class="form-hint">คิดค่าคอมเมื่ออัพโหลดใบเสร็จเท่านั้น</div></div>
+        <div class="form-group span-2"><div class="comm-preview-box" id="sale-comm-preview">กรอกข้อมูลและอัพโหลดใบเสร็จเพื่อดูค่าคอม</div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('sale-modal-overlay')">ยกเลิก</button>
+      <button class="btn btn-primary" id="sale-save-btn" onclick="saveSale()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        บันทึก
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: DETAIL ══ -->
+<div class="overlay" id="detail-modal-overlay" onclick="closeOnOverlay(event,'detail-modal-overlay')">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">รายละเอียดงาน</div>
+      <button class="close-btn" onclick="closeModal('detail-modal-overlay')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="detail-modal-content"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('detail-modal-overlay')">ปิด</button></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// API LAYER  — เปลี่ยน BASE_URL หลัง deploy
+// ══════════════════════════════════════════════════════════════════
+const BASE_URL = '';  // '' = same origin (Cloudflare Pages)
+
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(BASE_URL + path, opts);
+  if (!res.ok) throw new Error(`API ${method} ${path} → ${res.status}`);
+  return res.json();
+}
+
+const GET  = (path)        => api('GET',    path);
+const POST = (path, body)  => api('POST',   path, body);
+const PUT  = (path, body)  => api('PUT',    path, body);
+const DEL  = (path)        => api('DELETE', path);
+
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
+let DB = { jobs: [], sales: [], staff: [] };
+let editingJobId  = null;
+let editingSaleId = null;
+const verifyState = { v1:false, v2:false, v3:false, v4:false, v5:false };
+let curReceiptDataJob='', curReceiptNameJob='';
+let curJobFormData='',    curJobFormName='';
+let curReceiptDataSale='',curReceiptNameSale='';
+
+// ══════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════
+function today() { return new Date().toISOString().slice(0,10); }
+function fmtDate(d) {
+  if (!d) return '—';
+  const p = d.slice(0,10).split('-');
+  return `${p[2]}/${p[1]}/${p[0].slice(2)}`;
+}
+function fmtMoney(n) {
+  if (!n && n !== 0) return '—';
+  return '฿' + Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 });
+}
+function calcJobComm(j) {
+  const v = j.verify || {};
+  if (!(v.v1&&v.v2&&v.v3&&v.v4&&v.v5)) return null;
+  if (!j.serviceFee || j.serviceFee <= 0) return null;
+  return (j.serviceFee * 0.03) / ((j.assignees||[]).length || 1);
+}
+function calcSaleComm(s) {
+  if (!s.receiptData) return null;
+  return s.commType === 'project' ? (s.amount||0)*0.01 : 300;
+}
+function statusBadge(s) {
+  if (s==='done')   return `<span class="badge badge-done"><span class="badge-dot"></span>เสร็จสิ้น</span>`;
+  if (s==='active') return `<span class="badge badge-active"><span class="badge-dot"></span>กำลังดำเนินการ</span>`;
+  return `<span class="badge badge-pending"><span class="badge-dot"></span>รอดำเนินการ</span>`;
+}
+function verifyDots(v) {
+  return ['v1','v2','v3','v4','v5'].map(k =>
+    `<div class="vdot${v&&v[k]?' ok':''}"></div>`
+  ).join('');
+}
+function verifyCount(v) { return Object.values(v||{}).filter(Boolean).length; }
+function filePreviewHTML(name) {
+  return `<div class="file-preview"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${name}</div>`;
+}
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icon = type==='success' ? '<path d="M20 6L9 17l-5-5"/>'
+             : type==='error'   ? '<path d="M18 6 6 18M6 6l12 12"/>'
+             : '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>';
+  el.innerHTML = `<div class="toast-icon"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">${icon}</svg></div>${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(16px)'; el.style.transition='.2s'; setTimeout(()=>el.remove(),200); }, 3000);
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> กำลังบันทึก...`;
+  else btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> บันทึก`;
+}
+
+// spinner css
+const style = document.createElement('style');
+style.textContent = `@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`;
+document.head.appendChild(style);
+
+// Date
+document.getElementById('topbar-date').textContent =
+  new Date().toLocaleDateString('th-TH', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+
+// ══════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════════
+const TITLES = { jobs:'จ่ายงานช่าง', sales:'รายงานงานขาย', commission:'สรุปค่าคอมมิชชั่น' };
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .mob-nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if (document.getElementById('mob-'+name)) document.getElementById('mob-'+name).classList.add('active');
+  document.getElementById('topbar-title').textContent = TITLES[name]||'';
+  if (name==='commission') renderCommission();
+}
+function updateBadges() {
+  document.getElementById('badge-jobs').textContent  = DB.jobs.filter(j=>j.status==='pending').length;
+  document.getElementById('badge-sales').textContent = DB.sales.length;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LOAD DATA
+// ══════════════════════════════════════════════════════════════════
+async function loadAll() {
+  try {
+    const [jr, sr, str] = await Promise.all([
+      GET('/api/jobs'),
+      GET('/api/sales'),
+      GET('/api/staff'),
+    ]);
+    DB.jobs  = jr.jobs  || [];
+    DB.sales = sr.sales || [];
+    DB.staff = str.staff || [];
+    populateStaffSelects();
+    renderJobs();
+    renderSales();
+    updateBadges();
+  } catch (e) {
+    toast('ไม่สามารถเชื่อมต่อ API — ตรวจสอบ Cloudflare Worker', 'error');
+    console.error(e);
+  }
+}
+
+function populateStaffSelects() {
+  const names = DB.staff.map(s => s.name);
+  // Job assignees multi-select
+  const asel = document.getElementById('job-assignees');
+  asel.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+  // Sale staff select
+  const ssel = document.getElementById('sale-staff');
+  ssel.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+  // Tech filter
+  const tsel = document.getElementById('jobs-tech-filter');
+  tsel.innerHTML = '<option value="">ทุกช่าง</option>' + names.map(n => `<option>${n}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// JOBS
+// ══════════════════════════════════════════════════════════════════
+let jobsPage = 1; const JPP = 10;
+
+function renderJobs() {
+  const q  = (document.getElementById('jobs-search').value||'').toLowerCase();
+  const sf = document.getElementById('jobs-status-filter').value;
+  const tf = document.getElementById('jobs-tech-filter').value;
+  let list = DB.jobs.filter(j => {
+    if (sf && j.status!==sf) return false;
+    if (tf && !(j.assignees||[]).includes(tf)) return false;
+    if (q && !j.customer?.toLowerCase().includes(q) && !(j.jobNumber||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total/JPP));
+  if (jobsPage > pages) jobsPage = 1;
+  document.getElementById('jobs-count-label').textContent = `${total} รายการ`;
+  const slice = list.slice((jobsPage-1)*JPP, jobsPage*JPP);
+  const tbody = document.getElementById('jobs-tbody');
+  if (!slice.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="11"><div class="empty-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>ไม่พบรายการ</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map(j => {
+      const comm = calcJobComm(j);
+      const vc   = verifyCount(j.verify);
+      const chips = (j.assignees||[]).map(a=>`<span class="chip chip-gold">${a}</span>`).join(' ');
+      return `<tr>
+        <td class="td-mono">${j.jobNumber||'—'}</td>
+        <td style="font-size:12.5px;white-space:nowrap">${fmtDate(j.reportDate)}</td>
+        <td><div class="td-name">${j.customer}</div><div class="td-sub">${j.phone||''}</div></td>
+        <td><div style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px" title="${j.details||''}">${j.details||'—'}</div></td>
+        <td><div style="display:flex;flex-wrap:wrap;gap:3px">${chips||'<span style="color:var(--text-4);font-size:12px">—</span>'}</div></td>
+        <td>${statusBadge(j.status)}</td>
+        <td><div class="verify-track">${verifyDots(j.verify)}</div><div style="font-size:10.5px;color:var(--text-4);margin-top:3px;font-weight:600">${vc}/5</div></td>
+        <td style="font-weight:700;white-space:nowrap">${j.serviceFee?fmtMoney(j.serviceFee):'<span style="color:var(--text-4)">—</span>'}</td>
+        <td>${comm!==null?`<span class="comm-val">${fmtMoney(comm)}</span>`:`<span class="comm-na">ยังไม่ครบ</span>`}</td>
+        <td>${j.jobFormName?`<span style="font-size:11.5px;color:var(--success);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:`<span style="font-size:11.5px;color:var(--text-4)">—</span>`}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-ghost btn-icon" onclick="viewJobDetail('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="btn btn-ghost btn-icon" onclick="openJobModal('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+          <button class="btn btn-danger-ghost btn-icon" onclick="deleteJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+  renderJobStats();
+  renderPagination('jobs-pagination', jobsPage, pages, p => { jobsPage=p; renderJobs(); });
+}
+
+function renderJobStats() {
+  const all = DB.jobs;
+  const pending = all.filter(j=>j.status==='pending').length;
+  const done    = all.filter(j=>j.status==='done').length;
+  const totalFee = all.reduce((s,j)=>s+(j.serviceFee||0), 0);
+  document.getElementById('jobs-stats').innerHTML = `
+    <div class="stat-card c-info"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="stat-label">งานทั้งหมด</div><div class="stat-val">${all.length}</div><div class="stat-sub">รายการ</div></div>
+    <div class="stat-card c-warn"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div class="stat-label">รอดำเนินการ</div><div class="stat-val">${pending}</div><div class="stat-sub">งาน</div></div>
+    <div class="stat-card c-success"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="stat-label">เสร็จสิ้น</div><div class="stat-val">${done}</div><div class="stat-sub">งาน</div></div>
+    <div class="stat-card c-gold"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="stat-label">รวมค่าบริการ</div><div class="stat-val">${fmtMoney(totalFee)}</div><div class="stat-sub">บาท</div></div>
+  `;
+}
+
+// ── JOB MODAL ────────────────────────────────────────────────────
+function openJobModal(id=null) {
+  editingJobId = id;
+  const job = id ? DB.jobs.find(j=>j.id===id) : null;
+  document.getElementById('job-modal-title').textContent = id ? 'แก้ไขงาน' : 'เพิ่มงานใหม่';
+  ['v1','v2','v3','v4','v5'].forEach(k => { verifyState[k]=false; updateVerifyUI(k); });
+  curReceiptDataJob=''; curReceiptNameJob=''; curJobFormData=''; curJobFormName='';
+  ['job-receipt-preview','job-form-preview'].forEach(id=>document.getElementById(id).innerHTML='');
+  ['job-receipt','job-form-file'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('job-form-hint').textContent='ชื่อไฟล์ตรง MTC... = ปิดงานอัตโนมัติ';
+  document.getElementById('job-form-hint').style.color='';
+  if (job) {
+    document.getElementById('job-number').value       = job.jobNumber||'';
+    document.getElementById('job-report-date').value  = job.reportDate||'';
+    document.getElementById('job-customer').value     = job.customer||'';
+    document.getElementById('job-phone').value        = job.phone||'';
+    document.getElementById('job-details').value      = job.details||'';
+    document.getElementById('job-due').value          = job.dueDate||job.due||'';
+    document.getElementById('job-tech-report').value  = job.techReport||'';
+    document.getElementById('job-status').value       = job.status||'pending';
+    document.getElementById('job-service-fee').value  = job.serviceFee||'';
+    document.getElementById('job-completion-date').value = job.completionDate||'';
+    Array.from(document.getElementById('job-assignees').options)
+      .forEach(o => o.selected=(job.assignees||[]).includes(o.value));
+    if (job.verify) Object.keys(job.verify).forEach(k=>{verifyState[k]=job.verify[k];updateVerifyUI(k)});
+    if (job.receiptData){curReceiptDataJob=job.receiptData;curReceiptNameJob=job.receiptName;document.getElementById('job-receipt-preview').innerHTML=filePreviewHTML(job.receiptName||'ใบเสร็จ')}
+    if (job.jobFormData){curJobFormData=job.jobFormData;curJobFormName=job.jobFormName;document.getElementById('job-form-preview').innerHTML=filePreviewHTML(job.jobFormName||'ใบงาน')}
+  } else {
+    document.getElementById('job-number').value='';
+    document.getElementById('job-report-date').value=today();
+    ['job-customer','job-phone','job-details','job-due','job-tech-report','job-completion-date','job-service-fee']
+      .forEach(id=>document.getElementById(id).value='');
+    document.getElementById('job-status').value='pending';
+    Array.from(document.getElementById('job-assignees').options).forEach(o=>o.selected=false);
+  }
+  toggleCompletionDate(); updateCommPreview();
+  document.getElementById('job-modal-overlay').classList.add('open');
+}
+
+function toggleCompletionDate() {
+  const v = document.getElementById('job-status').value;
+  document.getElementById('completion-date-group').style.display = v==='done'?'flex':'none';
+  if (v==='done' && !document.getElementById('job-completion-date').value)
+    document.getElementById('job-completion-date').value = today();
+  updateCommPreview();
+}
+
+function toggleVerify(key) { verifyState[key]=!verifyState[key]; updateVerifyUI(key); updateCommPreview(); }
+function updateVerifyUI(key) {
+  const item=document.getElementById('vi-'+key), cb=document.getElementById('vcb-'+key);
+  if (verifyState[key]) { item.classList.add('checked');cb.style.background='var(--success)';cb.style.borderColor='var(--success)'; }
+  else { item.classList.remove('checked');cb.style.background='';cb.style.borderColor=''; }
+  document.getElementById('verify-progress').textContent = `${Object.values(verifyState).filter(Boolean).length}/5`;
+}
+function updateCommPreview() {
+  const fee = parseFloat(document.getElementById('job-service-fee').value)||0;
+  const allOk = Object.values(verifyState).every(Boolean);
+  const n = Array.from(document.getElementById('job-assignees').selectedOptions).length||1;
+  const el = document.getElementById('comm-preview');
+  if (allOk && fee>0) {
+    el.classList.add('active');
+    el.textContent = `✓ ครบแล้ว — ค่าคอม 3% = ${fmtMoney(fee*0.03)} ÷ ${n} คน = ${fmtMoney((fee*0.03)/n)}/คน`;
+  } else {
+    el.classList.remove('active');
+    el.textContent = !fee ? 'กรอกค่าบริการเพื่อดูค่าคอม'
+      : `ยังไม่ครบ ${Object.values(verifyState).filter(Boolean).length}/5 เงื่อนไข`;
+  }
+}
+
+function handleFileUpload(input, previewId) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (previewId==='job-receipt-preview') { curReceiptDataJob=e.target.result; curReceiptNameJob=file.name; }
+    else { curReceiptDataSale=e.target.result; curReceiptNameSale=file.name; updateSaleCommPreview(); }
+    document.getElementById(previewId).innerHTML = filePreviewHTML(file.name);
+  };
+  reader.readAsDataURL(file);
+}
+function handleJobFormUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    curJobFormData=e.target.result; curJobFormName=file.name;
+    document.getElementById('job-form-preview').innerHTML = filePreviewHTML(file.name);
+    const jn = document.getElementById('job-number').value.trim();
+    const fname = file.name.replace(/\.[^/.]+$/, '');
+    const hint = document.getElementById('job-form-hint');
+    if (jn && fname.toLowerCase().includes(jn.toLowerCase())) {
+      hint.innerHTML = '<span style="color:var(--success);font-weight:700">✓ ชื่อไฟล์ตรงกับเลขงาน — ปิดงานอัตโนมัติ</span>';
+      document.getElementById('job-status').value='done'; toggleCompletionDate();
+      verifyState.v2=true; updateVerifyUI('v2'); updateCommPreview();
+    } else { hint.textContent='ชื่อไฟล์ไม่ตรง — ตรวจสอบอีกครั้ง'; hint.style.color='var(--warning)'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveJob() {
+  const num  = document.getElementById('job-number').value.trim();
+  const cust = document.getElementById('job-customer').value.trim();
+  if (!num||!cust) { toast('กรุณากรอกเลขที่งานและชื่อลูกค้า','error'); return; }
+  setLoading('job-save-btn', true);
+  const status = document.getElementById('job-status').value;
+  const body = {
+    reportDate:     document.getElementById('job-report-date').value,
+    jobNumber: num, customer: cust,
+    phone:          document.getElementById('job-phone').value.trim(),
+    details:        document.getElementById('job-details').value.trim(),
+    due:            document.getElementById('job-due').value,
+    techReport:     document.getElementById('job-tech-report').value.trim(),
+    status,
+    assignees: Array.from(document.getElementById('job-assignees').selectedOptions).map(o=>o.value),
+    completionDate: status==='done' ? document.getElementById('job-completion-date').value : '',
+    serviceFee: parseFloat(document.getElementById('job-service-fee').value)||0,
+    receiptData: curReceiptDataJob, receiptName: curReceiptNameJob,
+    jobFormData: curJobFormData,    jobFormName: curJobFormName,
+    verify: {...verifyState},
+  };
+  try {
+    if (editingJobId) {
+      const r = await PUT(`/api/jobs/${editingJobId}`, body);
+      const idx = DB.jobs.findIndex(j=>j.id===editingJobId);
+      if (idx>=0) DB.jobs[idx] = r.job;
+    } else {
+      const r = await POST('/api/jobs', body);
+      DB.jobs.unshift(r.job);
+    }
+    closeModal('job-modal-overlay'); renderJobs(); updateBadges();
+    toast(editingJobId?'บันทึกการแก้ไขแล้ว':'เพิ่มงานใหม่แล้ว');
+  } catch(e) { toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+  finally { setLoading('job-save-btn', false); }
+}
+
+async function deleteJob(id) {
+  if (!confirm('ยืนยันลบรายการนี้?')) return;
+  try { await DEL(`/api/jobs/${id}`); DB.jobs=DB.jobs.filter(j=>j.id!==id); renderJobs(); updateBadges(); toast('ลบรายการแล้ว','error'); }
+  catch(e) { toast('ลบไม่สำเร็จ','error'); }
+}
+
+function viewJobDetail(id) {
+  const j = DB.jobs.find(x=>x.id===id); if (!j) return;
+  const comm = calcJobComm(j);
+  document.getElementById('detail-modal-content').innerHTML = `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <span class="td-mono" style="font-size:16px;font-weight:800">${j.jobNumber||'—'}</span>
+        ${statusBadge(j.status)}
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="dl">ลูกค้า</div><div class="dv">${j.customer}</div></div>
+        <div class="detail-item"><div class="dl">เบอร์ติดต่อ</div><div class="dv">${j.phone||'—'}</div></div>
+        <div class="detail-item"><div class="dl">วันที่แจ้ง</div><div class="dv">${fmtDate(j.reportDate)}</div></div>
+        <div class="detail-item"><div class="dl">กำหนดส่ง</div><div class="dv">${fmtDate(j.dueDate||j.due)}</div></div>
+        ${j.completionDate?`<div class="detail-item"><div class="dl">วันที่เสร็จ</div><div class="dv">${fmtDate(j.completionDate)}</div></div>`:''}
+      </div>
+      <div style="margin-bottom:14px"><div class="dl" style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">รายละเอียดงาน</div><div class="detail-box">${j.details||'—'}</div></div>
+      <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">ผู้รับมอบหมาย</span>
+        ${(j.assignees||[]).map(a=>`<span class="chip chip-gold">${a}</span>`).join('')}
+      </div>
+      <div class="detail-sep"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">ตรวจสอบ 5 ข้อ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px">
+        ${['เวลาเดินทาง','ส่งใบงาน','ภาพปิดงาน','รายงานตำแหน่ง','เอกสารอื่นๆ'].map((l,i)=>{
+          const v=['v1','v2','v3','v4','v5'][i]; const ok=j.verify&&j.verify[v];
+          return `<div style="display:flex;align-items:center;gap:7px;font-size:12.5px;padding:7px 10px;border-radius:6px;background:${ok?'var(--success-bg)':'var(--surface-2)'};border:1px solid ${ok?'var(--success-border)':'var(--border)'};color:${ok?'var(--success)':'var(--text-3)'}"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">${ok?'<path d="M20 6L9 17l-5-5"/>':'<path d="M18 6 6 18M6 6l12 12"/>'}</svg>${l}</div>`;
+        }).join('')}
+      </div>
+      <div class="detail-sep"></div>
+      <div class="detail-metric-row">
+        <div class="detail-metric"><div class="dm-val">${fmtMoney(j.serviceFee)}</div><div class="dm-label">ค่าบริการ</div></div>
+        <div class="detail-metric"><div class="dm-val" style="color:${comm!==null?'var(--success)':'var(--text-3)'}">${comm!==null?fmtMoney(comm):'ยังไม่ครบ'}</div><div class="dm-label">ค่าคอม / คน</div></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('detail-modal-overlay').classList.add('open');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES
+// ══════════════════════════════════════════════════════════════════
+let salesPage = 1; const SPP = 10;
+
+function renderSales() {
+  const q  = (document.getElementById('sales-search').value||'').toLowerCase();
+  const tf = document.getElementById('sales-type-filter').value;
+  let list = DB.sales.filter(s => {
+    if (tf && s.commType!==tf) return false;
+    if (q && !s.customer?.toLowerCase().includes(q) && !s.staff?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const total = list.length; const pages=Math.max(1,Math.ceil(total/SPP));
+  if (salesPage>pages) salesPage=1;
+  document.getElementById('sales-count-label').textContent = `${total} รายการ`;
+  const slice = list.slice((salesPage-1)*SPP, salesPage*SPP);
+  const tbody = document.getElementById('sales-tbody');
+  if (!slice.length) {
+    tbody.innerHTML=`<tr class="empty-row"><td colspan="10"><div class="empty-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/></svg></div>ไม่พบรายการ</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map(s => {
+      const comm = calcSaleComm(s);
+      const typeBadge = s.commType==='project'
+        ? `<span class="badge badge-info"><span class="badge-dot"></span>โปรเจก 1%</span>`
+        : `<span class="badge badge-active"><span class="badge-dot"></span>เนต+เคเบิล</span>`;
+      return `<tr>
+        <td style="font-size:12.5px;white-space:nowrap">${fmtDate(s.saleDate||s.date)}</td>
+        <td><div class="td-name">${s.customer}</div></td>
+        <td style="font-size:12px;color:var(--text-3)">${s.phone||'—'}</td>
+        <td><div style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px" title="${s.details||''}">${s.details||'—'}</div></td>
+        <td style="font-weight:700">${s.commType==='project'?fmtMoney(s.amount):'<span style="color:var(--text-4)">—</span>'}</td>
+        <td>${typeBadge}</td>
+        <td><span class="chip chip-gold">${s.staff||'—'}</span></td>
+        <td>${s.receiptData?`<span style="font-size:11.5px;color:var(--success);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:`<span style="font-size:11.5px;color:var(--text-4)">รอแนบ</span>`}</td>
+        <td>${comm!==null?`<span class="comm-val">${fmtMoney(comm)}</span>`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-ghost btn-icon" onclick="openSaleModal('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+          <button class="btn btn-danger-ghost btn-icon" onclick="deleteSale('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+  renderSalesStats();
+  renderPagination('sales-pagination', salesPage, pages, p=>{ salesPage=p; renderSales(); });
+}
+
+function renderSalesStats() {
+  const all = DB.sales;
+  const proj = all.filter(s=>s.commType==='project').length;
+  const nc   = all.filter(s=>s.commType==='net-cable').length;
+  const totalComm = all.reduce((a,s)=>{const c=calcSaleComm(s);return a+(c||0);}, 0);
+  const totalAmt  = all.filter(s=>s.commType==='project').reduce((a,s)=>a+(s.amount||0),0);
+  document.getElementById('sales-stats').innerHTML = `
+    <div class="stat-card c-info"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div><div class="stat-label">งานทั้งหมด</div><div class="stat-val">${all.length}</div><div class="stat-sub">รายการ</div></div>
+    <div class="stat-card c-purple"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><div class="stat-label">งานโปรเจก</div><div class="stat-val">${proj}</div><div class="stat-sub">${nc} เนต+เคเบิล</div></div>
+    <div class="stat-card c-warn"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="2"/></svg></div><div class="stat-label">มูลค่ารวม</div><div class="stat-val">${fmtMoney(totalAmt)}</div><div class="stat-sub">งานโปรเจก</div></div>
+    <div class="stat-card c-success"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="stat-label">ค่าคอมรวม</div><div class="stat-val">${fmtMoney(totalComm)}</div><div class="stat-sub">บาท</div></div>
+  `;
+}
+
+function openSaleModal(id=null) {
+  editingSaleId = id;
+  const sale = id ? DB.sales.find(s=>s.id===id) : null;
+  curReceiptDataSale=''; curReceiptNameSale='';
+  document.getElementById('sale-receipt-preview').innerHTML='';
+  document.getElementById('sale-receipt').value='';
+  document.getElementById('sale-modal-title').textContent = id?'แก้ไขงานขาย':'เพิ่มงานขาย';
+  if (sale) {
+    document.getElementById('sale-date').value      = sale.saleDate||sale.date||'';
+    document.getElementById('sale-customer').value  = sale.customer||'';
+    document.getElementById('sale-phone').value     = sale.phone||'';
+    document.getElementById('sale-details').value   = sale.details||'';
+    document.getElementById('sale-amount').value    = sale.amount||'';
+    document.getElementById('sale-comm-type').value = sale.commType||'project';
+    document.getElementById('sale-staff').value     = sale.staff||'';
+    if (sale.receiptData) { curReceiptDataSale=sale.receiptData; curReceiptNameSale=sale.receiptName; document.getElementById('sale-receipt-preview').innerHTML=filePreviewHTML(sale.receiptName||'ใบเสร็จ'); }
+  } else {
+    document.getElementById('sale-date').value=today();
+    ['sale-customer','sale-phone','sale-details'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('sale-amount').value='';
+    document.getElementById('sale-comm-type').value='project';
+    if (DB.staff.length) document.getElementById('sale-staff').value=DB.staff[0].name;
+  }
+  updateSaleCommPreview();
+  document.getElementById('sale-modal-overlay').classList.add('open');
+}
+function updateSaleCommPreview() {
+  const type = document.getElementById('sale-comm-type').value;
+  const amt  = parseFloat(document.getElementById('sale-amount').value)||0;
+  const el   = document.getElementById('sale-comm-preview');
+  const comm = type==='project' ? amt*0.01 : 300;
+  if (curReceiptDataSale) { el.classList.add('active'); el.textContent=`✓ มีใบเสร็จแล้ว — ค่าคอม = ${fmtMoney(comm)}`; }
+  else { el.classList.remove('active'); el.textContent=`อัพโหลดใบเสร็จเพื่อยืนยันค่าคอม (ประมาณ ${fmtMoney(comm)})`; }
+}
+async function saveSale() {
+  const cust = document.getElementById('sale-customer').value.trim();
+  if (!cust) { toast('กรุณากรอกชื่อลูกค้า','error'); return; }
+  setLoading('sale-save-btn', true);
+  const body = {
+    date:        document.getElementById('sale-date').value,
+    customer: cust,
+    phone:       document.getElementById('sale-phone').value.trim(),
+    details:     document.getElementById('sale-details').value.trim(),
+    amount:      parseFloat(document.getElementById('sale-amount').value)||0,
+    commType:    document.getElementById('sale-comm-type').value,
+    staff:       document.getElementById('sale-staff').value,
+    receiptData: curReceiptDataSale, receiptName: curReceiptNameSale,
+  };
+  try {
+    if (editingSaleId) {
+      const r = await PUT(`/api/sales/${editingSaleId}`, body);
+      const idx = DB.sales.findIndex(s=>s.id===editingSaleId);
+      if (idx>=0) DB.sales[idx]=r.sale;
+    } else {
+      const r = await POST('/api/sales', body);
+      DB.sales.unshift(r.sale);
+    }
+    closeModal('sale-modal-overlay'); renderSales(); updateBadges();
+    toast(editingSaleId?'บันทึกการแก้ไขแล้ว':'เพิ่มงานขายแล้ว');
+  } catch(e) { toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+  finally { setLoading('sale-save-btn', false); }
+}
+async function deleteSale(id) {
+  if (!confirm('ยืนยันลบรายการนี้?')) return;
+  try { await DEL(`/api/sales/${id}`); DB.sales=DB.sales.filter(s=>s.id!==id); renderSales(); updateBadges(); toast('ลบรายการแล้ว','error'); }
+  catch(e) { toast('ลบไม่สำเร็จ','error'); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// COMMISSION
+// ══════════════════════════════════════════════════════════════════
+function renderCommission() {
+  const monthFilter = document.getElementById('comm-month-filter').value;
+  const months = new Set();
+  DB.jobs.forEach(j=>{ if(j.reportDate) months.add(j.reportDate.slice(0,7)); });
+  DB.sales.forEach(s=>{ if(s.saleDate||s.date) months.add((s.saleDate||s.date).slice(0,7)); });
+  const sel = document.getElementById('comm-month-filter'); const curVal=sel.value;
+  sel.innerHTML = '<option value="">ทุกเดือน</option>' +
+    [...months].sort().reverse().map(m=>{const[y,mo]=m.split('-');return`<option value="${m}"${m===curVal?' selected':''}>${mo}/${y}</option>`;}).join('');
+
+  const perPerson = {};
+  DB.staff.forEach(s=>{ perPerson[s.name]={tech:[],sale:[]}; });
+
+  DB.jobs.forEach(j=>{
+    if (monthFilter && !j.reportDate?.startsWith(monthFilter)) return;
+    const comm = calcJobComm(j); if (comm===null) return;
+    (j.assignees||[]).forEach(a=>{
+      if (!perPerson[a]) perPerson[a]={tech:[],sale:[]};
+      perPerson[a].tech.push({jobNumber:j.jobNumber,customer:j.customer,date:j.reportDate,fee:j.serviceFee,comm});
+    });
+  });
+  DB.sales.forEach(s=>{
+    const d = s.saleDate||s.date;
+    if (monthFilter && !d?.startsWith(monthFilter)) return;
+    const comm = calcSaleComm(s); if (comm===null) return;
+    if (!perPerson[s.staff]) perPerson[s.staff]={tech:[],sale:[]};
+    perPerson[s.staff].sale.push({customer:s.customer,date:d,amount:s.amount,comm,commType:s.commType});
+  });
+
+  const allTech = DB.jobs.reduce((s,j)=>{const c=calcJobComm(j);return c?s+c*(j.assignees||[]).length:s;},0);
+  const allSale = DB.sales.reduce((s,s2)=>{const c=calcSaleComm(s2);return c?s+c:s;},0);
+  document.getElementById('comm-stats').innerHTML = `
+    <div class="stat-card c-warn"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div><div class="stat-label">ค่าคอมช่าง</div><div class="stat-val">${fmtMoney(allTech)}</div><div class="stat-sub">3% ของค่าบริการ</div></div>
+    <div class="stat-card c-success"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/></svg></div><div class="stat-label">ค่าคอมขาย</div><div class="stat-val">${fmtMoney(allSale)}</div><div class="stat-sub">จากงานขาย</div></div>
+    <div class="stat-card c-gold"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="stat-label">รวมทั้งหมด</div><div class="stat-val">${fmtMoney(allTech+allSale)}</div><div class="stat-sub">บาท</div></div>
+    <div class="stat-card c-purple"><div class="stat-icon"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-label">พนักงาน</div><div class="stat-val">${DB.staff.length}</div><div class="stat-sub">คน</div></div>
+  `;
+
+  const cards = DB.staff.map(s=>{
+    const p = perPerson[s.name]||{tech:[],sale:[]};
+    const techTotal = p.tech.reduce((a,t)=>a+t.comm,0);
+    const saleTotal = p.sale.reduce((a,t)=>a+t.comm,0);
+    return {name:s.name, p, techTotal, saleTotal, grand:techTotal+saleTotal};
+  }).filter(x=>x.grand>0||x.p.tech.length||x.p.sale.length);
+
+  document.getElementById('comm-grid').innerHTML = cards.map(({name,p,techTotal,saleTotal,grand})=>`
+    <div class="summary-card">
+      <div class="summary-card-top">
+        <div class="sc-avatar">${name.charAt(0)}</div>
+        <div class="sc-name">${name}</div>
+        <div class="sc-role">${p.tech.length} งานช่าง · ${p.sale.length} งานขาย</div>
+      </div>
+      <div class="summary-card-body">
+        ${techTotal>0?`<div class="sc-row"><span class="sc-row-label">ค่าคอมช่าง (3%)</span><span class="sc-row-val">${fmtMoney(techTotal)}</span></div>`:''}
+        ${saleTotal>0?`<div class="sc-row"><span class="sc-row-label">ค่าคอมขาย</span><span class="sc-row-val">${fmtMoney(saleTotal)}</span></div>`:''}
+        <div class="sc-total"><span class="sc-total-label">รวมค่าคอมมิชชั่น</span><span class="sc-total-val">${fmtMoney(grand)||'฿0'}</span></div>
+      </div>
+    </div>
+  `).join('') || `<p style="color:var(--text-3);padding:20px;grid-column:1/-1">ยังไม่มีค่าคอมที่คำนวณได้</p>`;
+
+  const rows = [];
+  DB.staff.forEach(s=>{
+    const p = perPerson[s.name]||{tech:[],sale:[]};
+    p.tech.forEach(t=>rows.push({name:s.name,type:'ช่าง',ref:t.jobNumber||'—',detail:t.customer,date:t.date,amount:t.fee,comm:t.comm}));
+    p.sale.forEach(sv=>rows.push({name:s.name,type:'ขาย',ref:sv.commType==='project'?'โปรเจก':'เนต+เคเบิล',detail:sv.customer,date:sv.date,amount:sv.amount,comm:sv.comm}));
+  });
+  const tbody = document.getElementById('comm-tbody');
+  if (!rows.length) { tbody.innerHTML=`<tr class="empty-row"><td colspan="6"><div class="empty-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>ยังไม่มีข้อมูล</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r=>`<tr>
+    <td><span class="chip chip-gold">${r.name}</span></td>
+    <td>${r.type==='ช่าง'?`<span class="badge badge-pending"><span class="badge-dot"></span>ช่าง</span>`:`<span class="badge badge-info"><span class="badge-dot"></span>ขาย</span>`}</td>
+    <td class="td-mono" style="font-size:12px">${r.ref}</td>
+    <td>${r.detail}</td>
+    <td style="font-weight:600">${r.type==='ช่าง'?fmtMoney(r.amount):'—'}</td>
+    <td><span class="comm-val">${fmtMoney(r.comm)}</span></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PAGINATION
+// ══════════════════════════════════════════════════════════════════
+function renderPagination(id, page, pages, onPage) {
+  const el = document.getElementById(id);
+  if (pages<=1) { el.innerHTML=''; return; }
+  const btns = Array.from({length:pages},(_,i)=>
+    `<button class="page-btn${i+1===page?' active':''}" onclick="(${onPage.toString()})(${i+1})">${i+1}</button>`
+  ).join('');
+  el.innerHTML = `<span>หน้า ${page} / ${pages}</span><div class="page-btns">${btns}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeOnOverlay(e, id) { if (e.target.id===id) closeModal(id); }
+
+// ══════════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════════
+function exportSnapshot() {
+  const w = window.open('','_blank','width=1000,height=700');
+  const rows = DB.jobs.map(j=>{
+    const s = {pending:'รอดำเนินการ',active:'กำลังดำเนินการ',done:'เสร็จสิ้น'}[j.status];
+    const comm = calcJobComm(j);
+    return `<tr><td>${j.jobNumber||'—'}</td><td>${fmtDate(j.reportDate)}</td><td>${j.customer}</td><td>${(j.assignees||[]).join(', ')}</td><td>${s}</td><td style="text-align:right">${j.serviceFee?fmtMoney(j.serviceFee):'—'}</td><td style="text-align:right">${comm!==null?fmtMoney(comm):'ยังไม่ครบ'}</td></tr>`;
+  }).join('');
+  w.document.write(`<!DOCTYPE html><html><head><title>รายงาน</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;padding:28px;font-size:13px}h2{font-size:18px;font-weight:800;margin-bottom:4px}p{color:#888;font-size:12px;margin-bottom:20px}.hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:2px solid #C4982A;margin-bottom:24px}.lb{width:36px;height:36px;background:linear-gradient(135deg,#C4982A,#E2B840);border-radius:8px;display:grid;place-items:center;font-size:18px;font-weight:800;color:white}.lw{display:flex;align-items:center;gap:10px}table{width:100%;border-collapse:collapse}th{background:#0D1B2E;color:#fff;padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em}td{padding:10px 12px;border-bottom:1px solid #eee}tr:hover td{background:#fafafa}@media print{button{display:none}}</style></head><body><div class="hdr"><div class="lw"><div class="lb">A</div><div><h2>Angthong Cable TV</h2><p>ตารางจ่ายงานช่าง — ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</p></div></div><button onclick="window.print()" style="padding:9px 20px;background:#C4982A;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700">🖨 พิมพ์</button></div><table><thead><tr><th>เลขที่งาน</th><th>วันที่</th><th>ลูกค้า</th><th>ผู้รับผิดชอบ</th><th>สถานะ</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+  w.document.close();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+loadAll();
+</script>
+</body>
+</html>
