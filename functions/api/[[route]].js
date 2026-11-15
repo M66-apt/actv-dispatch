@@ -13,6 +13,7 @@
  *   DELETE /api/sales/:id
  *   GET    /api/staff
  *   POST   /api/staff
+ *   PUT    /api/staff/:id         { name, role }  (rename cascades to jobs/sales)
  *   DELETE /api/staff/:id
  *   POST   /api/staff/:id/login   { pin }                -> { ok, isDefault }
  *   PUT    /api/staff/:id/pin     { oldPin, newPin }     (staff changes own)
@@ -160,6 +161,7 @@ export async function onRequest(context) {
         const sub = route[2];
         if (sub === 'login' && method === 'POST') return await staffLogin(id, request, env);
         if (sub === 'pin'   && method === 'PUT')  return await staffSetPin(id, request, env);
+        if (!sub && method === 'PUT')    return await updateStaff(id, request, env);
         if (!sub && method === 'DELETE') return await deleteStaff(id, env);
       }
     }
@@ -383,6 +385,38 @@ async function createStaff(request, env) {
     `INSERT INTO staff (id, name, role) VALUES (?,?,?)`
   ).bind(id, body.name, body.role ?? 'technician').run();
   return json({ id, name: body.name, role: body.role ?? 'technician' }, 201);
+}
+
+async function updateStaff(id, request, env) {
+  const body = await request.json();
+  const row = await env.DB.prepare(`SELECT id, name, role FROM staff WHERE id=?`).bind(id).first();
+  if (!row) return json({ error: 'ไม่พบพนักงาน' }, 404);
+  const name = String(body.name ?? row.name).trim();
+  const role = String(body.role ?? row.role).trim() || 'technician';
+  if (!name) return json({ error: 'กรุณากรอกชื่อ' }, 400);
+  if (name !== row.name) {
+    const dup = await env.DB.prepare(`SELECT id FROM staff WHERE name=? AND id<>?`).bind(name, id).first();
+    if (dup) return json({ error: `มีพนักงานชื่อ "${name}" อยู่แล้ว` }, 409);
+  }
+  const stmts = [env.DB.prepare(`UPDATE staff SET name=?, role=? WHERE id=?`).bind(name, role, id)];
+  let jobsChanged = 0, salesChanged = 0;
+  if (name !== row.name) {
+    // jobs.assignees is a JSON array of names, sales.staff is a name → rename everywhere
+    const { results } = await env.DB.prepare(`SELECT id, assignees FROM jobs WHERE assignees LIKE ?`)
+      .bind(`%${JSON.stringify(row.name).slice(1, -1)}%`).all();
+    for (const j of results) {
+      const arr = safeJSON(j.assignees, []);
+      if (!arr.includes(row.name)) continue;
+      const next = arr.map(a => (a === row.name ? name : a));
+      stmts.push(env.DB.prepare(`UPDATE jobs SET assignees=? WHERE id=?`).bind(JSON.stringify(next), j.id));
+      jobsChanged++;
+    }
+    const c = await env.DB.prepare(`SELECT COUNT(*) AS n FROM sales WHERE staff=?`).bind(row.name).first();
+    salesChanged = c?.n ?? 0;
+    stmts.push(env.DB.prepare(`UPDATE sales SET staff=? WHERE staff=?`).bind(name, row.name));
+  }
+  await env.DB.batch(stmts);
+  return json({ ok: true, staff: { id, name, role }, oldName: row.name, jobsChanged, salesChanged });
 }
 
 async function deleteStaff(id, env) {
