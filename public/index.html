@@ -223,7 +223,7 @@ tr:hover td{background:var(--card-2)}
 .ch-blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd)}
 .ch-ink{background:var(--card-2);color:var(--ink-3);border-color:var(--rule-2)}
 .vtrack{display:flex;gap:3px}
-.vd{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--rule-2);transition:var(--fast)}
+.vd{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--rule-2);transition:var(--fast)}.vd.clickable{width:11px;height:11px;cursor:pointer}.vd.clickable:hover{transform:scale(1.4);border-color:var(--green)}.vd.ok{background:var(--green);border-color:var(--green)}
 .vd.ok{background:var(--green);border-color:var(--green)}
 .comm-val{font-weight:800;color:var(--green);font-size:13px}
 .comm-na{font-size:12px;color:var(--faint)}
@@ -838,7 +838,20 @@ function fMoney(n){if(n==null||n==='')return'—';return'฿'+Number(n).toLocale
 function cjc(j){const v=j.verify||{};if(!(v.v1&&v.v2&&v.v3&&v.v4&&v.v5))return null;if(!j.serviceFee||j.serviceFee<=0)return null;return(j.serviceFee*0.03)/((j.assignees||[]).length||1);}
 function csc(s){if(!s.receiptData)return null;return s.commType==='project'?(s.amount||0)*0.01:300;}
 function sbadge(s){if(s==='done')return`<span class="b b-done"><span class="bd"></span>เสร็จสิ้น</span>`;if(s==='active')return`<span class="b b-active"><span class="bd"></span>กำลังดำเนินการ</span>`;return`<span class="b b-pend"><span class="bd"></span>รอดำเนินการ</span>`;}
-function vdots(v){return['v1','v2','v3','v4','v5'].map(k=>`<div class="vd${v&&v[k]?' ok':''}"></div>`).join('');}
+const VLABELS={v1:'เวลาเดินทาง',v2:'ส่งใบงาน',v3:'ภาพปิดงาน',v4:'รายงานตำแหน่ง',v5:'เอกสารอื่นๆ'};
+function vdots(v,id){return['v1','v2','v3','v4','v5'].map(k=>id?`<div class="vd${v&&v[k]?' ok':''} clickable" onclick="toggleVerify('${id}','${k}')" title="${VLABELS[k]}"></div>`:`<div class="vd${v&&v[k]?' ok':''}"></div>`).join('');}
+async function toggleVerify(id,k){
+  const j=DB.jobs.find(x=>x.id===id);if(!j)return;
+  const v={...(j.verify||{v1:false,v2:false,v3:false,v4:false,v5:false})};
+  v[k]=!v[k];
+  const newStatus=(k==='v2'&&v[k])?'done':j.status;
+  try{
+    const r=await PUT(`/api/jobs/${id}`,{...j,verify:v,status:newStatus});
+    const i=DB.jobs.findIndex(x=>x.id===id);if(i>=0)DB.jobs[i]=r.job;
+    renderJobs();updBadges();
+    if(k==='v2'&&v[k])toast('ส่งใบงานแล้ว — ปิดงานสำเร็จ','i');
+  }catch(e){toast('อัพเดตไม่สำเร็จ','e');}
+}
 function fprev(n){return`<div class="fprev"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${n}</div>`;}
 function toast(msg,type='s'){
   const el=document.createElement('div');el.className=`toast ${type}`;
@@ -1021,7 +1034,7 @@ function renderJobs(){
       <td style="max-width:140px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px" title="${j.details||''}">${j.details||'—'}</div></td>
       <td><div style="display:flex;flex-wrap:wrap;gap:3px">${chips||'<span style="color:var(--faint);font-size:12px">—</span>'}</div></td>
       <td>${sbadge(j.status)}</td>
-      <td><div class="vtrack">${vdots(j.verify)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
+      <td><div class="vtrack">${vdots(j.verify,j.id)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
       <td style="font-weight:700">${j.serviceFee?fMoney(j.serviceFee):'<span style="color:var(--faint)">—</span>'}</td>
       <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">ยังไม่ครบ</span>`}</td>
       <td>${fileCell}</td>
