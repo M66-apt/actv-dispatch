@@ -141,6 +141,19 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 6 ═══ */
+.sticky-head{position:sticky;top:0;z-index:150;box-shadow:0 2px 10px rgba(15,23,42,.06)}
+.sticky-head .topbar{position:static}
+tr.od-row td{background:#FEF2F2}
+tr.od-row:hover td{background:#FEE2E2}
+tr.od-row td:first-child{box-shadow:inset 4px 0 0 #EF4444}
+.due-od{font-weight:800;color:#DC2626}
+.due-tag{display:inline-block;margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;background:#EF4444;padding:0 7px;border-radius:10px;white-space:nowrap}
+.due-tag.soon{background:#F59E0B}
+.cap-rpt tr.od td{background:#FEF2F2!important}
+.cap-rpt tr.od td:first-child{box-shadow:inset 4px 0 0 #EF4444}
+.cap-rpt .odt{font-size:11.5px;font-weight:800;color:#DC2626}
+.staff-row.editing{border-color:var(--blue);background:var(--blue-bg);align-items:stretch;gap:10px}
 /* ══ BATCH 5 ═══ */
 #pw-ov{z-index:1600}
 .sb-foot{padding:14px 14px 16px!important}
@@ -725,6 +738,7 @@ tr:hover td{background:var(--card-2)}
   </nav>
 
   <div class="main">
+    <div class="sticky-head">
     <div class="topbar">
       <div class="tb-left">
         <div>
@@ -756,6 +770,7 @@ tr:hover td{background:var(--card-2)}
       </div>
     </div>
 
+    </div><!-- /sticky-head -->
     <div class="content">
       <!-- JOBS -->
       <div class="section on" id="section-jobs">
@@ -785,7 +800,7 @@ tr:hover td{background:var(--card-2)}
               </button>
             </div>
           </div>
-          <div class="tw"><table><thead><tr><th>เลขงาน</th><th>วันที่</th><th>ลูกค้า</th><th>รายละเอียด</th><th>ผู้รับงาน</th><th>สถานะ</th><th>ตรวจสอบ</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th><th>ไฟล์แนบ</th><th></th></tr></thead><tbody id="jobs-tbody"></tbody></table></div>
+          <div class="tw"><table><thead><tr><th>เลขงาน</th><th>วันที่แจ้ง</th><th>กำหนดส่ง</th><th>ลูกค้า</th><th>รายละเอียด</th><th>ผู้รับงาน</th><th>สถานะ</th><th>ตรวจสอบ</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th><th>ไฟล์แนบ</th><th></th></tr></thead><tbody id="jobs-tbody"></tbody></table></div>
           <div id="jobs-pg"></div>
         </div>
       </div>
@@ -1131,7 +1146,7 @@ function normDate(d){
 }
 function mLabel(k){if(!k)return'ทุกเดือน';const[y,m]=k.split('-');return`${TH_M[+m-1]} ${+y+543}`;}
 function fDate(d){const n=normDate(d);if(!n)return'—';const p=n.split('-');if(p.length<2||!TH_M[+p[1]-1])return String(d);const yy=String(+p[0]+543).slice(2);return p[2]?`${p[2]}/${p[1]}/${p[0].slice(2)}`:`${TH_MS[+p[1]-1]} ${yy}`;}
-function normAll(){DB.jobs.forEach(j=>{j.reportDate=normDate(j.reportDate);if(j.completedDate)j.completedDate=normDate(j.completedDate);if(j.completionDate)j.completionDate=normDate(j.completionDate);});DB.sales.forEach(x=>{if(x.saleDate)x.saleDate=normDate(x.saleDate);if(x.date)x.date=normDate(x.date);});}
+function normAll(){DB.jobs.forEach(j=>{j.reportDate=normDate(j.reportDate);if(j.completedDate)j.completedDate=normDate(j.completedDate);if(j.completionDate)j.completionDate=normDate(j.completionDate);if(j.dueDate)j.dueDate=normDate(j.dueDate);});DB.sales.forEach(x=>{if(x.saleDate)x.saleDate=normDate(x.saleDate);if(x.date)x.date=normDate(x.date);});}
 function fMoney(n){if(n==null||n==='')return'—';return'฿'+Number(n).toLocaleString('th-TH',{maximumFractionDigits:0});}
 function vFilled(val){if(val===null||val===undefined||val===false||val==='')return false;if(Array.isArray(val))return val.length>0;return true;}
 // ค่าคอมช่าง: สถานะสำเร็จ + แนบใบเสร็จ → 3% ของค่าบริการ หารจำนวนช่าง
@@ -1324,6 +1339,14 @@ function mpSync(id){const b=document.getElementById(id+'-btn');if(!b)return;b.qu
 document.addEventListener('click',e=>{if(!e.target.closest('#mp-pop')&&!e.target.closest('.mp-btn'))mpClose();});
 window.addEventListener('resize',mpClose);
 
+// ━━━━ DUE DATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function jobDue(j){return normDate(j.dueDate||j.due||'');}
+function overdueDays(j){const d=jobDue(j);if(d.length!==10||j.status==='done')return 0;const t=today();if(d>=t)return 0;return Math.round((new Date(t)-new Date(d))/864e5);}
+function dueCell(j,od){const d=jobDue(j);if(!d)return'<span style="color:var(--faint)">—</span>';
+  if(od>0)return`<div class="due-od">${fDate(d)}</div><div class="due-tag">เลย ${od} วัน</div>`;
+  if(j.status!=='done'&&d===today())return`<div style="font-weight:700;color:var(--amber)">${fDate(d)}</div><div class="due-tag soon">ครบวันนี้</div>`;
+  return fDate(d);}
+
 // ━━━━ ASSIGNEE CHIP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const AV_COL=['#2563EB','#D97706','#059669','#7C3AED','#DB2777','#0891B2','#DC2626','#4F46E5'];
 function avCol(n){let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))>>>0;return AV_COL[h%AV_COL.length];}
@@ -1400,15 +1423,51 @@ function closeDrawer(){document.getElementById('drawer').classList.remove('on');
 function renderStaffAdmin(){
   const el=document.getElementById('staff-admin-list');
   if(!DB.staff.length){el.innerHTML='<p style="font-size:13px;color:var(--muted);padding:4px 0">ยังไม่มีพนักงาน</p>';return;}
-  el.innerHTML=DB.staff.map(s=>`
+  el.innerHTML=DB.staff.map(s=>staffEditId===s.id?`
+    <div class="staff-row editing">
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
+        <input type="text" class="fi" id="se-name" value="${s.name.replace(/"/g,'&quot;')}" style="font-size:13px;padding:7px 10px" onkeydown="if(event.key==='Enter')saveStaffEdit('${s.id}');if(event.key==='Escape')editStaff(null)">
+        <select class="fs" id="se-role" style="font-size:12.5px">${DB.roles.map(r=>`<option value="${r.id}"${r.id===s.role?' selected':''}>${r.label}</option>`).join('')}<option value="admin"${s.role==='admin'?' selected':''}>แอดมิน</option>${s.role&&s.role!=='admin'&&!DB.roles.find(r=>r.id===s.role)?`<option value="${s.role}" selected>${s.role}</option>`:''}</select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+        <button class="btn btn-primary" style="font-size:12px;padding:6px 12px" onclick="saveStaffEdit('${s.id}')">บันทึก</button>
+        <button class="btn btn-out" style="font-size:12px;padding:6px 12px" onclick="editStaff(null)">ยกเลิก</button>
+      </div>
+    </div>`:`
     <div class="staff-row">
       <div class="srow-info"><strong>${s.name}</strong><small>${s.role==='admin'?'แอดมิน':roleLabel(s.role)} · ID: ${s.id||'—'}</small></div>
       <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn-pw" onclick="editStaff('${s.id}')" title="แก้ไขชื่อ/บทบาท">✏️ แก้ไข</button>
         <button class="btn-pw" onclick="openPw('admin','${s.id}')" title="ตั้ง/รีเซ็ตรหัสผ่าน">🔑 รหัส${+s.default_pin?'<b class="pw-def">1234</b>':''}</button>
         <button class="btn-del" onclick="delStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">ลบ</button>
       </div>
     </div>
   `).join('');
+}
+let staffEditId=null;
+function editStaff(id){staffEditId=id;renderStaffAdmin();if(id)setTimeout(()=>{const i=document.getElementById('se-name');i?.focus();i?.select();},30);}
+async function saveStaffEdit(id){
+  const st=DB.staff.find(s=>s.id===id);if(!st)return;
+  const name=document.getElementById('se-name').value.trim(),role=document.getElementById('se-role').value;
+  if(!name){toast('กรุณากรอกชื่อ','e');return;}
+  if(name===st.name&&role===st.role){editStaff(null);return;}
+  if(name!==st.name&&!confirm(`เปลี่ยนชื่อ "${st.name}" เป็น "${name}"?\nงานและยอดขายเดิมของพนักงานคนนี้จะเปลี่ยนชื่อตามด้วย`))return;
+  try{
+    const r=await fetch(`/api/staff/${encodeURIComponent(id)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,role})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok){toast(d.error||'บันทึกไม่สำเร็จ','e');return;}
+    const old=st.name;st.name=name;st.role=role;
+    if(name!==old){
+      DB.jobs.forEach(j=>{if((j.assignees||[]).includes(old))j.assignees=j.assignees.map(a=>a===old?name:a);});
+      DB.sales.forEach(x=>{if(x.staff===old)x.staff=name;});
+      if(currentUser?.name===old){currentUser.name=name;updUserUI();}
+      if(selectedCommStaff===old)selectedCommStaff=name;
+      try{if(localStorage.getItem('lastLogin')===old)localStorage.setItem('lastLogin',name);}catch(e){}
+    }
+    staffEditId=null;renderStaffAdmin();renderLoginStaff();populateSels();renderJobs();renderSales();
+    if(document.getElementById('section-commission').classList.contains('on'))renderCommission();
+    toast(name!==old?`บันทึกแล้ว — อัปเดตงาน ${d.jobsChanged} รายการ, ยอดขาย ${d.salesChanged} รายการ`:'บันทึกบทบาทแล้ว');
+  }catch(e){toast('เชื่อมต่อไม่ได้: '+e.message,'e');}
 }
 async function addStaff(){
   const inp=document.getElementById('new-sname'),name=inp.value.trim();
@@ -1553,21 +1612,24 @@ function renderJobs(){
     if(q&&!j.customer?.toLowerCase().includes(q)&&!(j.jobNumber||'').toLowerCase().includes(q))return false;
     return true;
   });
+  list=list.map((j,i)=>({j,i,od:overdueDays(j)})).sort((a,b)=>(b.od>0)-(a.od>0)||(b.od>0&&a.od>0?b.od-a.od:0)||a.i-b.i).map(x=>x.j);
   const tot=list.length,pages=Math.max(1,Math.ceil(tot/JPP));
   if(jPage>pages)jPage=1;
   document.getElementById('jobs-count-label').textContent=`${tot} รายการ`;
   const sl=list.slice((jPage-1)*JPP,jPage*JPP);
   const tb=document.getElementById('jobs-tbody');
-  if(!sl.length){tb.innerHTML=`<tr class="empty"><td colspan="11"><div class="ei"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>ไม่พบรายการ</td></tr>`;}
+  if(!sl.length){tb.innerHTML=`<tr class="empty"><td colspan="12"><div class="ei"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>ไม่พบรายการ</td></tr>`;}
   else{tb.innerHTML=sl.map(j=>{
     const comm=cjc(j),vc=Object.values(j.verify||{}).filter(Boolean).length;
     const chips=asgChips(j.assignees);
     // file attachment column
     const hasRcpt=!!j.receiptData,hasForm=!!j.jobFormData;
     const fileCell=hasRcpt?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ใบเสร็จ</span>`:`<button class="btn-upload-quick rcpt" onclick="openQuickUpload('${j.id}','rcpt')">+ ใบเสร็จ</button>`;
-    return`<tr>
+    const od=overdueDays(j);
+    return`<tr class="${od>0?'od-row':''}">
       <td class="tmono">${j.jobNumber||'—'}</td>
       <td style="font-size:12.5px;white-space:nowrap">${fDate(j.reportDate)}</td>
+      <td style="font-size:12.5px;white-space:nowrap">${dueCell(j,od)}</td>
       <td><div class="tn">${j.customer}</div><div class="ts">${j.phone||''}</div></td>
       <td style="max-width:140px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px" title="${j.details||''}">${j.details||'—'}</div></td>
       <td>${chips}</td>
@@ -1590,7 +1652,7 @@ function renderJobStats(){
   const fee=all.reduce((s,j)=>s+(j.serviceFee||0),0);
   document.getElementById('jobs-stats').innerHTML=`
     <div class="stat c-blue"><div class="stat-label">งานทั้งหมด</div><div class="stat-num">${all.length}</div><div class="stat-sub">รายการ</div></div>
-    <div class="stat c-amber"><div class="stat-label">รอดำเนินการ</div><div class="stat-num">${pend}</div><div class="stat-sub">งาน</div></div>
+    <div class="stat c-amber"><div class="stat-label">รอดำเนินการ</div><div class="stat-num">${pend}</div><div class="stat-sub">${(()=>{const n=all.filter(j=>overdueDays(j)>0).length;return n?`<span style="color:var(--red);font-weight:700">เลยกำหนด ${n} งาน</span>`:'งาน';})()}</div></div>
     <div class="stat c-green"><div class="stat-label">เสร็จสิ้น</div><div class="stat-num">${done}</div><div class="stat-sub">งาน</div></div>
     <div class="stat c-violet"><div class="stat-label">รวมค่าบริการ</div><div class="stat-num" style="font-size:20px">${fMoney(fee)}</div><div class="stat-sub">บาท</div></div>
   `;
@@ -1971,7 +2033,8 @@ function loadScript(srcs){return new Promise((res,rej)=>{const tryN=i=>{if(i>=sr
 async function printJobReport(){
   const mFilter=document.getElementById('jobs-mf')?.value||'';
   const list=DB.jobs.filter(j=>['pending','active'].includes(j.status)&&(!mFilter||j.reportDate?.startsWith(mFilter)))
-    .sort((a,b)=>(a.reportDate||'').localeCompare(b.reportDate||''));
+    .sort((a,b)=>(overdueDays(b)>0)-(overdueDays(a)>0)||overdueDays(b)-overdueDays(a)||(a.reportDate||'').localeCompare(b.reportDate||''));
+  const nOd=list.filter(j=>overdueDays(j)>0).length;
   if(!list.length){toast('ไม่มีงานที่รอดำเนินการ / กำลังดำเนินการ','w');return;}
   toast('กำลังสร้างภาพรายงาน...','i');
   try{if(!window.html2canvas)await loadScript(['https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js','https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js']);}
@@ -1992,9 +2055,10 @@ async function printJobReport(){
       <div><b>${list.length}</b><span>งานค้างทั้งหมด</span></div>
       <div style="--c:#B45309"><b>${pend}</b><span>รอดำเนินการ</span></div>
       <div style="--c:#1D4ED8"><b>${act}</b><span>กำลังดำเนินการ</span></div>
+      <div style="--c:#DC2626"><b>${nOd}</b><span>เลยกำหนดส่ง</span></div>
     </div>
-    <table><thead><tr><th>#</th><th>เลขงาน</th><th>วันที่แจ้ง</th><th>ลูกค้า</th><th>รายละเอียด</th><th>ช่าง</th><th>สถานะ</th></tr></thead><tbody>
-    ${list.map((j,i)=>`<tr><td>${i+1}</td><td class="m">${j.jobNumber||'—'}</td><td>${fDate(j.reportDate)}</td><td><b>${j.customer||'—'}</b>${j.phone?`<div class="ph">${j.phone}</div>`:''}</td><td class="dt">${j.details||'—'}</td><td>${(j.assignees||[]).join(', ')||'—'}</td><td><span class="st" style="color:${SL[j.status][1]};background:${SL[j.status][2]}">${SL[j.status][0]}</span></td></tr>`).join('')}
+    <table><thead><tr><th>#</th><th>เลขงาน</th><th>วันที่แจ้ง</th><th>กำหนดส่ง</th><th>ลูกค้า</th><th>รายละเอียด</th><th>ช่าง</th><th>สถานะ</th></tr></thead><tbody>
+    ${list.map((j,i)=>{const od=overdueDays(j);return`<tr class="${od?'od':''}"><td>${i+1}</td><td class="m">${j.jobNumber||'—'}</td><td>${fDate(j.reportDate)}</td><td>${jobDue(j)?fDate(jobDue(j)):'—'}${od?`<div class="odt">เลย ${od} วัน</div>`:''}</td><td><b>${j.customer||'—'}</b>${j.phone?`<div class="ph">${j.phone}</div>`:''}</td><td class="dt">${j.details||'—'}</td><td>${(j.assignees||[]).join(', ')||'—'}</td><td><span class="st" style="color:${SL[j.status][1]};background:${SL[j.status][2]}">${SL[j.status][0]}</span></td></tr>`;}).join('')}
     </tbody></table>
     <div class="cap-ft">Angthong Cable TV · ACTV Dispatch</div>`;
   document.body.appendChild(box);
