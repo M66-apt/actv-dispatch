@@ -1125,7 +1125,7 @@ function openJobModal(id=null){
   document.getElementById('job-ov').classList.add('open');
 }
 function toggleCDate(){const v=document.getElementById('job-status').value;document.getElementById('cdate-grp').style.display=v==='done'?'flex':'none';if(v==='done'&&!document.getElementById('job-cdate').value)document.getElementById('job-cdate').value=today();updCommPrev();}
-function tv(k){VS[k]=!VS[k];updVI(k);updCommPrev();}
+function tv(k){VS[k]=!VS[k];updVI(k);if(k==='v2'&&VS[k]){document.getElementById('job-status').value='done';toggleCDate();}updCommPrev();}
 function updVI(k){
   const vi=document.getElementById('vi-'+k),cb=document.getElementById('vcb-'+k);
   if(VS[k]){vi.classList.add('ok');cb.style.background='var(--green)';cb.style.borderColor='var(--green)';}
