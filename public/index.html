@@ -141,6 +141,12 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 9 ═══ */
+.cy-ck{width:34px;text-align:center}
+.cy-ck input{width:16px;height:16px;cursor:pointer;accent-color:var(--blue)}
+tr.cy-on td{background:var(--blue-bg)}
+.cy-bar{align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin-bottom:12px;border-radius:12px;background:#F5F3FF;border:1px solid #DDD6FE;font-size:13px}
+.cy-bar .btn{padding:6px 14px;font-size:12.5px}
 /* ══ BATCH 8 ═══ */
 .pay-tag{display:flex;align-items:center;gap:4px;width:max-content;margin-top:4px;padding:1px 8px 1px 6px;border-radius:20px;font-family:inherit;font-size:10.5px;font-weight:800;white-space:nowrap;cursor:pointer;
   color:#6D28D9;background:#F5F3FF;border:1px solid #DDD6FE;transition:var(--fast)}
@@ -919,12 +925,13 @@ tr:hover td{background:var(--card-2)}
           </div>
           <div class="cm-dt">
             <div id="comm-who"></div>
+            <div class="cy-bar" id="cy-bar" style="display:none"></div>
             <div class="cm-seg" id="comm-seg">
               <button class="on" data-t="tech" onclick="commTab('tech')">ค่าคอมช่าง<b id="cs-tech">0</b></button>
               <button data-t="sale" onclick="commTab('sale')">ค่าคอมขาย<b id="cs-sale">0</b></button>
             </div>
-            <div class="tw" id="cm-tw-tech"><table><thead><tr><th>ช่าง</th><th>เลขงาน</th><th>วันที่แจ้ง</th><th>สมบูรณ์เมื่อ</th><th>ลูกค้า</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th></tr></thead><tbody id="comm-tbody-tech"></tbody></table></div>
-            <div class="tw" id="cm-tw-sale" style="display:none"><table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>วันที่ขาย</th><th>แนบใบเสร็จ</th><th>ลูกค้า</th><th>มูลค่า</th><th>ค่าคอม</th></tr></thead><tbody id="comm-tbody-sale"></tbody></table></div>
+            <div class="tw" id="cm-tw-tech"><table><thead><tr><th class="cy-ck" data-perm="jobs.edit"><input type="checkbox" onchange="cySelAll('job',this.checked)"></th><th>ช่าง</th><th>เลขงาน</th><th>วันที่แจ้ง</th><th>สมบูรณ์เมื่อ</th><th>ลูกค้า</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th></tr></thead><tbody id="comm-tbody-tech"></tbody></table></div>
+            <div class="tw" id="cm-tw-sale" style="display:none"><table><thead><tr><th class="cy-ck" data-perm="sales.edit"><input type="checkbox" onchange="cySelAll('sale',this.checked)"></th><th>พนักงาน</th><th>ประเภท</th><th>วันที่ขาย</th><th>แนบใบเสร็จ</th><th>ลูกค้า</th><th>มูลค่า</th><th>ค่าคอม</th></tr></thead><tbody id="comm-tbody-sale"></tbody></table></div>
           </div>
         </div>
       </div>
@@ -988,6 +995,7 @@ tr:hover td{background:var(--card-2)}
         </div>
         <div class="f" id="cdate-grp" style="display:none"><label class="fl">วันที่เสร็จ</label><input type="date" class="fi" id="job-cdate"></div>
         <div class="f"><label class="fl">ค่าบริการ (บาท)</label><input type="number" class="fi" id="job-fee" placeholder="0" oninput="updCommPrev()"></div>
+        <div class="f"><label class="fl">รอบชำระค่าคอม</label><select class="fsel" id="job-paycycle"></select><div class="fhint">ลงรายการย้อนหลัง? เลือกเดือนที่ต้องการจ่ายได้</div></div>
         <div class="f"><label class="fl">ผู้รับมอบหมาย</label>
           <select class="fi fmsel" id="job-assignees" multiple onchange="updCommPrev()"></select>
           <div class="fhint">Ctrl/Cmd เพื่อเลือกหลายคน</div>
@@ -1033,6 +1041,7 @@ tr:hover td{background:var(--card-2)}
           <select class="fsel" id="sale-type" onchange="updSComm()"><option value="project">งานโปรเจก (1%)</option><option value="net-cable">งานเนต+เคเบิล (300฿)</option></select>
         </div>
         <div class="f"><label class="fl">มูลค่างาน (บาท)</label><input type="number" class="fi" id="sale-amt" placeholder="0" oninput="updSComm()"></div>
+        <div class="f"><label class="fl">รอบชำระค่าคอม</label><select class="fsel" id="sale-paycycle"></select><div class="fhint">ลงรายการย้อนหลัง? เลือกเดือนที่ต้องการจ่ายได้</div></div>
         <div class="f s2"><label class="fl">อัพโหลดใบเสร็จ</label><input type="file" class="fi" id="sale-rcpt" accept="image/*,.pdf" onchange="hfu(this,'sale-rcpt-prev')"><div id="sale-rcpt-prev"></div><div class="fhint">คิดค่าคอมเมื่ออัพโหลดใบเสร็จเท่านั้น</div></div>
         <div class="f s2"><div class="cprev" id="scprev">กรอกข้อมูลและอัพโหลดใบเสร็จเพื่อดูค่าคอม</div></div>
       </div>
@@ -1260,11 +1269,18 @@ function cjcWhy(j){if(j.status!=='done'&&!j.receiptData)return'รอปิด�
 function jobCommDate(j){const d=normDate(j.completionDate||j.doneAt||''),r=normDate(j.receiptAt||'');const a=[d,r].filter(x=>x.length>=7).sort();return a.length?a[a.length-1]:normDate(j.reportDate||'');}
 // ขาย: เดือนที่แนบใบเสร็จ
 // ป้ายรอบชำระ — เดือนที่เข้าเงื่อนไข = รอบจ่ายเดือนนั้น (กดเพื่อดูรอบนั้นในหน้าค่าคอม)
-function payTag(d){const k=normDate(d||'').slice(0,7);if(k.length!==7)return'';const[y,m]=k.split('-');
+function payTag(d,manual){const k=normDate(d||'').slice(0,7);if(k.length!==7)return'';const[y,m]=k.split('-');
   const cur=today().slice(0,7),cls=k===cur?' now':k<cur?' past':'';
-  return`<button class="pay-tag${cls}" title="รอบชำระ ${mLabel(k)} — กดเพื่อดูในหน้าค่าคอม" onclick="goPayCycle('${k}')">รอบ ${TH_MS[+m-1]} ${String(+y+543).slice(2)}</button>`;}
+  return`<button class="pay-tag${cls}" title="รอบชำระ ${mLabel(k)}${manual?' (ตั้งเอง)':''} — กดเพื่อดูในหน้าค่าคอม" onclick="goPayCycle('${k}')">รอบ ${TH_MS[+m-1]} ${String(+y+543).slice(2)}${manual?' ✎':''}</button>`;}
 function goPayCycle(k){if(!secAllowed('commission')){toast('ไม่มีสิทธิ์ดูหน้าค่าคอม','w');return;}document.getElementById('comm-mf').value=k;mpSync('comm-mf');showSec('commission');}
 function saleCommDate(s){return normDate(s.receiptAt||'')||normDate(s.saleDate||s.date||'');}
+// รอบชำระจริง: ถ้าแก้เองใช้ค่าที่ตั้ง ไม่งั้นใช้เดือนที่เข้าเงื่อนไข
+function jobPayMonth(j){return j.payCycle||jobCommDate(j).slice(0,7);}
+function salePayMonth(s){return s.payCycle||saleCommDate(s).slice(0,7);}
+function cycleOpts(cur,autoK){const now=today().slice(0,7),[y,m]=now.split('-').map(Number),ks=new Set();
+  for(let i=-12;i<=2;i++){const d=new Date(y,m-1+i,1);ks.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);}
+  if(cur)ks.add(cur);
+  return`<option value="">อัตโนมัติ${autoK?' — '+mLabel(autoK):' (ตามเดือนที่เข้าเงื่อนไข)'}</option>`+[...ks].sort().reverse().map(k=>`<option value="${k}"${k===cur?' selected':''}>${mLabel(k)}</option>`).join('');}
 function csc(s){if(!s.receiptData)return null;return s.commType==='project'?(s.amount||0)*0.01:300;}
 function sbadge(s){if(s==='done')return`<span class="b b-done"><span class="bd"></span>เสร็จสิ้น</span>`;if(s==='active')return`<span class="b b-active"><span class="bd"></span>กำลังดำเนินการ</span>`;return`<span class="b b-pend"><span class="bd"></span>รอดำเนินการ</span>`;}
 const VLABELS={v1:'เวลาเดินทาง',v2:'ส่งใบงาน',v3:'ภาพปิดงาน',v4:'รายงานตำแหน่ง',v5:'เอกสารอื่นๆ'};
@@ -1426,9 +1442,9 @@ const MP_SRC={
   'jobs-mf':()=>DB.jobs.map(j=>j.reportDate),
   'sales-mf':()=>DB.sales.map(x=>x.saleDate||x.date),
   'logs-mf':()=>[],
-  'comm-mf':()=>[...DB.jobs.filter(j=>cjc(j)!==null).map(jobCommDate),...DB.sales.filter(x=>csc(x)!==null).map(saleCommDate)],
+  'comm-mf':()=>[...DB.jobs.filter(j=>cjc(j)!==null).map(j=>jobPayMonth(j)+'-01'),...DB.sales.filter(x=>csc(x)!==null).map(x=>salePayMonth(x)+'-01')],
 };
-const MP_CB={'logs-mf':()=>loadLogs(true),'jobs-mf':()=>{jPage=1;renderJobs();},'sales-mf':()=>renderSales(),'comm-mf':()=>renderCommission()};
+const MP_CB={'comm-mf':()=>{CY.job.clear();CY.sale.clear();renderCommission();},'logs-mf':()=>loadLogs(true),'jobs-mf':()=>{jPage=1;renderJobs();},'sales-mf':()=>renderSales()};
 function mpCounts(id){const c={};(MP_SRC[id]?.()||[]).forEach(d=>{const k=normDate(d).slice(0,7);if(k.length===7)c[k]=(c[k]||0)+1;});return c;}
 function mpOpen(id,btn){
   const pop=document.getElementById('mp-pop');
@@ -1715,11 +1731,13 @@ async function delRole(id){
 let LG={rows:[],total:0,eid:null,elabel:''};
 const LOG_ACT={create:['เพิ่ม','#059669','#D1FAE5'],update:['แก้ไข','#1D4ED8','#DBEAFE'],delete:['ลบ','#DC2626','#FEE2E2'],login:['เข้าระบบ','#475569','#F1F5F9'],login_fail:['เข้าระบบไม่สำเร็จ','#B45309','#FEF3C7'],pin_change:['เปลี่ยนรหัส','#7C3AED','#EDE9FE'],pin_reset:['ตั้งรหัสให้','#7C3AED','#EDE9FE']};
 const LOG_ENT={job:'งานช่าง',sale:'งานขาย',staff:'พนักงาน',role:'บทบาท',auth:'ระบบ'};
-const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน'};
+const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ'};
 const ST_L={pending:'รอดำเนินการ',active:'กำลังดำเนินการ',done:'สำเร็จ'};
 function fmtV(f,v){
+  if((v===''||v==null)&&f==='payCycle')return'<i class="lg-e">อัตโนมัติ</i>';
   if(v===''||v==null)return'<i class="lg-e">ว่าง</i>';
   if(f==='status')return ST_L[v]||v;
+  if(f==='payCycle')return mLabel(v);
   if(f==='serviceFee'||f==='amount')return fMoney(v);
   if(/Date$/.test(f))return fDate(v);
   if(f==='role')return v==='admin'?'แอดมิน':roleLabel(v);
@@ -1839,7 +1857,7 @@ function renderJobs(){
       <td>${sbadge(j.status)}</td>
       <td><div class="vtrack">${vdots(j.verify,can('jobs.verify')?j.id:null)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
       <td style="font-weight:700">${j.serviceFee?fMoney(j.serviceFee):'<span style="color:var(--faint)">—</span>'}</td>
-      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(jobCommDate(j))}`:`<span class="comm-na">${cjcWhy(j)}</span>`}</td>
+      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(jobPayMonth(j),!!j.payCycle)}`:`<span class="comm-na">${cjcWhy(j)}</span>`}</td>
       <td>${fileCell}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" onclick="viewJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -1935,6 +1953,7 @@ function openJobModal(id=null){
     document.getElementById('job-status').value=job.status||'pending';
     document.getElementById('job-fee').value=job.serviceFee||'';
     document.getElementById('job-cdate').value=job.completionDate||'';
+    document.getElementById('job-paycycle').innerHTML=cycleOpts(job.payCycle||'',cjc(job)!==null?jobCommDate(job).slice(0,7):null);
     Array.from(document.getElementById('job-assignees').options).forEach(o=>o.selected=(job.assignees||[]).includes(o.value));
     if(job.verify)Object.keys(job.verify).forEach(k=>{VS[k]=job.verify[k];updVI(k);});
     if(job.receiptData){rcptJ=job.receiptData;rcptJN=job.receiptName;document.getElementById('job-rcpt-prev').innerHTML=fprev(job.receiptName||'ใบเสร็จ');}
@@ -1942,6 +1961,7 @@ function openJobModal(id=null){
   }else{
     document.getElementById('job-number').value='';
     document.getElementById('job-report-date').value=today();
+    document.getElementById('job-paycycle').innerHTML=cycleOpts('',null);
     ['job-customer','job-phone','job-details','job-due','job-tech','job-cdate','job-fee'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('job-status').value='pending';
     Array.from(document.getElementById('job-assignees').options).forEach(o=>o.selected=false);
@@ -2029,6 +2049,7 @@ async function saveJob(){
     completionDate:status==='done'?document.getElementById('job-cdate').value:'',
     serviceFee:parseFloat(document.getElementById('job-fee').value)||0,
     receiptData:rcptJ,receiptName:rcptJN,jobFormData:formJ,jobFormName:formJN,verify:{...VS},
+    payCycle:document.getElementById('job-paycycle').value,
   };
   try{
     if(editJobId){const r=await PUT(`/api/jobs/${editJobId}`,body);const i=DB.jobs.findIndex(j=>j.id===editJobId);if(i>=0)DB.jobs[i]=r.job;}
@@ -2066,7 +2087,7 @@ function viewJob(id){
       <div class="dsep"></div>
       <div class="dmet">
         <div class="dm"><div class="dmv">${fMoney(j.serviceFee)}</div><div class="dml">ค่าบริการ</div></div>
-        <div class="dm"><div class="dmv" style="color:${comm!==null?'var(--green)':'var(--muted)'}">${comm!==null?fMoney(comm):cjcWhy(j)}</div><div class="dml">ค่าคอม / คน</div>${comm!==null?`<div style="display:flex;justify-content:center">${payTag(jobCommDate(j))}</div>`:''}</div>
+        <div class="dm"><div class="dmv" style="color:${comm!==null?'var(--green)':'var(--muted)'}">${comm!==null?fMoney(comm):cjcWhy(j)}</div><div class="dml">ค่าคอม / คน</div>${comm!==null?`<div style="display:flex;justify-content:center">${payTag(jobPayMonth(j),!!j.payCycle)}</div>`:''}</div>
       </div>
       <div class="dsep"></div>
       <div style="display:flex;gap:8px">
@@ -2111,7 +2132,7 @@ function renderSales(){
       <td>${tb2}</td>
       <td><span class="chip ch-blue" style="font-size:11px">${s.staff||'—'}</span></td>
       <td>${s.receiptData?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:can('sales.upload')?`<button class="btn-sale-rcpt" onclick="openSaleReceiptUpload('${s.id}')">รอแนบ</button>`:`<span style="font-size:11px;color:var(--faint)">รอแนบ</span>`}</td>
-      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(saleCommDate(s))}`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
+      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(salePayMonth(s),!!s.payCycle)}`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" data-perm="sales.edit" style="display:none" onclick="openSaleModal('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
         <button class="btn btn-red-ghost btn-icon" data-perm="sales.delete" style="display:none" onclick="delSale('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
@@ -2143,9 +2164,11 @@ function openSaleModal(id=null){
     document.getElementById('sale-amt').value=sale.amount||'';
     document.getElementById('sale-type').value=sale.commType||'project';
     document.getElementById('sale-staff').value=sale.staff||'';
+    document.getElementById('sale-paycycle').innerHTML=cycleOpts(sale.payCycle||'',csc(sale)!==null?saleCommDate(sale).slice(0,7):null);
     if(sale.receiptData){rcptS=sale.receiptData;rcptSN=sale.receiptName;document.getElementById('sale-rcpt-prev').innerHTML=fprev(sale.receiptName||'ใบเสร็จ');}
   }else{
     document.getElementById('sale-date').value=today();
+    document.getElementById('sale-paycycle').innerHTML=cycleOpts('',null);
     ['sale-cust','sale-phone','sale-details'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('sale-amt').value='';
     document.getElementById('sale-type').value='project';
@@ -2164,7 +2187,7 @@ async function saveSale(){
   const cust=document.getElementById('sale-cust').value.trim();
   if(!cust){toast('กรุณากรอกชื่อลูกค้า','e');return;}
   setLd('sale-sbtn',true);
-  const body={date:document.getElementById('sale-date').value,customer:cust,phone:document.getElementById('sale-phone').value.trim(),details:document.getElementById('sale-details').value.trim(),amount:parseFloat(document.getElementById('sale-amt').value)||0,commType:document.getElementById('sale-type').value,staff:document.getElementById('sale-staff').value,receiptData:rcptS,receiptName:rcptSN};
+  const body={payCycle:document.getElementById('sale-paycycle').value,date:document.getElementById('sale-date').value,customer:cust,phone:document.getElementById('sale-phone').value.trim(),details:document.getElementById('sale-details').value.trim(),amount:parseFloat(document.getElementById('sale-amt').value)||0,commType:document.getElementById('sale-type').value,staff:document.getElementById('sale-staff').value,receiptData:rcptS,receiptName:rcptSN};
   try{
     if(editSaleId){const r=await PUT(`/api/sales/${editSaleId}`,body);const i=DB.sales.findIndex(s=>s.id===editSaleId);if(i>=0)DB.sales[i]=r.sale;}
     else{const r=await POST('/api/sales',body);DB.sales.unshift(r.sale);}
@@ -2180,6 +2203,28 @@ async function delSale(id){
 
 // ━━━━ COMMISSION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let commTabCur='tech';
+// ── ย้ายรอบชำระหลายรายการ ──
+const CY={job:new Set(),sale:new Set()};
+function cySel(t,id,on){on?CY[t].add(id):CY[t].delete(id);renderCommission();}
+function cySelAll(t,on){const ids=[...document.querySelectorAll(`#comm-tbody-${t==='job'?'tech':'sale'} input[type=checkbox]`)].map(i=>i.getAttribute('onchange').match(/'([^']+)',this/)[1]);ids.forEach(id=>on?CY[t].add(id):CY[t].delete(id));renderCommission();}
+function cyBar(){const n=CY.job.size+CY.sale.size,el=document.getElementById('cy-bar');if(!el)return;
+  if(!n){el.style.display='none';return;}
+  el.style.display='flex';
+  el.innerHTML=`<b>เลือก ${n} รายการ</b><span style="color:var(--muted)">${CY.job.size?`งานช่าง ${CY.job.size}`:''}${CY.job.size&&CY.sale.size?' · ':''}${CY.sale.size?`งานขาย ${CY.sale.size}`:''}</span>
+    <span style="margin-left:auto">ย้ายไปรอบ</span><select class="fs" id="cy-to">${cycleOpts('',null).replace('อัตโนมัติ (ตามเดือนที่เข้าเงื่อนไข)','อัตโนมัติ (ยกเลิกการตั้งเอง)')}</select>
+    <button class="btn btn-primary" id="cy-go" onclick="cyMove()">ย้าย</button><button class="btn btn-out" onclick="CY.job.clear();CY.sale.clear();renderCommission()">ยกเลิก</button>`;
+  const mf=document.getElementById('comm-mf').value;const o=document.getElementById('cy-to');
+  const [y,m]=(mf||today().slice(0,7)).split('-').map(Number);const d=new Date(y,m-2,1);const prev=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  if([...o.options].some(x=>x.value===prev))o.value=prev;}
+async function cyMove(){
+  const to=document.getElementById('cy-to').value,btn=document.getElementById('cy-go');
+  const n=CY.job.size+CY.sale.size;if(!confirm(`ย้าย ${n} รายการไป${to?'รอบ '+mLabel(to):'รอบอัตโนมัติ'}?`))return;
+  btn.disabled=true;let ok=0,fail=0;
+  for(const id of CY.job){const j=DB.jobs.find(x=>x.id===id);if(!j)continue;try{const r=await PUT(`/api/jobs/${id}`,{...j,due:j.dueDate,payCycle:to});Object.assign(j,r.job);ok++;}catch(e){fail++;}}
+  for(const id of CY.sale){const x=DB.sales.find(y=>y.id===id);if(!x)continue;try{const r=await PUT(`/api/sales/${id}`,{...x,date:x.saleDate||x.date,payCycle:to});Object.assign(x,r.sale);ok++;}catch(e){fail++;}}
+  normAll();CY.job.clear();CY.sale.clear();renderCommission();renderJobs();renderSales();
+  toast(fail?`ย้ายแล้ว ${ok} รายการ · ไม่สำเร็จ ${fail}`:`ย้ายไป${to?'รอบ '+mLabel(to):'รอบอัตโนมัติ'}แล้ว ${ok} รายการ`,fail?'w':'s');
+}
 function commTab(t){commTabCur=t;document.querySelectorAll('#comm-seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   document.getElementById('cm-tw-tech').style.display=t==='tech'?'':'none';document.getElementById('cm-tw-sale').style.display=t==='sale'?'':'none';}
 function renderCommission(){
@@ -2187,13 +2232,13 @@ function renderCommission(){
   const pp={};const P=n=>pp[n]||(pp[n]={tech:[],sale:[]});
   DB.jobs.forEach(j=>{
     const c=cjc(j);if(c===null)return;
-    const d=jobCommDate(j);if(mFilter&&!d.startsWith(mFilter))return;
-    (j.assignees||[]).forEach(a=>P(a).tech.push({jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:d,open:j.reportDate}));
+    const d=jobCommDate(j),pm=jobPayMonth(j);if(mFilter&&pm!==mFilter)return;
+    (j.assignees||[]).forEach(a=>P(a).tech.push({id:j.id,jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:d,open:j.reportDate,pm,manual:!!j.payCycle}));
   });
   DB.sales.forEach(s=>{
     const c=csc(s);if(c===null)return;
-    const d=saleCommDate(s);if(mFilter&&!d.startsWith(mFilter))return;
-    P(s.staff).sale.push({customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d,open:s.saleDate||s.date});
+    const d=saleCommDate(s),pm=salePayMonth(s);if(mFilter&&pm!==mFilter)return;
+    P(s.staff).sale.push({id:s.id,customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d,open:s.saleDate||s.date,pm,manual:!!s.payCycle});
   });
   const sum=a=>a.reduce((x,t)=>x+t.comm,0);
   let people=Object.entries(pp).map(([name,p])=>({name,p,t:sum(p.tech),s:sum(p.sale)})).map(x=>({...x,tot:x.t+x.s})).filter(x=>x.tot>0||x.p.tech.length||x.p.sale.length).sort((a,b)=>b.tot-a.tot);
@@ -2228,9 +2273,10 @@ function renderCommission(){
     x.p.tech.forEach(t=>rowsT.push({name:x.name,...t}));x.p.sale.forEach(t=>rowsS.push({name:x.name,...t}));});
   rowsT.sort((a,b)=>(b.date||'').localeCompare(a.date||''));rowsS.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   document.getElementById('cs-tech').textContent=rowsT.length;document.getElementById('cs-sale').textContent=rowsS.length;
-  const empty=`<tr class="empty"><td colspan="7"><div class="ei">—</div>${selectedCommStaff?`ไม่มีข้อมูลของ ${selectedCommStaff}`:'ยังไม่มีข้อมูล'}</td></tr>`;
-  document.getElementById('comm-tbody-tech').innerHTML=rowsT.length?rowsT.map(r=>`<tr><td>${asgChips([r.name])}</td><td class="tmono" style="font-size:12px">${r.jobNumber||'—'}</td><td style="font-size:12.5px;white-space:nowrap;color:var(--muted)">${fDate(r.open)}</td><td style="font-size:12.5px;white-space:nowrap;font-weight:700">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.fee)}</td><td><span class="comm-val">${fMoney(r.comm)}</span></td></tr>`).join(''):empty;
-  document.getElementById('comm-tbody-sale').innerHTML=rowsS.length?rowsS.map(r=>`<tr><td>${asgChips([r.name])}</td><td>${r.commType==='project'?`<span class="b b-info"><span class="bd"></span>โปรเจก</span>`:`<span class="b b-active"><span class="bd"></span>เนต+เคเบิล</span>`}</td><td style="font-size:12.5px;white-space:nowrap;color:var(--muted)">${fDate(r.open)}</td><td style="font-size:12.5px;white-space:nowrap;font-weight:700">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.amount)}</td><td><span class="comm-val">${fMoney(r.comm)}</span></td></tr>`).join(''):empty;
+  const empty=`<tr class="empty"><td colspan="8"><div class="ei">—</div>${selectedCommStaff?`ไม่มีข้อมูลของ ${selectedCommStaff}`:'ยังไม่มีข้อมูล'}</td></tr>`;
+  document.getElementById('comm-tbody-tech').innerHTML=rowsT.length?rowsT.map(r=>`<tr class="${CY.job.has(r.id)?'cy-on':''}"><td class="cy-ck" data-perm="jobs.edit"><input type="checkbox" ${CY.job.has(r.id)?'checked':''} onchange="cySel('job','${r.id}',this.checked)"></td><td>${asgChips([r.name])}</td><td class="tmono" style="font-size:12px">${r.jobNumber||'—'}</td><td style="font-size:12.5px;white-space:nowrap;color:var(--muted)">${fDate(r.open)}</td><td style="font-size:12.5px;white-space:nowrap;font-weight:700">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.fee)}</td><td><span class="comm-val">${fMoney(r.comm)}</span>${payTag(r.pm,r.manual)}</td></tr>`).join(''):empty;
+  document.getElementById('comm-tbody-sale').innerHTML=rowsS.length?rowsS.map(r=>`<tr class="${CY.sale.has(r.id)?'cy-on':''}"><td class="cy-ck" data-perm="sales.edit"><input type="checkbox" ${CY.sale.has(r.id)?'checked':''} onchange="cySel('sale','${r.id}',this.checked)"></td><td>${asgChips([r.name])}</td><td>${r.commType==='project'?`<span class="b b-info"><span class="bd"></span>โปรเจก</span>`:`<span class="b b-active"><span class="bd"></span>เนต+เคเบิล</span>`}</td><td style="font-size:12.5px;white-space:nowrap;color:var(--muted)">${fDate(r.open)}</td><td style="font-size:12.5px;white-space:nowrap;font-weight:700">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.amount)}</td><td><span class="comm-val">${fMoney(r.comm)}</span>${payTag(r.pm,r.manual)}</td></tr>`).join(''):empty;
+  cyBar();updAdminUI();
   if(selectedCommStaff&&sel){if(!sel.p.tech.length&&sel.p.sale.length)commTab('sale');else if(sel.p.tech.length&&!sel.p.sale.length)commTab('tech');}
 }
 
@@ -2291,14 +2337,14 @@ function printCommReport(){
   const pp={tech:[],sale:[]};
   DB.jobs.forEach(j=>{
     const c=cjc(j);if(c===null)return;
-    const d=jobCommDate(j);if(mFilter&&!d.startsWith(mFilter))return;
+    const d=jobCommDate(j);if(mFilter&&jobPayMonth(j)!==mFilter)return;
     if(!name||(j.assignees||[]).includes(name)){
       (j.assignees||[]).filter(a=>!name||a===name).forEach(()=>{pp.tech.push({jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:d});});
     }
   });
   DB.sales.forEach(s=>{
     const c=csc(s);if(c===null)return;
-    const d=saleCommDate(s);if(mFilter&&!d.startsWith(mFilter))return;
+    const d=saleCommDate(s);if(mFilter&&salePayMonth(s)!==mFilter)return;
     if(!name||s.staff===name)pp.sale.push({customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d});
   });
   const tT=pp.tech.reduce((a,t)=>a+t.comm,0);
