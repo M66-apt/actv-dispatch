@@ -571,6 +571,10 @@ tr:hover td{background:var(--card-2)}
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 นำเข้า
               </button>
+              <button class="btn btn-out admin-only" style="display:none;border-color:var(--green);color:var(--green)" onclick="openCloseJobsModal()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                ปิดงาน CSV
+              </button>
               <button class="btn btn-primary admin-only" style="display:none" onclick="openJobModal()">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 เพิ่มงาน
@@ -792,6 +796,57 @@ tr:hover td{background:var(--card-2)}
       <button class="btn btn-out" id="imp-back" style="display:none" onclick="impBack()">← กลับ</button>
       <button class="btn btn-out" onclick="cm('imp-ov')">ยกเลิก</button>
       <button class="btn btn-primary" id="imp-next" onclick="impNext()">ตรวจสอบข้อมูล →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: BULK CLOSE JOBS ════════════════════════════ -->
+<div class="ov" id="closejobs-ov" onclick="coo(event,'closejobs-ov')">
+  <div class="modal imp-modal" style="max-width:680px">
+    <div class="mh"><div class="mt">ปิดงานจำนวนมาก (CSV)</div><button class="cx" onclick="cm('closejobs-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb">
+      <div id="cj-s1">
+        <div class="imp-tpl">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <strong>ดาวน์โหลด Template CSV สำหรับปิดงาน</strong>
+          <button class="btn btn-out" onclick="downloadCloseTemplate()" style="font-size:11.5px;padding:5px 10px;white-space:nowrap">⬇ ดาวน์โหลด Template</button>
+        </div>
+        <div style="padding:10px 14px;background:var(--card-2);border-radius:var(--r-md);font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          <strong style="color:var(--ink)">คอลัมน์ใน Template:</strong>
+          <span style="font-family:monospace;background:var(--rule);padding:1px 5px;border-radius:4px;margin:0 3px">เลขงาน</span> (จำเป็น) ·
+          <span style="font-family:monospace;background:var(--rule);padding:1px 5px;border-radius:4px;margin:0 3px">วันที่ปิดงาน</span> (ไม่จำเป็น — ถ้าเว้นว่างจะใช้วันนี้)
+        </div>
+        <div class="imp-tabs">
+          <div class="imp-tab on" id="cjtab-paste" onclick="switchCjTab('paste')">📋 วางข้อมูล CSV</div>
+          <div class="imp-tab" id="cjtab-file" onclick="switchCjTab('file')">📂 อัพโหลดไฟล์</div>
+        </div>
+        <div id="cjinp-paste">
+          <label class="fl" style="display:block;margin-bottom:5px">วางข้อมูล CSV (มีหัวคอลัมน์หรือไม่มีก็ได้)</label>
+          <textarea class="imp-paste" id="cj-csv" placeholder="เลขงาน,วันที่ปิดงาน&#10;JOB-001,2024-01-15&#10;JOB-002,&#10;JOB-003,2024-01-16"></textarea>
+        </div>
+        <div id="cjinp-file" style="display:none">
+          <div class="drop-zone" id="cj-drop" onclick="document.getElementById('cj-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="cjDrop(event)">
+            <svg width="36" height="36" fill="none" stroke="var(--muted)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>ลากไฟล์มาวาง หรือคลิกเพื่อเลือก</p>
+            <p style="font-size:12px;margin-top:4px">รองรับ .csv และ .txt</p>
+          </div>
+          <input type="file" id="cj-file-input" accept=".csv,.txt" style="display:none" onchange="cjFileLoad(this)">
+        </div>
+      </div>
+      <div id="cj-s2" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:var(--ink)">ตรวจสอบรายการที่จะปิด</div>
+          <div style="font-size:12px;color:var(--muted)" id="cj-matchcount"></div>
+        </div>
+        <div class="imp-preview" id="cj-preview-tbl"></div>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--r-md);font-size:13px;color:var(--amber);font-weight:600;display:none" id="cj-warn"></div>
+      </div>
+      <div id="cj-s3" style="display:none"><div class="imp-result" id="cj-result"></div></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-out" id="cj-back" style="display:none" onclick="cjBack()">← กลับ</button>
+      <button class="btn btn-out" onclick="cm('closejobs-ov')">ยกเลิก</button>
+      <button class="btn btn-primary" id="cj-next" onclick="cjNext()" style="background:var(--green);border-color:var(--green)">ตรวจสอบรายการ →</button>
     </div>
   </div>
 </div>
@@ -1411,6 +1466,98 @@ function downloadTemplate(){
   a.click();
   toast('ดาวน์โหลด template แล้ว','i');
 }
+// ── BULK CLOSE JOBS ──────────────────────────────────────────────────────
+let cjRows=[],cjMatches=[],cjStep=1,cjTab='paste';
+function downloadCloseTemplate(){
+  // Download template pre-filled with pending/active job numbers
+  const jobs=DB.jobs.filter(j=>j.status!=='done').sort((a,b)=>a.jobNumber?.localeCompare(b.jobNumber||'')||0);
+  const lines=['เลขงาน,วันที่ปิดงาน,...(ชื่อลูกค้า)'];
+  if(jobs.length)jobs.slice(0,20).forEach(j=>lines.push(`${j.jobNumber||''},${today()},${j.customer||''}`));
+  else lines.push('JOB-001,'+today()+',ตัวอย่าง');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(lines.join('\n'));
+  a.download='close_jobs_template.csv';a.click();
+  toast('ดาวน์โหลด template แล้ว — กรอกแล้วอัพโหลดกลับ','i');
+}
+function openCloseJobsModal(){
+  cjRows=[];cjMatches=[];cjStep=1;cjTab='paste';
+  document.getElementById('cj-csv').value='';
+  setCjStep(1);switchCjTab('paste');
+  document.getElementById('closejobs-ov').classList.add('open');
+}
+function setCjStep(n){
+  cjStep=n;
+  document.getElementById('cj-s1').style.display=n===1?'':'none';
+  document.getElementById('cj-s2').style.display=n===2?'':'none';
+  document.getElementById('cj-s3').style.display=n===3?'':'none';
+  document.getElementById('cj-back').style.display=n>1?'':'none';
+  const nb=document.getElementById('cj-next');
+  if(n===1)nb.textContent='ตรวจสอบรายการ →',nb.style.display='',nb.disabled=false,nb.style.background='var(--green)',nb.style.borderColor='var(--green)';
+  else if(n===2){nb.textContent=`ปิดงาน ${cjMatches.length} รายการ ✓`,nb.style.display='',nb.disabled=cjMatches.length===0,nb.style.background='var(--green)',nb.style.borderColor='var(--green)';}
+  else nb.style.display='none';
+}
+function switchCjTab(tab){
+  cjTab=tab;
+  document.getElementById('cjtab-paste').className='imp-tab'+(tab==='paste'?' on':'');
+  document.getElementById('cjtab-file').className='imp-tab'+(tab==='file'?' on':'');
+  document.getElementById('cjinp-paste').style.display=tab==='paste'?'':'none';
+  document.getElementById('cjinp-file').style.display=tab==='file'?'':'none';
+}
+function cjDrop(e){e.preventDefault();document.getElementById('cj-drop').classList.remove('drag');const file=e.dataTransfer.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{document.getElementById('cj-csv').value=ev.target.result;switchCjTab('paste');};r.readAsText(file,'utf-8');}
+function cjFileLoad(inp){const file=inp.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{document.getElementById('cj-csv').value=ev.target.result;switchCjTab('paste');};r.readAsText(file,'utf-8');}
+function cjNext(){
+  if(cjStep===1){
+    const csv=document.getElementById('cj-csv').value.trim();
+    if(!csv){toast('กรุณาวางข้อมูล CSV','e');return;}
+    const rows=parseCSV(csv);
+    if(!rows.length){toast('ไม่พบข้อมูล','e');return;}
+    // detect header row
+    const first=rows[0];const hasHeader=first[0]&&(first[0].includes('เลข')||first[0].toLowerCase().includes('job')||first[0].includes('งาน'));
+    cjRows=hasHeader?rows.slice(1):rows;
+    if(!cjRows.length){toast('ไม่มีข้อมูลหลังหัวคอลัมน์','e');return;}
+    // match to DB.jobs by jobNumber
+    cjMatches=[];const notFound=[];
+    cjRows.forEach(r=>{
+      const jn=(r[0]||'').trim();if(!jn)return;
+      const job=DB.jobs.find(j=>j.jobNumber===jn);
+      if(job)cjMatches.push({job,closeDate:(r[1]||'').trim()||today()});
+      else notFound.push(jn);
+    });
+    // build preview table
+    const tableHTML=`<table><thead><tr><th>เลขงาน</th><th>ลูกค้า</th><th>สถานะปัจจุบัน</th><th>วันที่ปิดงาน</th></tr></thead><tbody>${cjMatches.map(({job,closeDate})=>`<tr><td style="font-size:12px;font-weight:700">${job.jobNumber||'—'}</td><td style="font-size:12px">${job.customer||'—'}</td><td style="font-size:12px"><span class="badge ${job.status==='done'?'done':job.status==='active'?'active':'pend'}">${job.status==='done'?'เสร็จสิ้น':job.status==='active'?'กำลังดำเนินการ':'รอดำเนินการ'}</span></td><td style="font-size:12px;font-family:monospace">${closeDate}</td></tr>`).join('')}</tbody></table>`;
+    document.getElementById('cj-preview-tbl').innerHTML=cjMatches.length?tableHTML:'<div style="color:var(--muted);padding:16px;text-align:center">ไม่พบงานที่ตรงกัน</div>';
+    document.getElementById('cj-matchcount').textContent=`พบ ${cjMatches.length} งาน (ไม่พบ ${notFound.length} รายการ)`;
+    const w=document.getElementById('cj-warn');
+    const msgs=[];
+    if(notFound.length)msgs.push(`⚠️ ไม่พบเลขงาน: ${notFound.join(', ')}`);
+    const alreadyDone=cjMatches.filter(m=>m.job.status==='done').length;
+    if(alreadyDone)msgs.push(`ℹ️ ${alreadyDone} งานที่ปิดแล้ว — จะอัพเดตวันที่ปิดงาน`);
+    w.style.display=msgs.length?'':'none';w.innerHTML=msgs.join('<br>');
+    setCjStep(2);
+  }else if(cjStep===2)doCloseJobs();
+}
+function cjBack(){if(cjStep>1)setCjStep(cjStep-1);}
+async function doCloseJobs(){
+  const nb=document.getElementById('cj-next');nb.disabled=true;nb.textContent='กำลังปิดงาน...';
+  let ok=0,fail=0;
+  for(const{job,closeDate}of cjMatches){
+    try{
+      const v={v1:true,v2:true,v3:true,v4:true,v5:true};
+      const r=await PUT(`/api/jobs/${job.id}`,{...job,status:'done',verify:v,completionDate:closeDate});
+      const i=DB.jobs.findIndex(x=>x.id===job.id);if(i>=0)DB.jobs[i]=r.job;
+      ok++;
+    }catch(e){fail++;}
+  }
+  renderJobs();updBadges();
+  const res=document.getElementById('cj-result');
+  res.innerHTML=fail===0
+    ?`<div style="text-align:center;padding:24px"><svg width="40" height="40" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:12px"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg><div style="font-size:17px;font-weight:800;color:var(--green);margin-bottom:6px">ปิดงานสำเร็จ!</div><div style="font-size:14px;color:var(--muted)">อัพเดต ${ok} งาน เรียบร้อย</div></div>`
+    :`<div style="text-align:center;padding:24px"><div style="font-size:15px;font-weight:700">ปิดงาน ${ok} รายการ — ล้มเหลว ${fail} รายการ</div></div>`;
+  if(ok)toast(`ปิดงานสำเร็จ ${ok} รายการ`);
+  setCjStep(3);
+}
+// ─────────────────────────────────────────────────────────────────────────
+
 function openImportModal(type){
   impType=type;impStep=1;impRows=[];impTab='paste';
   document.getElementById('imp-title').textContent=`นำเข้า${type==='jobs'?'งานช่าง':'งานขาย'}ย้อนหลัง`;
