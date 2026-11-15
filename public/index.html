@@ -1000,7 +1000,7 @@ tr:hover td{background:var(--card-2)}
           <select class="fi fmsel" id="job-assignees" multiple onchange="updCommPrev()"></select>
           <div class="fhint">Ctrl/Cmd เพื่อเลือกหลายคน</div>
         </div>
-        <div class="f s2"><label class="fl">รายงานช่าง</label><textarea class="fi fta" id="job-tech" placeholder="รายงานจากช่าง..."></textarea></div>
+        <div class="f s2"><label class="fl">รายงานช่าง / การแก้ไขก่อนปิดงาน</label><textarea class="fi fta" id="job-tech" placeholder="ช่างแก้ไขอะไรไปบ้างก่อนปิดงาน..."></textarea></div>
         <div class="f"><label class="fl">แนบใบเสร็จ</label><input type="file" class="fi" id="job-rcpt" accept="image/*,.pdf" onchange="hfu(this,'job-rcpt-prev')"><div id="job-rcpt-prev"></div></div>
         <div class="f"><label class="fl">แนบใบงาน</label><input type="file" class="fi" id="job-form" accept="image/*,.pdf" onchange="hJFU(this)"><div id="job-form-prev"></div><div class="fhint" id="jfhint">ชื่อไฟล์ตรง MTC... = ปิดงานอัตโนมัติ</div></div>
         <div class="vsec">
@@ -2569,9 +2569,9 @@ async function saveVP(){
 // ━━━━ IMPORT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const IMP={
   jobs:{
-    headers:['เลขงาน','วันที่','ลูกค้า','เบอร์','รายละเอียด','ผู้รับงาน','สถานะ','ค่าบริการ'],
-    example:'JB-0001,2024-01-15,นายสมชาย ใจดี,0812345678,ซ่อมสายเคเบิล,สมหมาย,done,500',
-    hint:`<strong>รูปแบบ CSV งานช่าง:</strong><br><code>เลขงาน</code>, <code>วันที่ (YYYY-MM-DD)</code>, <code>ชื่อลูกค้า</code>, <code>เบอร์</code>, <code>รายละเอียด</code>, <code>ผู้รับงาน (ใช้ | คั่นหลายคน)</code>, <code>สถานะ (pending/active/done)</code>, <code>ค่าบริการ</code>`
+    headers:['เลขงาน','วันที่','ลูกค้า','เบอร์','รายละเอียด','ผู้รับงาน','สถานะ','ค่าบริการ','กำหนดส่ง','รายงานช่าง (การแก้ไขก่อนปิดงาน)','วันที่เสร็จ'],
+    example:'JB-0001,2026-10-15,นายสมชาย ใจดี,0812345678,สัญญาณภาพไม่ชัด,สมหมาย|สมศักดิ์,done,500,2026-10-17,"เปลี่ยนหัว F-Type, ปรับจานใหม่",2026-10-16',
+    hint:`<strong>รูปแบบ CSV งานช่าง:</strong><br><code>เลขงาน</code>, <code>วันที่ (YYYY-MM-DD)</code>, <code>ชื่อลูกค้า</code>, <code>เบอร์</code>, <code>รายละเอียด</code>, <code>ผู้รับงาน (ใช้ | คั่นหลายคน)</code>, <code>สถานะ (pending/active/done)</code>, <code>ค่าบริการ</code>, <code>กำหนดส่ง</code>, <code>รายงานช่าง — การแก้ไขก่อนปิดงาน</code>, <code>วันที่เสร็จ</code><br><span style="color:var(--muted)">3 คอลัมน์ท้ายไม่บังคับ · ถ้าข้อความมีจุลภาค ( , ) ให้ครอบด้วย " "</span>`
   },
   sales:{
     headers:['วันที่','ลูกค้า','เบอร์','รายละเอียด','มูลค่า','ประเภท','พนักงาน'],
@@ -2621,7 +2621,7 @@ function impFileLoad(inp){const file=inp.files[0];if(!file)return;const r=new Fi
 function parseCSV(text){
   return text.split(/\r?\n/).filter(l=>l.trim()).map(line=>{
     const cells=[];let cur='',inQ=false;
-    for(let i=0;i<line.length;i++){const c=line[i];if(c==='"')inQ=!inQ;else if(c===','&&!inQ){cells.push(cur.trim());cur='';}else cur+=c;}
+    for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){cells.push(cur.trim());cur='';}else cur+=c;}
     cells.push(cur.trim());return cells;
   });
 }
@@ -2650,8 +2650,9 @@ async function doImport(){
   for(const row of impRows){
     try{
       if(impType==='jobs'){
-        const[jn,dt,cust,ph,det,asgn,st,fee]=row;if(!jn||!cust)continue;
-        await POST('/api/jobs',{jobNumber:jn.trim(),reportDate:normDate(dt?.trim())||today(),customer:cust.trim(),phone:(ph||'').trim(),details:(det||'').trim(),status:['pending','active','done'].includes((st||'').trim())?(st||'pending').trim():'pending',assignees:(asgn||'').trim().split('|').map(a=>a.trim()).filter(Boolean),serviceFee:parseFloat((fee||'').replace(/[^\d.]/g,''))||0,verify:{}});ok++;
+        const[jn,dt,cust,ph,det,asgn,st,fee,due,tech,cdt]=row;if(!jn||!cust)continue;
+        const stv=['pending','active','done'].includes((st||'').trim())?(st||'pending').trim():'pending';
+        await POST('/api/jobs',{due:normDate((due||'').trim()),techReport:(tech||'').trim(),completionDate:stv==='done'?normDate((cdt||'').trim()):'',jobNumber:jn.trim(),reportDate:normDate(dt?.trim())||today(),customer:cust.trim(),phone:(ph||'').trim(),details:(det||'').trim(),status:['pending','active','done'].includes((st||'').trim())?(st||'pending').trim():'pending',assignees:(asgn||'').trim().split('|').map(a=>a.trim()).filter(Boolean),serviceFee:parseFloat((fee||'').replace(/[^\d.]/g,''))||0,verify:{}});ok++;
       }else{
         const[dt,cust,ph,det,amt,type,staff]=row;if(!cust)continue;
         await POST('/api/sales',{date:(dt||'').trim()||today(),customer:cust.trim(),phone:(ph||'').trim(),details:(det||'').trim(),amount:parseFloat((amt||'').replace(/[^\d.]/g,''))||0,commType:['project','net-cable'].includes((type||'').trim())?(type||'net-cable').trim():'net-cable',staff:(staff||'').trim()||DB.staff[0]?.name||''});ok++;
