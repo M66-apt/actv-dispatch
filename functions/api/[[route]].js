@@ -51,6 +51,12 @@ function nowLocal() {
   return new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' }).replace(' ', 'T');
 }
 
+function vFilled(v) {
+  if (v === null || v === undefined || v === false || v === '') return false;
+  if (Array.isArray(v)) return v.length > 0;
+  return true;
+}
+const allVerified = v => ['v1', 'v2', 'v3', 'v4', 'v5'].every(k => vFilled(v?.[k]));
 function safeJSON(str, fallback) {
   try { return JSON.parse(str); } catch { return fallback; }
 }
@@ -84,6 +90,7 @@ async function ensureCols(env) {
   await run(`ALTER TABLE sales ADD COLUMN receipt_at TEXT`);
   await run(`ALTER TABLE jobs  ADD COLUMN pay_cycle TEXT`);    // manual payout month 'YYYY-MM' (empty = automatic)
   await run(`ALTER TABLE sales ADD COLUMN pay_cycle TEXT`);
+  await run(`ALTER TABLE jobs  ADD COLUMN verified_at TEXT`);  // date all 5 verify checks became complete
   await run(`CREATE TABLE IF NOT EXISTS roles (id TEXT PRIMARY KEY, label TEXT NOT NULL, perms TEXT DEFAULT '[]', sort INTEGER DEFAULT 0)`);
   await run(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`);
   await run(`CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, staff_id TEXT, name TEXT, role TEXT, created_at TEXT, expires_at TEXT)`);
@@ -107,6 +114,12 @@ async function ensureCols(env) {
     WHERE done_at IS NULL AND status = 'done'`).run();
   await env.DB.prepare(`UPDATE sales SET receipt_at = substr(updated_at,1,10)
     WHERE receipt_at IS NULL AND COALESCE(receipt_data,'') <> ''`).run();
+  { // backfill verified_at for jobs that were already fully verified
+    const { results } = await env.DB.prepare(`SELECT id, verify, updated_at FROM jobs WHERE verified_at IS NULL`).all();
+    const st = results.filter(r => allVerified(safeJSON(r.verify, {})))
+      .map(r => env.DB.prepare(`UPDATE jobs SET verified_at=? WHERE id=?`).bind(String(r.updated_at || '').slice(0, 10), r.id));
+    for (let i = 0; i < st.length; i += 50) await env.DB.batch(st.slice(i, i + 50));
+  }
   colsReady = true;
 }
 
@@ -358,16 +371,25 @@ function parseJob(row) {
     receiptAt: row.receipt_at ?? '',
     doneAt: row.done_at ?? '',
     payCycle: row.pay_cycle ?? '',
+    verifiedAt: row.verified_at ?? '',
   };
 }
 
 // Server decides the commission dates — first receipt attach / first time done.
 async function stampJob(env, id) {
   const today = nowLocal().slice(0, 10);
+  const r = await env.DB.prepare(`SELECT verify FROM jobs WHERE id=?`).bind(id).first();
+  const ver = allVerified(safeJSON(r?.verify, {})) ? 1 : 0;
   await env.DB.prepare(`UPDATE jobs SET
-      receipt_at = CASE WHEN COALESCE(receipt_data,'') = '' THEN NULL ELSE COALESCE(receipt_at, ?) END,
-      done_at    = CASE WHEN status = 'done' THEN COALESCE(done_at, ?) ELSE NULL END
-    WHERE id = ?`).bind(today, today, id).run();
+      receipt_at  = CASE WHEN COALESCE(receipt_data,'') = '' THEN NULL ELSE COALESCE(receipt_at, ?) END,
+      done_at     = CASE WHEN status = 'done' THEN COALESCE(done_at, ?) ELSE NULL END,
+      verified_at = CASE WHEN ? = 1 THEN COALESCE(verified_at, ?) ELSE NULL END
+    WHERE id = ?`).bind(today, today, ver, today, id).run();
+}
+// a technician report means work has started
+function autoStatus(b) {
+  if (String(b.techReport ?? '').trim() && (b.status ?? 'pending') === 'pending') b.status = 'active';
+  return b;
 }
 
 async function getJobs(env, me) {
@@ -404,7 +426,7 @@ function jobFromBody(body) {
 }
 
 async function createJob(request, env, me) {
-  const b = jobFromBody(await request.json());
+  const b = autoStatus(jobFromBody(await request.json()));
   const id = uid();
   const now = nowLocal();
   await env.DB.prepare(`
@@ -446,6 +468,7 @@ async function updateJob(id, request, env, me) {
       b.status = inc.status; b.verify = inc.verify; b.completionDate = inc.completionDate;
     }
   }
+  autoStatus(b);
   await env.DB.prepare(`
     UPDATE jobs SET
       report_date=?, job_number=?, customer=?, phone=?, details=?,
