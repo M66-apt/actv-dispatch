@@ -1057,15 +1057,27 @@ tr:hover td{background:var(--card-2)}
       <div class="qu-files">
         <div class="qu-slot" id="qu-rcpt-slot">
           <div class="qu-slot-top"><strong>📄 ใบเสร็จรับเงิน</strong><span id="qu-rcpt-status" style="font-size:11.5px;color:var(--muted)"></span></div>
-          <div class="qu-label">อัพโหลดใบเสร็จ (รูปภาพ / PDF)</div>
-          <input type="file" id="qu-rcpt-file" accept="image/*,.pdf" onchange="hQuFile(this,'rcpt')">
+          <label class="qu-label">อัพโหลดใบเสร็จ (รูปภาพ / PDF)</label>
+          <input type="file" id="qu-rcpt-file" accept="image/*,.pdf" onchange="hQuFile(this,'rcpt')" style="display:none">
           <div class="qu-prev" id="qu-rcpt-prev"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-out" style="flex:1;font-size:12px" onclick="document.getElementById('qu-rcpt-file').click()">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/></svg>เลือกไฟล์
+            </button>
+          </div>
+          <div class="fhint">ค่าคอมช่างคิดเมื่องานสำเร็จ + แนบใบเสร็จ</div>
         </div>
         <div class="qu-slot" id="qu-form-slot">
           <div class="qu-slot-top"><strong>📋 ใบงาน</strong><span id="qu-form-status" style="font-size:11.5px;color:var(--muted)"></span></div>
-          <div class="qu-label">อัพโหลดใบงาน (รูปภาพ / PDF)</div>
-          <input type="file" id="qu-form-file" accept="image/*,.pdf" onchange="hQuFile(this,'form')">
+          <label class="qu-label">อัพโหลดใบงาน (รูปภาพ / PDF)</label>
+          <input type="file" id="qu-form-file" accept="image/*,.pdf" onchange="hQuFile(this,'form')" style="display:none">
           <div class="qu-prev" id="qu-form-prev"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-out" style="flex:1;font-size:12px" onclick="document.getElementById('qu-form-file').click()">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/></svg>เลือกไฟล์
+            </button>
+          </div>
+          <div class="fhint">ระบบตรวจเลขงานจากชื่อไฟล์หรือข้อความบนรูป</div>
         </div>
       </div>
     </div>
@@ -1839,6 +1851,7 @@ function renderJobStats(){
 
 // ━━━━ QUICK UPLOAD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let quFormOk=false;
+function quPrev(d,name){return d.startsWith('data:image')?`<img src="${d}" style="max-width:100%;max-height:220px;object-fit:contain;border-radius:8px;margin-top:8px;display:block">`:`<div style="font-size:12px;color:var(--blue);margin-top:8px">📄 ${name}</div>`;}
 function openQuickUpload(jobId,focus){
   quJobId=jobId;quRcptD='';quRcptN='';quFormD='';quFormN='';quFormOk=false;
   const j=DB.jobs.find(x=>x.id===jobId);
@@ -1859,8 +1872,8 @@ function hQuFile(input,type){
   const file=input.files[0];if(!file)return;
   const r=new FileReader();
   r.onload=e=>{
-    if(type==='rcpt'){quRcptD=e.target.result;quRcptN=file.name;document.getElementById('qu-rcpt-prev').innerHTML=fprev(file.name);document.getElementById('qu-rcpt-slot').className='qu-slot has-file';}
-    else{quFormD=e.target.result;quFormN=file.name;quFormOk=false;const pv=document.getElementById('qu-form-prev');pv.innerHTML=fprev(file.name);document.getElementById('qu-form-slot').className='qu-slot has-file';
+    if(type==='rcpt'){quRcptD=e.target.result;quRcptN=file.name;document.getElementById('qu-rcpt-prev').innerHTML=quPrev(quRcptD,file.name);document.getElementById('qu-rcpt-status').innerHTML='<span style="color:var(--green);font-weight:700">✓ เลือกแล้ว</span>';document.getElementById('qu-rcpt-slot').className='qu-slot has-file';}
+    else{quFormD=e.target.result;quFormN=file.name;quFormOk=false;const pv=document.getElementById('qu-form-prev');pv.innerHTML=quPrev(quFormD,file.name);document.getElementById('qu-form-status').innerHTML='<span style="color:var(--green);font-weight:700">✓ เลือกแล้ว</span>';document.getElementById('qu-form-slot').className='qu-slot has-file';
       const jn=DB.jobs.find(x=>x.id===quJobId)?.jobNumber||'';const hn=document.createElement('div');hn.style.cssText='font-size:11.5px;margin-top:6px;font-weight:700';pv.appendChild(hn);
       if(jn&&ocrNorm(file.name).includes(ocrNorm(jn))){quFormOk=true;hn.style.color='var(--green)';hn.textContent='✓ ชื่อไฟล์ตรงกับเลขงาน';}
       else if(jn&&quFormD.startsWith('data:image')){hn.style.color='var(--blue)';hn.textContent='🔍 กำลังอ่านข้อความบนรูป...';const mine=quFormD;
