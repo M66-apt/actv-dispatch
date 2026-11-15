@@ -141,6 +141,40 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 7 ═══ */
+#role-ov{z-index:1600}
+.rm{width:100%;border-collapse:separate;border-spacing:0}
+.rm th,.rm td{padding:8px 10px;border-bottom:1px solid var(--rule)}
+.rm thead th{position:sticky;top:0;background:var(--card);vertical-align:bottom;z-index:1}
+.rm-col{text-align:center;min-width:130px}
+.rm-name{width:100%;text-align:center;font-family:inherit;font-weight:800;font-size:13.5px;border:1.5px solid transparent;border-radius:8px;padding:4px 6px;background:none;color:var(--ink)}
+.rm-name:hover,.rm-name:focus{border-color:var(--rule);background:var(--card-2);outline:none}
+.rm-pre{display:flex;gap:3px;justify-content:center;margin-top:5px;flex-wrap:wrap}
+.rm-pre button{border:1px solid var(--rule);background:var(--card);border-radius:6px;font-family:inherit;font-size:10.5px;font-weight:700;padding:2px 6px;cursor:pointer;color:var(--muted)}
+.rm-pre button:hover{border-color:var(--blue);color:var(--blue)}
+.rm-n{font-size:10.5px;color:var(--faint);font-weight:600;margin-top:4px}
+.rm-n a{color:var(--red)}
+.rm-g td{background:var(--card-2);font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.rm-l{font-size:13px;font-weight:600;text-align:left}
+.rm-c{text-align:center}
+.rm-adm{background:#FFFBEB}
+.rm-cb{display:inline-grid;place-items:center;cursor:pointer}
+.rm-cb input{display:none}
+.rm-cb span{width:22px;height:22px;border-radius:7px;border:2px solid var(--rule);display:grid;place-items:center;transition:var(--fast);background:var(--card)}
+.rm-cb input:checked+span{background:var(--blue);border-color:var(--blue)}
+.rm-cb input:checked+span::after{content:'✓';color:#fff;font-weight:900;font-size:13px}
+.rm-cb input:disabled+span{background:#F59E0B;border-color:#F59E0B;cursor:default}
+.lg-act{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11.5px;font-weight:800;white-space:nowrap}
+.lg-ch{font-size:12.5px;line-height:1.6;max-width:420px}
+.lg-ch summary{cursor:pointer;color:var(--blue);font-weight:700}
+.lg-old{color:#B91C1C;background:#FEF2F2;padding:0 5px;border-radius:4px;text-decoration:line-through;text-decoration-color:rgba(185,28,28,.4)}
+.lg-new{color:#047857;background:#ECFDF5;padding:0 5px;border-radius:4px;font-weight:700}
+.lg-on{color:#047857;font-weight:700}.lg-off{color:#B91C1C;font-weight:700}
+.lg-e{color:var(--faint)}
+.lg-hist{font-size:11.5px;color:var(--blue);font-weight:700}
+tr.lg-del td{background:#FFF7F7}tr.lg-warn td{background:#FFFBEB}
+.lg-chip{display:inline-flex;align-items:center;gap:6px;margin-left:8px;background:var(--blue-bg);color:var(--blue);font-size:12px;font-weight:700;padding:3px 4px 3px 10px;border-radius:20px}
+.lg-chip button{border:none;background:#fff;border-radius:50%;width:20px;height:20px;cursor:pointer;color:var(--blue)}
 /* ══ BATCH 6 ═══ */
 .sticky-head{position:sticky;top:0;z-index:150;box-shadow:0 2px 10px rgba(15,23,42,.06)}
 .sticky-head .topbar{position:static}
@@ -685,12 +719,13 @@ tr:hover td{background:var(--card-2)}
       </div>
     </div>
     <div class="dsec" id="dr-roles-sec" style="display:none">
-      <h3>จัดการบทบาท (Role)</h3>
+      <h3>บทบาทและสิทธิ์</h3>
       <div id="roles-admin-list" style="margin-bottom:10px"></div>
-      <div class="add-row">
-        <input type="text" id="new-role-label" placeholder="ชื่อบทบาทใหม่" style="flex:1;font-size:13px" onkeydown="if(event.key==='Enter')addRole()">
-        <button class="btn btn-primary" onclick="addRole()" style="font-size:12px">+ เพิ่ม</button>
-      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="openRoles()">🛡️ จัดการบทบาทและสิทธิ์</button>
+    </div>
+    <div class="dsec dr-admin">
+      <h3>บันทึกการใช้งาน</h3>
+      <button class="btn btn-out" style="width:100%;justify-content:center" onclick="closeDrawer();showSec('logs')">📜 ดูบันทึกการใช้งาน (Log)</button>
     </div>
     <div class="dsec dr-admin">
       <h3>Admin PIN</h3>
@@ -756,15 +791,19 @@ tr:hover td{background:var(--card-2)}
     </div>
 
     <div class="tabs">
-      <div class="tab on" id="tab-jobs" onclick="showSec('jobs')">
+      <div class="tab on" data-perm="jobs.view" id="tab-jobs" onclick="showSec('jobs')">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         จ่ายงานช่าง <span class="tab-ct" id="tc-jobs">0</span>
       </div>
-      <div class="tab" id="tab-sales" onclick="showSec('sales')">
+      <div class="tab" data-perm="sales.view" id="tab-sales" onclick="showSec('sales')">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg>
         รายงานงานขาย <span class="tab-ct" id="tc-sales">0</span>
       </div>
-      <div class="tab" id="tab-commission" onclick="showSec('commission')">
+      <div class="tab admin-only" id="tab-logs" onclick="showSec('logs')" style="display:none;order:9">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+        บันทึกการใช้งาน
+      </div>
+      <div class="tab" data-perm="comm.view|comm.all" id="tab-commission" onclick="showSec('commission')">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         ค่าคอมมิชชั่น
       </div>
@@ -786,7 +825,7 @@ tr:hover td{background:var(--card-2)}
               <input type="hidden" id="jobs-mf" value=""><button type="button" class="mp-btn" id="jobs-mf-btn" onclick="mpOpen('jobs-mf',this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="mp-lbl">ทุกเดือน</span><svg class="mp-car" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
               <select class="fs" id="jobs-sf" onchange="renderJobs()"><option value="">ทุกสถานะ</option><option value="pending">รอดำเนินการ</option><option value="active">กำลังดำเนินการ</option><option value="done">เสร็จสิ้น</option></select>
               <select class="fs" id="jobs-tf" onchange="renderJobs()"><option value="">ทุกช่าง</option></select>
-              <button class="btn btn-out admin-only" style="display:none" onclick="openImportModal('jobs')">
+              <button class="btn btn-out" data-perm="jobs.create" style="display:none" onclick="openImportModal('jobs')">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 นำเข้า
               </button>
@@ -794,7 +833,7 @@ tr:hover td{background:var(--card-2)}
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 บันทึกภาพรายงาน
               </button>
-              <button class="btn btn-primary admin-only" style="display:none" onclick="openJobModal()">
+              <button class="btn btn-primary" data-perm="jobs.create" style="display:none" onclick="openJobModal()">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 เพิ่มงาน
               </button>
@@ -818,11 +857,11 @@ tr:hover td{background:var(--card-2)}
               </div>
               <input type="hidden" id="sales-mf" value=""><button type="button" class="mp-btn" id="sales-mf-btn" onclick="mpOpen('sales-mf',this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="mp-lbl">ทุกเดือน</span><svg class="mp-car" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
               <select class="fs" id="sales-tf" onchange="renderSales()"><option value="">ทุกประเภท</option><option value="project">งานโปรเจก</option><option value="net-cable">งานเนต+เคเบิล</option></select>
-              <button class="btn btn-out admin-only" style="display:none" onclick="openImportModal('sales')">
+              <button class="btn btn-out" data-perm="sales.create" style="display:none" onclick="openImportModal('sales')">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 นำเข้า
               </button>
-              <button class="btn btn-primary admin-only" style="display:none" onclick="openSaleModal()">
+              <button class="btn btn-primary" data-perm="sales.create" style="display:none" onclick="openSaleModal()">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 เพิ่มงานขาย
               </button>
@@ -830,6 +869,26 @@ tr:hover td{background:var(--card-2)}
           </div>
           <div class="tw"><table><thead><tr><th>วันที่</th><th>ลูกค้า</th><th>เบอร์</th><th>รายละเอียด</th><th>มูลค่า</th><th>ประเภท</th><th>พนักงาน</th><th>ใบเสร็จ</th><th>ค่าคอม</th><th></th></tr></thead><tbody id="sales-tbody"></tbody></table></div>
           <div id="sales-pg"></div>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="section" id="section-logs">
+        <div class="card">
+          <div class="ch">
+            <div class="ch-left"><h2>บันทึกการใช้งาน</h2><span class="cnt" id="logs-count"></span><span id="logs-chip"></span></div>
+            <div class="fr">
+              <div class="sbox">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="si" type="text" id="logs-q" placeholder="ค้นหาเลขงาน / ลูกค้า / ชื่อ..." oninput="clearTimeout(window._lq);window._lq=setTimeout(()=>loadLogs(true),350)">
+              </div>
+              <input type="hidden" id="logs-mf" value=""><button type="button" class="mp-btn" id="logs-mf-btn" onclick="mpOpen('logs-mf',this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="mp-lbl">ทุกเดือน</span><svg class="mp-car" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+              <select class="fs" id="logs-actor" onchange="loadLogs(true)"><option value="">ทุกคน</option></select>
+              <select class="fs" id="logs-entity" onchange="loadLogs(true)"><option value="">ทุกประเภท</option><option value="job">งานช่าง</option><option value="sale">งานขาย</option><option value="staff">พนักงาน</option><option value="role">บทบาท/สิทธิ์</option><option value="auth">การเข้าระบบ</option></select>
+            </div>
+          </div>
+          <div class="tw"><table><thead><tr><th style="width:120px">เวลา</th><th>ผู้ใช้</th><th>การกระทำ</th><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody id="logs-tbody"></tbody></table></div>
+          <div id="logs-more" style="padding:14px;text-align:center"></div>
         </div>
       </div>
 
@@ -867,6 +926,25 @@ tr:hover td{background:var(--card-2)}
 </div>
 
 <div id="mp-pop"></div>
+
+<!-- ══ ROLES & PERMISSIONS ════════════════════════════════ -->
+<div class="ov" id="role-ov" onclick="coo(event,'role-ov')">
+  <div class="modal" style="max-width:980px;width:96vw">
+    <div class="mh"><div class="mt">🛡️ บทบาทและสิทธิ์การใช้งาน</div><button class="cx" onclick="cm('role-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb" style="padding-top:8px">
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">ติ๊กเลือกว่าแต่ละบทบาททำอะไรได้บ้าง · แอดมินมีสิทธิ์ทั้งหมดเสมอ · การเปลี่ยนแปลงมีผลทันทีหลังบันทึก</div>
+      <div class="tw" id="role-matrix"></div>
+      <div class="add-row" style="margin-top:12px;max-width:420px">
+        <input type="text" id="new-role-label" placeholder="ชื่อบทบาทใหม่ เช่น ผู้ตรวจสอบ" style="flex:1;font-size:13px" onkeydown="if(event.key==='Enter')addRole()">
+        <button class="btn btn-out" onclick="addRole()" style="font-size:12px">+ เพิ่มบทบาท</button>
+      </div>
+    </div>
+    <div class="mf" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--rule)">
+      <button class="btn btn-out" onclick="cm('role-ov')">ปิด</button>
+      <button class="btn btn-primary" id="role-save" onclick="saveRoles()">บันทึกสิทธิ์</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ PASSWORD MODAL ═════════════════════════════════════ -->
 <div class="ov" id="pw-ov" onclick="coo(event,'pw-ov')">
@@ -1106,11 +1184,17 @@ tr:hover td{background:var(--card-2)}
 
 <script>
 // ━━━━ API ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function authH(){const h={'Content-Type':'application/json'};if(currentUser?.token)h.Authorization='Bearer '+currentUser.token;return h;}
 async function api(m,p,b){
-  const o={method:m,headers:{'Content-Type':'application/json'}};
+  const o={method:m,headers:authH()};
   if(b)o.body=JSON.stringify(b);
   const r=await fetch(p,o);
-  if(!r.ok)throw new Error(`${m} ${p} → ${r.status}`);
+  if(!r.ok){
+    let d={};try{d=await r.json();}catch(e){}
+    if(r.status===401&&currentUser){toast('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่','w');logout(true);}
+    else if(r.status===403)toast(d.error||'ไม่มีสิทธิ์ทำรายการนี้','e');
+    const e=new Error(d.error||`${m} ${p} → ${r.status}`);e.status=r.status;throw e;
+  }
   return r.json();
 }
 const GET=p=>api('GET',p);
@@ -1184,7 +1268,7 @@ function setLd(id,on,txt='บันทึก'){
 // ━━━━ LOGIN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function initLogin(){
   playWelcome();
-  try{const r=await GET('/api/staff');DB.staff=r.staff||[];renderLoginStaff();}
+  try{const[r,rr]=await Promise.all([GET('/api/staff'),GET('/api/roles').catch(()=>({}))]);DB.staff=r.staff||[];if(rr.roles)DB.roles=rr.roles;renderLoginStaff();}
   catch(e){document.getElementById('login-staff-list').innerHTML=`<p style="color:#F87171;font-size:13px;padding:8px 0">ไม่สามารถโหลด: ${e.message}</p>`;}
 }
 function renderLoginStaff(){
@@ -1235,7 +1319,7 @@ async function loginSelected(){
     if(!r.ok||!d.ok){err.textContent=d.error||'รหัสผ่านไม่ถูกต้อง';pwEl.value='';pwEl.focus();pwEl.classList.remove('shake');void pwEl.offsetWidth;pwEl.classList.add('shake');return;}
     try{localStorage.setItem('lastLogin',v);}catch(e){}
     pwEl.value='';
-    loginAs(v,st.id);
+    setSession(d);enterApp();
     if(d.isDefault)setTimeout(()=>{toast('คุณยังใช้รหัสเริ่มต้น 1234 — กรุณาเปลี่ยนรหัส','w');openPw('self');},900);
   }catch(e){err.textContent='เชื่อมต่อไม่ได้: '+e.message;}
   finally{btn.disabled=false;}
@@ -1252,7 +1336,9 @@ function playWelcome(){
     const full=lines.join('\n');let i=0;clearInterval(t._iv);t.innerHTML='';
     setTimeout(()=>{t._iv=setInterval(()=>{i++;t.innerHTML=full.slice(0,i).replace(/\n/g,'<br>');if(i>=full.length)clearInterval(t._iv);},45);},1500);}
 }
-function loginAs(name,id){currentUser={name,role:'user',id:id||DB.staff.find(s=>s.name===name)?.id};enterApp();}
+function loginAs(name,id){currentUser={name,role:'user',id:id||DB.staff.find(s=>s.name===name)?.id,perms:new Set()};enterApp();}
+function setSession(d){const u=d.user||d.staff||{};currentUser={name:u.name,role:u.role==='admin'?'admin':'user',staffRole:u.role,id:u.id,token:d.token,perms:new Set(d.perms||[])};}
+function can(p){return currentUser?.role==='admin'||!!currentUser?.perms?.has(p);}
 function showPin(mode){
   pinMode=mode;pinEntry='';updPinDots();
   document.getElementById('pin-err').textContent='';
@@ -1265,18 +1351,23 @@ function pk(key){
   updPinDots();if(pinEntry.length===4)setTimeout(checkPin,80);
 }
 function updPinDots(){for(let i=0;i<4;i++)document.getElementById(`pd${i}`).className='pin-dot'+(i<pinEntry.length?' on':'');}
-function checkPin(){
+async function checkPin(){
+  const errEl=document.getElementById('pin-err'),pin=pinEntry;
+  const fail=m=>{errEl.textContent='❌ '+m;pinEntry='';updPinDots();};
   if(pinMode==='admin-login'){
-    if(pinEntry===getPin()){
-      currentUser={name:'แอดมิน',role:'admin'};closePinOv();
-      if(document.getElementById('app').classList.contains('on')){updUserUI();updAdminUI();openDrawer();toast('เข้าโหมดแอดมินแล้ว');}
-      else enterApp();
-    }else{document.getElementById('pin-err').textContent='❌ PIN ไม่ถูกต้อง';pinEntry='';updPinDots();}
+    try{
+      const r=await fetch('/api/auth/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok||!d.ok)return fail(d.error||'PIN ไม่ถูกต้อง');
+      if(currentUser?.token)fetch('/api/auth/logout',{method:'POST',headers:authH()}).catch(()=>{});
+      setSession(d);closePinOv();await enterApp();
+      if(d.isDefault)setTimeout(()=>toast('Admin PIN ยังเป็นค่าเริ่มต้น 1234 — กรุณาเปลี่ยนในหน้าตั้งค่า','w'),800);
+    }catch(e){fail('เชื่อมต่อไม่ได้');}
   }else if(pinMode==='change-old'){
-    if(pinEntry===getPin()){tmpOld=pinEntry;pinEntry='';updPinDots();showPin('change-new');}
-    else{document.getElementById('pin-err').textContent='❌ PIN เดิมไม่ถูกต้อง';pinEntry='';updPinDots();}
+    tmpOld=pin;pinEntry='';updPinDots();showPin('change-new');
   }else if(pinMode==='change-new'){
-    localStorage.setItem('actv_pin',pinEntry);closePinOv();openDrawer();toast('เปลี่ยน PIN เรียบร้อย');
+    try{await PUT('/api/auth/admin-pin',{oldPin:tmpOld,newPin:pin});closePinOv();openDrawer();toast('เปลี่ยน Admin PIN เรียบร้อย');}
+    catch(e){showPin('change-old');document.getElementById('pin-err').textContent='❌ '+(e.message||'เปลี่ยนไม่สำเร็จ');}
   }
 }
 
@@ -1310,9 +1401,10 @@ const MP={id:null,year:new Date().getFullYear()};
 const MP_SRC={
   'jobs-mf':()=>DB.jobs.map(j=>j.reportDate),
   'sales-mf':()=>DB.sales.map(x=>x.saleDate||x.date),
+  'logs-mf':()=>[],
   'comm-mf':()=>[...DB.jobs.filter(j=>cjc(j)!==null).map(jobCommDate),...DB.sales.filter(x=>csc(x)!==null).map(saleCommDate)],
 };
-const MP_CB={'jobs-mf':()=>{jPage=1;renderJobs();},'sales-mf':()=>renderSales(),'comm-mf':()=>renderCommission()};
+const MP_CB={'logs-mf':()=>loadLogs(true),'jobs-mf':()=>{jPage=1;renderJobs();},'sales-mf':()=>renderSales(),'comm-mf':()=>renderCommission()};
 function mpCounts(id){const c={};(MP_SRC[id]?.()||[]).forEach(d=>{const k=normDate(d).slice(0,7);if(k.length===7)c[k]=(c[k]||0)+1;});return c;}
 function mpOpen(id,btn){
   const pop=document.getElementById('mp-pop');
@@ -1363,17 +1455,18 @@ async function enterApp(){
   closePinOv();updUserUI();updAdminUI();
   startClock();
   try{
-    const[jr,sr,str]=await Promise.all([GET('/api/jobs'),GET('/api/sales'),GET('/api/staff')]);
-    DB.jobs=jr.jobs||[];DB.sales=sr.sales||[];DB.staff=str.staff||[];normAll();
-    populateSels();renderJobs();renderSales();updBadges();['jobs-mf','sales-mf','comm-mf'].forEach(mpSync);
-  }catch(e){toast('ไม่สามารถเชื่อมต่อ API — '+e.message,'e');}
+    const safe=p=>GET(p).catch(e=>{if(e.status===403)return{};throw e;});
+    const[jr,sr,str,rr]=await Promise.all([safe('/api/jobs'),safe('/api/sales'),GET('/api/staff'),safe('/api/roles')]);
+    DB.jobs=jr.jobs||[];DB.sales=sr.sales||[];DB.staff=str.staff||[];if(rr.roles)DB.roles=rr.roles;normAll();
+    populateSels();renderJobs();renderSales();updBadges();['jobs-mf','sales-mf','comm-mf','logs-mf'].forEach(mpSync);updAdminUI();showFirstSec();
+  }catch(e){if(e.status!==401)toast('ไม่สามารถเชื่อมต่อ API — '+e.message,'e');}
 }
 function updUserUI(){
   if(!currentUser)return;
   const ini=currentUser.name.charAt(0);
   ['sb-av','tb-av'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=ini;el.className=(id==='sb-av'?'sb-av':'tb-av')+(currentUser.role==='admin'?' admin':'');}});
   ['sb-uname','tb-uname'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=currentUser.name;});
-  ['sb-urole','tb-urole'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=currentUser.role==='admin'?'แอดมิน':'พนักงาน';});
+  ['sb-urole','tb-urole'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=currentUser.role==='admin'?'แอดมิน':roleLabel(currentUser.staffRole||'technician');});
   const crown=document.getElementById('tb-crown');if(crown)crown.style.display=currentUser.role==='admin'?'inline':'none';
   const tbUser=document.getElementById('tb-user');if(tbUser)tbUser.className='tb-user'+(currentUser.role==='admin'?' admin':'');
   const sbCrown=document.getElementById('sb-crown-s');if(sbCrown)sbCrown.style.display=currentUser.role==='admin'?'inline':'none';
@@ -1382,7 +1475,14 @@ function updUserUI(){
 function updAdminUI(){
   const on=currentUser&&currentUser.role==='admin';
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=on?'':'none');
+  document.querySelectorAll('[data-perm]').forEach(el=>el.style.display=el.dataset.perm.split('|').some(can)?'':'none');
 }
+const SEC_PERM={jobs:'jobs.view',sales:'sales.view',commission:'comm.view|comm.all',logs:'@admin'};
+function secAllowed(n){const p=SEC_PERM[n];if(p==='@admin')return currentUser?.role==='admin';return p.split('|').some(can);}
+function showFirstSec(){const cur=document.querySelector('.section.on')?.id.replace('section-','');
+  if(cur&&secAllowed(cur)){showSec(cur);return;}
+  const f=['jobs','sales','commission','logs'].find(secAllowed);
+  if(f)showSec(f);else{document.querySelectorAll('.section').forEach(x=>x.classList.remove('on'));document.getElementById('topbar-title').textContent='ไม่มีสิทธิ์เข้าถึงข้อมูล';}}
 function onUserClick(){
   if(!currentUser)return;
   openDrawer();
@@ -1399,10 +1499,10 @@ function selfChangeRole(val){
 }
 function openDrawer(){
   document.getElementById('dr-name').textContent=currentUser?.name||'—';
-  document.getElementById('dr-role').textContent=currentUser?.role==='admin'?'แอดมิน':'พนักงาน';
+  document.getElementById('dr-role').textContent=currentUser?.role==='admin'?'แอดมิน':roleLabel(currentUser?.staffRole);
   const isAdmin=currentUser?.role==='admin';
   const drRoleWrap=document.getElementById('dr-role-wrap');
-  if(drRoleWrap)drRoleWrap.style.display=isAdmin?'none':'flex';
+  if(drRoleWrap)drRoleWrap.style.display='none';
   const drRoleSel=document.getElementById('dr-role-sel');
   if(drRoleSel&&!isAdmin){
     const st=DB.staff.find(s=>s.name===currentUser?.name);
@@ -1453,7 +1553,7 @@ async function saveStaffEdit(id){
   if(name===st.name&&role===st.role){editStaff(null);return;}
   if(name!==st.name&&!confirm(`เปลี่ยนชื่อ "${st.name}" เป็น "${name}"?\nงานและยอดขายเดิมของพนักงานคนนี้จะเปลี่ยนชื่อตามด้วย`))return;
   try{
-    const r=await fetch(`/api/staff/${encodeURIComponent(id)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,role})});
+    const r=await fetch(`/api/staff/${encodeURIComponent(id)}`,{method:'PUT',headers:authH(),body:JSON.stringify({name,role})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.ok){toast(d.error||'บันทึกไม่สำเร็จ','e');return;}
     const old=st.name;st.name=name;st.role=role;
@@ -1484,36 +1584,10 @@ async function delStaff(id,name){
 function renderRolesAdmin(){
   const sec=document.getElementById('dr-roles-sec');
   if(sec)sec.style.display=currentUser?.role==='admin'?'':'none';
-  const el=document.getElementById('roles-admin-list');
-  if(!el)return;
-  if(!DB.roles.length){el.innerHTML='<p style="font-size:13px;color:var(--muted);padding:4px 0">ยังไม่มีบทบาท</p>';return;}
-  el.innerHTML=DB.roles.map(r=>`
-    <div class="staff-row">
-      <div class="srow-info"><strong>${r.label}</strong><small>ID: ${r.id}</small></div>
-      <button class="btn-del" onclick="delRole('${r.id}')">ลบ</button>
-    </div>
-  `).join('');
-}
-function addRole(){
-  const inp=document.getElementById('new-role-label');
-  const label=(inp?.value||'').trim();
-  if(!label){toast('กรอกชื่อบทบาท','e');return;}
-  const id=label.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-ก-๙]/g,'').slice(0,20)||('role'+Date.now());
-  if(DB.roles.find(r=>r.id===id||r.label===label)){toast('มีบทบาทนี้แล้ว','e');return;}
-  DB.roles.push({id,label});
-  if(inp)inp.value='';
-  renderRolesAdmin();
-  populateRoleSels();
-  toast(`เพิ่มบทบาท "${label}" แล้ว`);
-}
-function delRole(id){
-  const r=DB.roles.find(x=>x.id===id);
-  if(!r)return;
-  if(!confirm(`ยืนยันลบบทบาท "${r.label}"?`))return;
-  DB.roles=DB.roles.filter(x=>x.id!==id);
-  renderRolesAdmin();
-  populateRoleSels();
-  toast(`ลบบทบาท "${r.label}" แล้ว`,'e');
+  const el=document.getElementById('roles-admin-list');if(!el)return;
+  el.innerHTML=DB.roles.map(r=>{const n=DB.staff.filter(x=>x.role===r.id).length;const pr=r.perms||[];
+    const ro=pr.length&&pr.every(p=>p.endsWith('.view'));
+    return`<div class="staff-row"><div class="srow-info"><strong>${r.label}</strong><small>${n} คน · ${ro?'ดูได้อย่างเดียว':pr.length+' สิทธิ์'}</small></div></div>`;}).join('');
 }
 function populateRoleSels(){
   // staff add form role select
@@ -1553,7 +1627,7 @@ async function savePw(reset){
   }
   const btn=document.getElementById('pw-save');btn.disabled=true;
   try{
-    const r=await fetch(`/api/staff/${encodeURIComponent(pwTarget.id)}/pin`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const r=await fetch(`/api/staff/${encodeURIComponent(pwTarget.id)}/pin`,{method:'PUT',headers:authH(),body:JSON.stringify(body)});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.ok){err.textContent=d.error||'บันทึกไม่สำเร็จ';return;}
     const st=DB.staff.find(s=>s.id===pwTarget.id);if(st)st.default_pin=d.isDefault?1:0;
@@ -1567,12 +1641,116 @@ function updMyPw(){
   const st=DB.staff.find(s=>s.id===currentUser?.id);
   el.innerHTML=st&&+st.default_pin?'<span style="color:var(--amber);font-weight:700">⚠ ยังใช้รหัสเริ่มต้น 1234</span>':'รหัสผ่าน: ****';
 }
+// ━━━━ ROLES & PERMISSIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const PERM_GROUPS=[
+  {g:'jobs',t:'งานช่าง',items:[['jobs.view','ดูรายการงาน'],['jobs.create','เพิ่ม / นำเข้างาน'],['jobs.edit','แก้ไขงาน'],['jobs.delete','ลบงาน'],['jobs.upload','แนบใบเสร็จ / ใบงาน'],['jobs.verify','ติ๊กตรวจสอบ / เปลี่ยนสถานะ']]},
+  {g:'sales',t:'งานขาย',items:[['sales.view','ดูรายการขาย'],['sales.create','เพิ่ม / นำเข้ารายการ'],['sales.edit','แก้ไขรายการ'],['sales.delete','ลบรายการ'],['sales.upload','แนบใบเสร็จ']]},
+  {g:'comm',t:'ค่าคอมมิชชั่น',items:[['comm.view','ดูค่าคอมของตัวเอง'],['comm.all','ดูค่าคอมของทุกคน']]},
+];
+const PERM_LABEL=Object.fromEntries(PERM_GROUPS.flatMap(g=>g.items.map(([k,l])=>[k,g.t+': '+l])));
+let RE=[];
+function openRoles(){RE=DB.roles.map(r=>({...r,perms:[...(r.perms||[])]}));renderRoleMatrix();document.getElementById('role-ov').classList.add('open');}
+function renderRoleMatrix(){
+  const th=RE.map((r,i)=>`<th class="rm-col"><input class="rm-name" value="${r.label.replace(/"/g,'&quot;')}" onchange="RE[${i}].label=this.value.trim()||RE[${i}].label">
+    <div class="rm-pre"><button onclick="rmPreset(${i},'ro')">ดูอย่างเดียว</button><button onclick="rmPreset(${i},'all')">ทั้งหมด</button><button onclick="rmPreset(${i},'none')">ล้าง</button></div>
+    <div class="rm-n">${DB.staff.filter(x=>x.role===r.id).length} คน · <a href="#" onclick="event.preventDefault();delRole('${r.id}')">ลบ</a></div></th>`).join('');
+  const rows=PERM_GROUPS.map(g=>`<tr class="rm-g"><td colspan="${RE.length+2}">${g.t}</td></tr>`+g.items.map(([k,l])=>`<tr><td class="rm-l">${l}</td>${RE.map((r,i)=>`<td class="rm-c"><label class="rm-cb"><input type="checkbox" ${r.perms.includes(k)?'checked':''} onchange="rmToggle(${i},'${k}',this.checked)"><span></span></label></td>`).join('')}<td class="rm-c rm-adm"><label class="rm-cb"><input type="checkbox" checked disabled><span></span></label></td></tr>`).join('')).join('');
+  document.getElementById('role-matrix').innerHTML=`<table class="rm"><thead><tr><th class="rm-l" style="min-width:190px">สิทธิ์</th>${th}<th class="rm-col rm-adm"><div class="rm-name" style="border:none">แอดมิน</div><div class="rm-n">ทุกสิทธิ์</div></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function rmToggle(i,k,on){
+  const P=new Set(RE[i].perms);const [g]=k.split('.');
+  if(on){P.add(k);if(k!==g+'.view'&&g!=='comm')P.add(g+'.view');if(k==='comm.all')P.add('comm.view');}
+  else{P.delete(k);if(k===g+'.view'&&g!=='comm')[...P].filter(x=>x.startsWith(g+'.')).forEach(x=>P.delete(x));if(k==='comm.view')P.delete('comm.all');}
+  RE[i].perms=[...P];renderRoleMatrix();
+}
+function rmPreset(i,t){RE[i].perms=t==='all'?PERM_GROUPS.flatMap(g=>g.items.map(x=>x[0])):t==='ro'?['jobs.view','sales.view','comm.view']:[];renderRoleMatrix();}
+async function saveRoles(){
+  const btn=document.getElementById('role-save');btn.disabled=true;let n=0;
+  try{
+    for(const r of RE){const o=DB.roles.find(x=>x.id===r.id);
+      if(!o||o.label!==r.label||JSON.stringify([...(o.perms||[])].sort())!==JSON.stringify([...r.perms].sort())){
+        const d=await PUT(`/api/roles/${r.id}`,{label:r.label,perms:r.perms});Object.assign(o,d.role);n++;}}
+    renderRolesAdmin();populateRoleSels();renderStaffAdmin();toast(n?`บันทึกสิทธิ์แล้ว (${n} บทบาท)`:'ไม่มีการเปลี่ยนแปลง');cm('role-ov');
+  }catch(e){toast('บันทึกไม่สำเร็จ: '+e.message,'e');}
+  finally{btn.disabled=false;}
+}
+async function addRole(){
+  const inp=document.getElementById('new-role-label');const label=(inp?.value||'').trim();
+  if(!label){toast('กรอกชื่อบทบาท','e');return;}
+  try{const d=await POST('/api/roles',{label,perms:['jobs.view','sales.view','comm.view']});DB.roles.push(d.role);RE.push({...d.role,perms:[...d.role.perms]});inp.value='';renderRoleMatrix();renderRolesAdmin();populateRoleSels();toast(`เพิ่มบทบาท "${label}" แล้ว (เริ่มต้น: ดูอย่างเดียว)`);}
+  catch(e){toast(e.message,'e');}
+}
+async function delRole(id){
+  const r=DB.roles.find(x=>x.id===id);if(!r)return;
+  if(!confirm(`ลบบทบาท "${r.label}"?`))return;
+  try{await DEL(`/api/roles/${id}`);DB.roles=DB.roles.filter(x=>x.id!==id);RE=RE.filter(x=>x.id!==id);renderRoleMatrix();renderRolesAdmin();populateRoleSels();toast(`ลบบทบาท "${r.label}" แล้ว`,'e');}
+  catch(e){toast(e.message,'e');}
+}
+
+// ━━━━ AUDIT LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let LG={rows:[],total:0,eid:null,elabel:''};
+const LOG_ACT={create:['เพิ่ม','#059669','#D1FAE5'],update:['แก้ไข','#1D4ED8','#DBEAFE'],delete:['ลบ','#DC2626','#FEE2E2'],login:['เข้าระบบ','#475569','#F1F5F9'],login_fail:['เข้าระบบไม่สำเร็จ','#B45309','#FEF3C7'],pin_change:['เปลี่ยนรหัส','#7C3AED','#EDE9FE'],pin_reset:['ตั้งรหัสให้','#7C3AED','#EDE9FE']};
+const LOG_ENT={job:'งานช่าง',sale:'งานขาย',staff:'พนักงาน',role:'บทบาท',auth:'ระบบ'};
+const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน'};
+const ST_L={pending:'รอดำเนินการ',active:'กำลังดำเนินการ',done:'สำเร็จ'};
+function fmtV(f,v){
+  if(v===''||v==null)return'<i class="lg-e">ว่าง</i>';
+  if(f==='status')return ST_L[v]||v;
+  if(f==='serviceFee'||f==='amount')return fMoney(v);
+  if(/Date$/.test(f))return fDate(v);
+  if(f==='role')return v==='admin'?'แอดมิน':roleLabel(v);
+  if(f==='commType')return v==='project'?'โปรเจก':'เนต+เคเบิล';
+  if(f==='perms+'||f==='perms-'||f==='perms')return(Array.isArray(v)?v:String(v).split(', ')).map(p=>PERM_LABEL[p]||p).join(', ');
+  if(Array.isArray(v))return v.join(', ')||'<i class="lg-e">ว่าง</i>';
+  if(typeof v==='object')return Object.entries(v).filter(([k,x])=>vFilled(x)).map(([k])=>VLABELS[k]||k).join(', ')||'<i class="lg-e">ไม่มี</i>';
+  return String(v).replace(/</g,'&lt;');
+}
+function fmtChanges(l){
+  const c=l.changes;if(!c)return'';
+  if(Array.isArray(c))return c.map(x=>{
+    if(x.f==='verify'){const a=x.from||{},b=x.to||{};const ks=['v1','v2','v3','v4','v5'].filter(k=>vFilled(a[k])!==vFilled(b[k]));
+      return ks.map(k=>`<div><b>${VLABELS[k]}</b>: ${vFilled(b[k])?'<span class="lg-on">✓ ติ๊ก</span>':'<span class="lg-off">✗ เอาออก</span>'}</div>`).join('');}
+    if(x.f==='perms+'||x.f==='perms-')return`<div><b>${F_LABEL[x.f]}</b>: ${fmtV(x.f,x.f==='perms+'?x.to:x.from)}</div>`;
+    return`<div><b>${F_LABEL[x.f]||x.f}</b>: <span class="lg-old">${fmtV(x.f,x.from)}</span> → <span class="lg-new">${fmtV(x.f,x.to)}</span></div>`;}).join('');
+  const ent=Object.entries(c).filter(([k,v])=>v!==''&&v!=null&&!(Array.isArray(v)&&!v.length)&&!(k==='verify'));
+  return`<details><summary>${l.action==='delete'?'ข้อมูลที่ถูกลบ':'ข้อมูลที่เพิ่ม'} (${ent.length})</summary>${ent.map(([k,v])=>`<div><b>${F_LABEL[k]||k}</b>: ${fmtV(k,v)}</div>`).join('')}</details>`;
+}
+async function loadLogs(reset){
+  if(currentUser?.role!=='admin')return;
+  if(reset)LG.rows=[];
+  const q=new URLSearchParams({limit:100,offset:LG.rows.length});
+  const v=id=>document.getElementById(id)?.value||'';
+  if(v('logs-q'))q.set('q',v('logs-q'));if(v('logs-actor'))q.set('actor',v('logs-actor'));
+  if(v('logs-entity'))q.set('entity',v('logs-entity'));if(v('logs-mf'))q.set('month',v('logs-mf'));
+  if(LG.eid)q.set('entityId',LG.eid);
+  const tb=document.getElementById('logs-tbody');
+  if(reset)tb.innerHTML='<tr class="empty"><td colspan="5">กำลังโหลด...</td></tr>';
+  try{
+    const d=await GET('/api/logs?'+q);
+    LG.rows=LG.rows.concat(d.logs);LG.total=d.total;
+    const as=document.getElementById('logs-actor'),cur=as.value;
+    as.innerHTML='<option value="">ทุกคน</option>'+d.actors.map(a=>`<option${a===cur?' selected':''}>${a}</option>`).join('');
+    document.getElementById('logs-count').textContent=`${d.total} รายการ`;
+    document.getElementById('logs-chip').innerHTML=LG.eid?`<span class="lg-chip">ประวัติ: ${LG.elabel} <button onclick="LG.eid=null;loadLogs(true)">✕</button></span>`:'';
+    tb.innerHTML=LG.rows.length?LG.rows.map(l=>{const a=LOG_ACT[l.action]||[l.action,'#475569','#F1F5F9'];const t=l.at||'';
+      return`<tr class="${l.action==='delete'?'lg-del':l.action==='login_fail'?'lg-warn':''}">
+        <td style="white-space:nowrap;font-size:12.5px">${fDate(t.slice(0,10))}<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted)">${t.slice(11,16)} น.</div></td>
+        <td>${asgChips([l.actor])}<div style="font-size:10.5px;color:var(--faint);margin-top:2px">${l.actor_role==='admin'?'แอดมิน':l.actor_role?roleLabel(l.actor_role):''}</div></td>
+        <td><span class="lg-act" style="color:${a[1]};background:${a[2]}">${a[0]}</span><div style="font-size:11px;color:var(--muted);margin-top:3px">${LOG_ENT[l.entity]||l.entity}</div></td>
+        <td style="max-width:220px"><div style="font-weight:700;font-size:13px">${(l.label||'—').replace(/</g,'&lt;')}</div>${['job','sale','staff','role'].includes(l.entity)&&!LG.eid?`<a href="#" class="lg-hist" onclick="event.preventDefault();logsFor('${l.entity_id}','${(l.label||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">ดูประวัติ</a>`:''}</td>
+        <td class="lg-ch">${fmtChanges(l)}</td></tr>`;}).join(''):'<tr class="empty"><td colspan="5"><div class="ei">—</div>ไม่พบบันทึก</td></tr>';
+    document.getElementById('logs-more').innerHTML=LG.rows.length<LG.total?`<button class="btn btn-out" onclick="loadLogs(false)">โหลดเพิ่ม (${LG.total-LG.rows.length})</button>`:'';
+  }catch(e){if(reset)tb.innerHTML=`<tr class="empty"><td colspan="5">โหลดไม่สำเร็จ: ${e.message}</td></tr>`;}
+}
+function logsFor(id,label){LG.eid=id;LG.elabel=label;if(!document.getElementById('section-logs').classList.contains('on'))showSec('logs');else loadLogs(true);}
+
 function changePin(){closeDrawer();showPin('change-old');}
-function logout(){closeDrawer();currentUser=null;document.getElementById('app').classList.remove('on');document.getElementById('login-screen').style.display='';renderLoginStaff();playWelcome();toast('ออกจากระบบแล้ว','i');}
+function logout(silent){if(currentUser?.token)fetch('/api/auth/logout',{method:'POST',headers:authH()}).catch(()=>{});closeDrawer();currentUser=null;DB.jobs=[];DB.sales=[];document.getElementById('app').classList.remove('on');document.getElementById('login-screen').style.display='';renderLoginStaff();playWelcome();if(silent!==true)toast('ออกจากระบบแล้ว','i');}
 
 // ━━━━ NAV ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const TITLES={jobs:'จ่ายงานช่าง',sales:'รายงานงานขาย',commission:'ค่าคอมมิชชั่น'};
+const TITLES={jobs:'จ่ายงานช่าง',sales:'รายงานงานขาย',commission:'ค่าคอมมิชชั่น',logs:'บันทึกการใช้งาน'};
 function showSec(name){
+  if(currentUser&&!secAllowed(name)){toast('ไม่มีสิทธิ์เข้าดูหน้านี้','w');return;}
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
@@ -1581,6 +1759,7 @@ function showSec(name){
   document.getElementById('tab-'+name).classList.add('on');
   document.getElementById('topbar-title').textContent=TITLES[name];
   if(name==='commission')renderCommission();
+  if(name==='logs')loadLogs(true);
 }
 function updBadges(){
   updToday();
@@ -1624,7 +1803,7 @@ function renderJobs(){
     const chips=asgChips(j.assignees);
     // file attachment column
     const hasRcpt=!!j.receiptData,hasForm=!!j.jobFormData;
-    const fileCell=hasRcpt?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ใบเสร็จ</span>`:`<button class="btn-upload-quick rcpt" onclick="openQuickUpload('${j.id}','rcpt')">+ ใบเสร็จ</button>`;
+    const fileCell=hasRcpt?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ใบเสร็จ</span>`:can('jobs.upload')?`<button class="btn-upload-quick rcpt" onclick="openQuickUpload('${j.id}','rcpt')">+ ใบเสร็จ</button>`:`<span style="font-size:11px;color:var(--faint)">ยังไม่แนบ</span>`;
     const od=overdueDays(j);
     return`<tr class="${od>0?'od-row':''}">
       <td class="tmono">${j.jobNumber||'—'}</td>
@@ -1634,14 +1813,14 @@ function renderJobs(){
       <td style="max-width:140px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px" title="${j.details||''}">${j.details||'—'}</div></td>
       <td>${chips}</td>
       <td>${sbadge(j.status)}</td>
-      <td><div class="vtrack">${vdots(j.verify,j.id)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
+      <td><div class="vtrack">${vdots(j.verify,can('jobs.verify')?j.id:null)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
       <td style="font-weight:700">${j.serviceFee?fMoney(j.serviceFee):'<span style="color:var(--faint)">—</span>'}</td>
       <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">${cjcWhy(j)}</span>`}</td>
       <td>${fileCell}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" onclick="viewJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        <button class="btn btn-ghost btn-icon admin-only" style="display:none" onclick="openJobModal('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
-        <button class="btn btn-red-ghost btn-icon admin-only" style="display:none" onclick="delJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
+        <button class="btn btn-ghost btn-icon" data-perm="jobs.edit" style="display:none" onclick="openJobModal('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+        <button class="btn btn-red-ghost btn-icon" data-perm="jobs.delete" style="display:none" onclick="delJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
       </div></td>
     </tr>`;
   }).join('');}
@@ -1840,6 +2019,7 @@ async function delJob(id){
 }
 function viewJob(id){
   const j=DB.jobs.find(x=>x.id===id);if(!j)return;
+  setTimeout(()=>{const b=document.getElementById('det-body');if(b&&currentUser?.role==='admin')b.insertAdjacentHTML('beforeend',`<button class="btn btn-out" style="margin-top:14px" onclick="cm('det-ov');logsFor('${j.id}','${(j.jobNumber||'')+' · '+(j.customer||'').replace(/'/g,'')}')">📜 ดูประวัติการแก้ไขงานนี้</button>`);},0);
   const comm=cjc(j);
   document.getElementById('det-body').innerHTML=`
     <div>
@@ -1905,11 +2085,11 @@ function renderSales(){
       <td style="font-weight:700">${s.amount?fMoney(s.amount):'<span style="color:var(--faint)">—</span>'}</td>
       <td>${tb2}</td>
       <td><span class="chip ch-blue" style="font-size:11px">${s.staff||'—'}</span></td>
-      <td>${s.receiptData?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:`<button class="btn-sale-rcpt" onclick="openSaleReceiptUpload('${s.id}')">รอแนบ</button>`}</td>
+      <td>${s.receiptData?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:can('sales.upload')?`<button class="btn-sale-rcpt" onclick="openSaleReceiptUpload('${s.id}')">รอแนบ</button>`:`<span style="font-size:11px;color:var(--faint)">รอแนบ</span>`}</td>
       <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
       <td><div class="ta">
-        <button class="btn btn-ghost btn-icon admin-only" style="display:none" onclick="openSaleModal('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
-        <button class="btn btn-red-ghost btn-icon admin-only" style="display:none" onclick="delSale('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
+        <button class="btn btn-ghost btn-icon" data-perm="sales.edit" style="display:none" onclick="openSaleModal('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+        <button class="btn btn-red-ghost btn-icon" data-perm="sales.delete" style="display:none" onclick="delSale('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
       </div></td>
     </tr>`;
   }).join('');}
@@ -1991,7 +2171,8 @@ function renderCommission(){
     P(s.staff).sale.push({customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d,open:s.saleDate||s.date});
   });
   const sum=a=>a.reduce((x,t)=>x+t.comm,0);
-  const people=Object.entries(pp).map(([name,p])=>({name,p,t:sum(p.tech),s:sum(p.sale)})).map(x=>({...x,tot:x.t+x.s})).filter(x=>x.tot>0||x.p.tech.length||x.p.sale.length).sort((a,b)=>b.tot-a.tot);
+  let people=Object.entries(pp).map(([name,p])=>({name,p,t:sum(p.tech),s:sum(p.sale)})).map(x=>({...x,tot:x.t+x.s})).filter(x=>x.tot>0||x.p.tech.length||x.p.sale.length).sort((a,b)=>b.tot-a.tot);
+  if(!can('comm.all')){people=people.filter(x=>x.name===currentUser?.name);selectedCommStaff=null;}
   const totT=people.reduce((a,x)=>a+x.t,0),totS=people.reduce((a,x)=>a+x.s,0),tot=totT+totS;
   const nT=people.reduce((a,x)=>a+x.p.tech.length,0),nS=people.reduce((a,x)=>a+x.p.sale.length,0);
   const pt=tot?totT/tot*100:0;
@@ -2080,7 +2261,7 @@ async function printJobReport(){
 function printCommReport(){
   const mf=document.getElementById('comm-mf');
   const mFilter=mf?mf.value:'';
-  const name=selectedCommStaff;
+  const name=can('comm.all')?selectedCommStaff:currentUser?.name;
   // build data
   const pp={tech:[],sale:[]};
   DB.jobs.forEach(j=>{
