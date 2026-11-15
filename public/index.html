@@ -141,6 +141,13 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 8 ═══ */
+.pay-tag{display:flex;align-items:center;gap:4px;width:max-content;margin-top:4px;padding:1px 8px 1px 6px;border-radius:20px;font-family:inherit;font-size:10.5px;font-weight:800;white-space:nowrap;cursor:pointer;
+  color:#6D28D9;background:#F5F3FF;border:1px solid #DDD6FE;transition:var(--fast)}
+.pay-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.pay-tag:hover{border-color:#7C3AED;background:#EDE9FE}
+.pay-tag.now{color:#047857;background:#ECFDF5;border-color:#A7F3D0}
+.pay-tag.past{color:#64748B;background:#F1F5F9;border-color:#E2E8F0}
 /* ══ BATCH 7 ═══ */
 #role-ov{z-index:1600}
 .rm{width:100%;border-collapse:separate;border-spacing:0}
@@ -1252,6 +1259,11 @@ function cjcWhy(j){if(j.status!=='done'&&!j.receiptData)return'รอปิด�
 // ช่าง: งานสมบูรณ์เมื่อครบทั้ง "สำเร็จ" และ "ใบเสร็จ" → เดือนของวันที่ครบหลังสุด
 function jobCommDate(j){const d=normDate(j.completionDate||j.doneAt||''),r=normDate(j.receiptAt||'');const a=[d,r].filter(x=>x.length>=7).sort();return a.length?a[a.length-1]:normDate(j.reportDate||'');}
 // ขาย: เดือนที่แนบใบเสร็จ
+// ป้ายรอบชำระ — เดือนที่เข้าเงื่อนไข = รอบจ่ายเดือนนั้น (กดเพื่อดูรอบนั้นในหน้าค่าคอม)
+function payTag(d){const k=normDate(d||'').slice(0,7);if(k.length!==7)return'';const[y,m]=k.split('-');
+  const cur=today().slice(0,7),cls=k===cur?' now':k<cur?' past':'';
+  return`<button class="pay-tag${cls}" title="รอบชำระ ${mLabel(k)} — กดเพื่อดูในหน้าค่าคอม" onclick="goPayCycle('${k}')">รอบ ${TH_MS[+m-1]} ${String(+y+543).slice(2)}</button>`;}
+function goPayCycle(k){if(!secAllowed('commission')){toast('ไม่มีสิทธิ์ดูหน้าค่าคอม','w');return;}document.getElementById('comm-mf').value=k;mpSync('comm-mf');showSec('commission');}
 function saleCommDate(s){return normDate(s.receiptAt||'')||normDate(s.saleDate||s.date||'');}
 function csc(s){if(!s.receiptData)return null;return s.commType==='project'?(s.amount||0)*0.01:300;}
 function sbadge(s){if(s==='done')return`<span class="b b-done"><span class="bd"></span>เสร็จสิ้น</span>`;if(s==='active')return`<span class="b b-active"><span class="bd"></span>กำลังดำเนินการ</span>`;return`<span class="b b-pend"><span class="bd"></span>รอดำเนินการ</span>`;}
@@ -1827,7 +1839,7 @@ function renderJobs(){
       <td>${sbadge(j.status)}</td>
       <td><div class="vtrack">${vdots(j.verify,can('jobs.verify')?j.id:null)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
       <td style="font-weight:700">${j.serviceFee?fMoney(j.serviceFee):'<span style="color:var(--faint)">—</span>'}</td>
-      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">${cjcWhy(j)}</span>`}</td>
+      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(jobCommDate(j))}`:`<span class="comm-na">${cjcWhy(j)}</span>`}</td>
       <td>${fileCell}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" onclick="viewJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -2054,7 +2066,7 @@ function viewJob(id){
       <div class="dsep"></div>
       <div class="dmet">
         <div class="dm"><div class="dmv">${fMoney(j.serviceFee)}</div><div class="dml">ค่าบริการ</div></div>
-        <div class="dm"><div class="dmv" style="color:${comm!==null?'var(--green)':'var(--muted)'}">${comm!==null?fMoney(comm):'ยังไม่ครบ'}</div><div class="dml">ค่าคอม / คน</div></div>
+        <div class="dm"><div class="dmv" style="color:${comm!==null?'var(--green)':'var(--muted)'}">${comm!==null?fMoney(comm):cjcWhy(j)}</div><div class="dml">ค่าคอม / คน</div>${comm!==null?`<div style="display:flex;justify-content:center">${payTag(jobCommDate(j))}</div>`:''}</div>
       </div>
       <div class="dsep"></div>
       <div style="display:flex;gap:8px">
@@ -2099,7 +2111,7 @@ function renderSales(){
       <td>${tb2}</td>
       <td><span class="chip ch-blue" style="font-size:11px">${s.staff||'—'}</span></td>
       <td>${s.receiptData?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:can('sales.upload')?`<button class="btn-sale-rcpt" onclick="openSaleReceiptUpload('${s.id}')">รอแนบ</button>`:`<span style="font-size:11px;color:var(--faint)">รอแนบ</span>`}</td>
-      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
+      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(saleCommDate(s))}`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" data-perm="sales.edit" style="display:none" onclick="openSaleModal('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
         <button class="btn btn-red-ghost btn-icon" data-perm="sales.delete" style="display:none" onclick="delSale('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></button>
