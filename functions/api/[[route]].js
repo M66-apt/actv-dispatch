@@ -82,6 +82,8 @@ async function ensureCols(env) {
   await run(`ALTER TABLE jobs  ADD COLUMN receipt_at TEXT`);
   await run(`ALTER TABLE jobs  ADD COLUMN done_at TEXT`);
   await run(`ALTER TABLE sales ADD COLUMN receipt_at TEXT`);
+  await run(`ALTER TABLE jobs  ADD COLUMN pay_cycle TEXT`);    // manual payout month 'YYYY-MM' (empty = automatic)
+  await run(`ALTER TABLE sales ADD COLUMN pay_cycle TEXT`);
   await run(`CREATE TABLE IF NOT EXISTS roles (id TEXT PRIMARY KEY, label TEXT NOT NULL, perms TEXT DEFAULT '[]', sort INTEGER DEFAULT 0)`);
   await run(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`);
   await run(`CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, staff_id TEXT, name TEXT, role TEXT, created_at TEXT, expires_at TEXT)`);
@@ -201,8 +203,9 @@ function snapshot(obj, fields) {
   return o;
 }
 const JOB_FIELDS = ['jobNumber', 'reportDate', 'customer', 'phone', 'details', 'dueDate', 'techReport', 'status',
-  'assignees', 'completionDate', 'serviceFee', 'verify', 'receiptData', 'jobFormData'];
-const SALE_FIELDS = ['saleDate', 'customer', 'phone', 'details', 'amount', 'commType', 'staff', 'receiptData'];
+  'assignees', 'completionDate', 'serviceFee', 'verify', 'receiptData', 'jobFormData', 'payCycle'];
+const cleanCycle = v => (/^\d{4}-\d{2}$/.test(String(v ?? '')) ? String(v) : '');
+const SALE_FIELDS = ['payCycle', 'saleDate', 'customer', 'phone', 'details', 'amount', 'commType', 'staff', 'receiptData'];
 
 // ════════════════════════════════════════════════════════════════
 // ROUTER
@@ -354,6 +357,7 @@ function parseJob(row) {
     jobFormName: row.job_form_name ?? '',
     receiptAt: row.receipt_at ?? '',
     doneAt: row.done_at ?? '',
+    payCycle: row.pay_cycle ?? '',
   };
 }
 
@@ -395,6 +399,7 @@ function jobFromBody(body) {
     jobFormData: body.jobFormData ?? body.job_form_data ?? '',
     jobFormName: body.jobFormName ?? body.job_form_name ?? '',
     verify: body.verify ?? { v1: false, v2: false, v3: false, v4: false, v5: false },
+    payCycle: cleanCycle(body.payCycle ?? body.pay_cycle),
   };
 }
 
@@ -407,12 +412,12 @@ async function createJob(request, env, me) {
       (id, report_date, job_number, customer, phone, details, due_date,
        tech_report, status, assignees, completion_date, service_fee,
        receipt_data, receipt_name, job_form_data, job_form_name, verify,
-       created_at, updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+       created_at, updated_at, pay_cycle)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).bind(
     id, b.reportDate || now.slice(0, 10), b.jobNumber, b.customer, b.phone, b.details, b.dueDate,
     b.techReport, b.status, JSON.stringify(b.assignees), b.completionDate, b.serviceFee,
-    b.receiptData, b.receiptName, b.jobFormData, b.jobFormName, JSON.stringify(b.verify), now, now
+    b.receiptData, b.receiptName, b.jobFormData, b.jobFormName, JSON.stringify(b.verify), now, now, b.payCycle || null
   ).run();
   await stampJob(env, id);
   const job = parseJob(await env.DB.prepare(`SELECT * FROM jobs WHERE id=?`).bind(id).first());
@@ -446,13 +451,13 @@ async function updateJob(id, request, env, me) {
       report_date=?, job_number=?, customer=?, phone=?, details=?,
       due_date=?, tech_report=?, status=?, assignees=?, completion_date=?,
       service_fee=?, receipt_data=?, receipt_name=?, job_form_data=?,
-      job_form_name=?, verify=?, updated_at=?
+      job_form_name=?, verify=?, updated_at=?, pay_cycle=?
     WHERE id=?
   `).bind(
     b.reportDate ?? '', b.jobNumber ?? '', b.customer, b.phone ?? '', b.details ?? '',
     b.dueDate ?? '', b.techReport ?? '', b.status ?? 'pending', JSON.stringify(b.assignees ?? []), b.completionDate ?? '',
     b.serviceFee ?? 0, b.receiptData ?? '', b.receiptName ?? '', b.jobFormData ?? '',
-    b.jobFormName ?? '', JSON.stringify(b.verify ?? {}), nowLocal(), id
+    b.jobFormName ?? '', JSON.stringify(b.verify ?? {}), nowLocal(), b.payCycle || null, id
   ).run();
   await stampJob(env, id);
   const job = parseJob(await env.DB.prepare(`SELECT * FROM jobs WHERE id=?`).bind(id).first());
@@ -480,6 +485,7 @@ function parseSale(row) {
     receiptName: row.receipt_name ?? '',
     saleDate: row.sale_date,
     receiptAt: row.receipt_at ?? '',
+    payCycle: row.pay_cycle ?? '',
   };
 }
 async function stampSale(env, id) {
@@ -499,6 +505,7 @@ function saleFromBody(body) {
     staff: body.staff ?? '',
     receiptData: body.receiptData ?? body.receipt_data ?? '',
     receiptName: body.receiptName ?? body.receipt_name ?? '',
+    payCycle: cleanCycle(body.payCycle ?? body.pay_cycle),
   };
 }
 
@@ -519,10 +526,10 @@ async function createSale(request, env, me) {
   await env.DB.prepare(`
     INSERT INTO sales
       (id, sale_date, customer, phone, details, amount, comm_type,
-       staff, receipt_data, receipt_name, created_at, updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+       staff, receipt_data, receipt_name, created_at, updated_at, pay_cycle)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).bind(id, b.saleDate || now.slice(0, 10), b.customer, b.phone, b.details, b.amount, b.commType,
-    b.staff, b.receiptData, b.receiptName, now, now).run();
+    b.staff, b.receiptData, b.receiptName, now, now, b.payCycle || null).run();
   await stampSale(env, id);
   const sale = parseSale(await env.DB.prepare(`SELECT * FROM sales WHERE id=?`).bind(id).first());
   await audit(env, request, me, 'create', 'sale', id, `${sale.customer} · ${sale.staff || '—'}`, snapshot(sale, SALE_FIELDS));
@@ -539,10 +546,10 @@ async function updateSale(id, request, env, me) {
   await env.DB.prepare(`
     UPDATE sales SET
       sale_date=?, customer=?, phone=?, details=?, amount=?,
-      comm_type=?, staff=?, receipt_data=?, receipt_name=?, updated_at=?
+      comm_type=?, staff=?, receipt_data=?, receipt_name=?, updated_at=?, pay_cycle=?
     WHERE id=?
   `).bind(b.saleDate ?? '', b.customer, b.phone ?? '', b.details ?? '', b.amount ?? 0,
-    b.commType ?? 'project', b.staff ?? '', b.receiptData ?? '', b.receiptName ?? '', nowLocal(), id).run();
+    b.commType ?? 'project', b.staff ?? '', b.receiptData ?? '', b.receiptName ?? '', nowLocal(), b.payCycle || null, id).run();
   await stampSale(env, id);
   const sale = parseSale(await env.DB.prepare(`SELECT * FROM sales WHERE id=?`).bind(id).first());
   const ch = diff(old, sale, SALE_FIELDS);
