@@ -14,6 +14,9 @@
  *   GET    /api/staff
  *   POST   /api/staff
  *   DELETE /api/staff/:id
+ *   POST   /api/staff/:id/login   { pin }                -> { ok, isDefault }
+ *   PUT    /api/staff/:id/pin     { oldPin, newPin }     (staff changes own)
+ *                                  { reset:true, newPin } (admin sets / resets)
  */
 
 const CORS = {
@@ -37,6 +40,40 @@ function nowLocal() {
   return new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' }).replace(' ', 'T');
 }
 
+// ── Schema upgrades (run once per worker, safe to repeat) ─────────────────────
+let colsReady = false;
+async function ensureCols(env) {
+  if (colsReady) return;
+  const add = async (sql) => { try { await env.DB.prepare(sql).run(); } catch (e) { /* column exists */ } };
+  await add(`ALTER TABLE staff ADD COLUMN pin_hash TEXT`);
+  await add(`ALTER TABLE jobs  ADD COLUMN receipt_at TEXT`);   // date receipt was first attached
+  await add(`ALTER TABLE jobs  ADD COLUMN done_at TEXT`);      // date status became 'done'
+  await add(`ALTER TABLE sales ADD COLUMN receipt_at TEXT`);
+  // Backfill rows that existed before these columns (best guess = last update)
+  await env.DB.prepare(`UPDATE jobs SET receipt_at = substr(updated_at,1,10)
+    WHERE receipt_at IS NULL AND COALESCE(receipt_data,'') <> ''`).run();
+  await env.DB.prepare(`UPDATE jobs SET done_at = COALESCE(NULLIF(completion_date,''), substr(updated_at,1,10))
+    WHERE done_at IS NULL AND status = 'done'`).run();
+  await env.DB.prepare(`UPDATE sales SET receipt_at = substr(updated_at,1,10)
+    WHERE receipt_at IS NULL AND COALESCE(receipt_data,'') <> ''`).run();
+  colsReady = true;
+}
+
+// Server decides the commission dates — first receipt attach / first time done.
+async function stampJob(env, id) {
+  const today = nowLocal().slice(0, 10);
+  await env.DB.prepare(`UPDATE jobs SET
+      receipt_at = CASE WHEN COALESCE(receipt_data,'') = '' THEN NULL ELSE COALESCE(receipt_at, ?) END,
+      done_at    = CASE WHEN status = 'done' THEN COALESCE(done_at, ?) ELSE NULL END
+    WHERE id = ?`).bind(today, today, id).run();
+}
+async function stampSale(env, id) {
+  const today = nowLocal().slice(0, 10);
+  await env.DB.prepare(`UPDATE sales SET
+      receipt_at = CASE WHEN COALESCE(receipt_data,'') = '' THEN NULL ELSE COALESCE(receipt_at, ?) END
+    WHERE id = ?`).bind(today, id).run();
+}
+
 // ── Parse DB rows (JSON columns back to objects) ──────────────────────────────
 function parseJob(row) {
   if (!row) return null;
@@ -54,6 +91,8 @@ function parseJob(row) {
     receiptName: row.receipt_name ?? '',
     jobFormData: row.job_form_data ?? '',
     jobFormName: row.job_form_name ?? '',
+    receiptAt: row.receipt_at ?? '',
+    doneAt: row.done_at ?? '',
   };
 }
 
@@ -65,6 +104,7 @@ function parseSale(row) {
     receiptData: row.receipt_data ?? '',
     receiptName: row.receipt_name ?? '',
     saleDate: row.sale_date,
+    receiptAt: row.receipt_at ?? '',
   };
 }
 
@@ -87,6 +127,8 @@ export async function onRequest(context) {
   const method = request.method;
 
   try {
+    await ensureCols(env);
+    await ensureCols(env);
     // ── JOBS ──────────────────────────────────────────────────────────────
     if (resource === 'jobs') {
       if (!id) {
@@ -115,7 +157,10 @@ export async function onRequest(context) {
         if (method === 'GET')  return await getStaff(env);
         if (method === 'POST') return await createStaff(request, env);
       } else {
-        if (method === 'DELETE') return await deleteStaff(id, env);
+        const sub = route[2];
+        if (sub === 'login' && method === 'POST') return await staffLogin(id, request, env);
+        if (sub === 'pin'   && method === 'PUT')  return await staffSetPin(id, request, env);
+        if (!sub && method === 'DELETE') return await deleteStaff(id, env);
       }
     }
 
@@ -169,6 +214,7 @@ async function createJob(request, env) {
     now, now
   ).run();
 
+  await stampJob(env, id);
   const row = await env.DB.prepare(`SELECT * FROM jobs WHERE id=?`).bind(id).first();
   return json({ job: parseJob(row) }, 201);
 }
@@ -204,6 +250,7 @@ async function updateJob(id, request, env) {
     now, id
   ).run();
 
+  await stampJob(env, id);
   const row = await env.DB.prepare(`SELECT * FROM jobs WHERE id=?`).bind(id).first();
   return json({ job: parseJob(row) });
 }
@@ -247,6 +294,7 @@ async function createSale(request, env) {
     now, now
   ).run();
 
+  await stampSale(env, id);
   const row = await env.DB.prepare(`SELECT * FROM sales WHERE id=?`).bind(id).first();
   return json({ sale: parseSale(row) }, 201);
 }
@@ -273,6 +321,7 @@ async function updateSale(id, request, env) {
     now, id
   ).run();
 
+  await stampSale(env, id);
   const row = await env.DB.prepare(`SELECT * FROM sales WHERE id=?`).bind(id).first();
   return json({ sale: parseSale(row) });
 }
@@ -285,11 +334,46 @@ async function deleteSale(id, env) {
 // ════════════════════════════════════════════════════════════════
 // STAFF
 // ════════════════════════════════════════════════════════════════
+const DEFAULT_PIN = '1234';
+const ensurePinCol = ensureCols;
+async function hashPin(id, pin) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`actv:${id}:${pin}`));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function checkPin(row, pin) {
+  if (!row) return false;
+  if (!row.pin_hash) return String(pin) === DEFAULT_PIN;
+  return (await hashPin(row.id, String(pin))) === row.pin_hash;
+}
+
 async function getStaff(env) {
+  await ensurePinCol(env);
   const { results } = await env.DB.prepare(
-    `SELECT * FROM staff ORDER BY name`
+    `SELECT id, name, role, created_at, (pin_hash IS NULL) AS default_pin FROM staff ORDER BY name`
   ).all();
   return json({ staff: results });
+}
+
+async function staffLogin(id, request, env) {
+  await ensurePinCol(env);
+  const { pin } = await request.json();
+  const row = await env.DB.prepare(`SELECT id, name, role, pin_hash FROM staff WHERE id=?`).bind(id).first();
+  if (!row) return json({ ok: false, error: 'ไม่พบพนักงาน' }, 404);
+  if (!(await checkPin(row, pin))) return json({ ok: false, error: 'รหัสผ่านไม่ถูกต้อง' }, 401);
+  return json({ ok: true, isDefault: !row.pin_hash, staff: { id: row.id, name: row.name, role: row.role } });
+}
+
+async function staffSetPin(id, request, env) {
+  await ensurePinCol(env);
+  const body = await request.json();
+  const newPin = String(body.newPin ?? '');
+  if (!/^\d{4,6}$/.test(newPin)) return json({ ok: false, error: 'รหัสต้องเป็นตัวเลข 4-6 หลัก' }, 400);
+  const row = await env.DB.prepare(`SELECT id, pin_hash FROM staff WHERE id=?`).bind(id).first();
+  if (!row) return json({ ok: false, error: 'ไม่พบพนักงาน' }, 404);
+  if (!body.reset && !(await checkPin(row, body.oldPin))) return json({ ok: false, error: 'รหัสเดิมไม่ถูกต้อง' }, 401);
+  const h = newPin === DEFAULT_PIN && body.reset ? null : await hashPin(id, newPin);
+  await env.DB.prepare(`UPDATE staff SET pin_hash=? WHERE id=?`).bind(h, id).run();
+  return json({ ok: true, isDefault: !h });
 }
 
 async function createStaff(request, env) {
@@ -298,7 +382,7 @@ async function createStaff(request, env) {
   await env.DB.prepare(
     `INSERT INTO staff (id, name, role) VALUES (?,?,?)`
   ).bind(id, body.name, body.role ?? 'technician').run();
-  return json({ id, name: body.name }, 201);
+  return json({ id, name: body.name, role: body.role ?? 'technician' }, 201);
 }
 
 async function deleteStaff(id, env) {
