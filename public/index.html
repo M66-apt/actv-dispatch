@@ -141,6 +141,34 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 5 ═══ */
+#pw-ov{z-index:1600}
+.sb-foot{padding:14px 14px 16px!important}
+.sb-me{padding:4px 4px 0}
+.sb-me-name{display:flex;align-items:center;gap:6px}
+.sb-me-name strong{font-size:15px;font-weight:800;color:#fff;line-height:1.3}
+.sb-me small{display:block;font-size:11.5px;color:var(--sbt);margin-top:1px}
+.sb-me-act{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.sb-me-act button{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px 10px;border-radius:10px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:var(--fast)}
+.sb-set{background:rgba(255,255,255,.06);color:#CBD5E1;border:1px solid rgba(255,255,255,.08)}
+.sb-set:hover{background:rgba(255,255,255,.12);color:#fff}
+.sb-lo{background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.25)}
+.sb-lo:hover{background:rgba(239,68,68,.22);color:#fff}
+.tb-m-act{display:none;gap:6px}
+.tb-m-act button{width:38px;height:38px;border-radius:10px;border:1px solid var(--rule);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.tb-m-act button.lo{color:var(--red);border-color:rgba(239,68,68,.3)}
+@media(max-width:900px){.tb-m-act{display:flex}}
+.login-sel{padding-left:16px!important}
+.login-pw-wrap{position:relative}
+.login-pw{letter-spacing:.3em;font-family:'IBM Plex Mono',monospace!important;background-image:none!important;padding-right:44px!important}
+.login-pw::placeholder{letter-spacing:.2em;color:var(--faint)}
+.pw-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--muted);cursor:pointer;padding:6px}
+.login-err{color:var(--red);font-size:12.5px;font-weight:700;min-height:16px;margin-top:-4px}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.btn-pw{border:1px solid var(--rule);background:var(--card-2);border-radius:8px;padding:4px 8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn-pw:hover{border-color:var(--blue);color:var(--blue)}
+.pw-def{font-size:9.5px;background:#FEF3C7;color:#B45309;padding:0 5px;border-radius:6px}
 /* ══ BATCH 4 ═══════════════════════════════════════════ */
 /* sidebar clock */
 .sb{background:linear-gradient(180deg,#0D1526 0%,#101C33 60%,#0B1322 100%)}
@@ -617,9 +645,16 @@ tr:hover td{background:var(--card-2)}
 <!-- ══ ADMIN DRAWER ═══════════════════════════════════════ -->
 <div class="drawer-bg" id="drbg" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
-  <div class="drawer-head"><h2>⚙️ ตั้งค่าระบบ</h2><span class="admin-pill">Admin Mode</span></div>
+  <div class="drawer-head"><h2>⚙️ ตั้งค่า</h2><span class="admin-pill" id="dr-pill">Admin Mode</span><button class="cx" onclick="closeDrawer()" style="margin-left:auto"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
   <div class="drawer-body">
-    <div class="dsec">
+    <div class="dsec" id="dr-mypw-sec">
+      <h3>รหัสผ่านของฉัน</h3>
+      <div class="info-row">
+        <span style="font-size:13px" id="dr-mypw-st">รหัสผ่าน: ****</span>
+        <button class="btn btn-out" onclick="openPw('self')" style="font-size:11.5px;padding:5px 10px">เปลี่ยนรหัส</button>
+      </div>
+    </div>
+    <div class="dsec dr-admin">
       <h3>จัดการพนักงาน</h3>
       <div id="staff-admin-list"></div>
       <div class="add-row">
@@ -644,19 +679,13 @@ tr:hover td{background:var(--card-2)}
         <button class="btn btn-primary" onclick="addRole()" style="font-size:12px">+ เพิ่ม</button>
       </div>
     </div>
-    <div class="dsec">
+    <div class="dsec dr-admin">
       <h3>Admin PIN</h3>
       <div class="info-row">
         <span style="font-size:13px">PIN ปัจจุบัน: ****</span>
         <button class="btn btn-out" onclick="changePin()" style="font-size:11.5px;padding:5px 10px">เปลี่ยน PIN</button>
       </div>
     </div>
-  </div>
-  <div class="drawer-foot">
-    <button class="btn-logout" onclick="logout()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      ออกจากระบบ
-    </button>
   </div>
 </div>
 
@@ -680,31 +709,16 @@ tr:hover td{background:var(--card-2)}
         <div class="clk-day" id="clk-day">—</div>
         <div class="clk-date" id="clk-date">—</div>
       </div>
-      <div class="sb-sec-label" style="margin:18px 0 8px">ภาพรวมวันนี้</div>
-      <div class="tdy" onclick="showSec('jobs')"><div class="tdy-ic" style="background:rgba(245,158,11,.16);color:#FBBF24"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="tdy-t">รอดำเนินการ</div><div class="tdy-v" id="tdy-pend">0</div></div>
-      <div class="tdy" onclick="showSec('jobs')"><div class="tdy-ic" style="background:rgba(59,130,246,.16);color:#60A5FA"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 14h3"/></svg></div><div class="tdy-t">งานแจ้งวันนี้</div><div class="tdy-v" id="tdy-today">0</div></div>
-      <div class="tdy" onclick="showSec('jobs')"><div class="tdy-ic" style="background:rgba(16,185,129,.16);color:#34D399"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="tdy-t">เสร็จเดือนนี้</div><div class="tdy-v" id="tdy-done">0</div></div>
-      <div class="tdy" onclick="showSec('sales')"><div class="tdy-ic" style="background:rgba(167,139,250,.16);color:#A78BFA"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg></div><div class="tdy-t">ขายเดือนนี้</div><div class="tdy-v" id="tdy-sales">0</div></div>
     </div>
     <div class="sb-foot">
-      <div class="sb-user" onclick="onUserClick()">
-        <div style="position:relative;flex-shrink:0">
-          <div class="sb-av" id="sb-av">A</div>
-          <span id="sb-admin-dot" style="display:none;position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#FCD34D);border:2px solid var(--sb);box-shadow:0 0 6px rgba(245,158,11,.5)"></span>
+      <div class="sb-me">
+        <div class="sb-me-name"><strong id="sb-uname">—</strong>
+          <span id="sb-crown-s" style="display:none;line-height:0"><svg width="13" height="11" viewBox="0 0 24 20" fill="none"><path d="M2 18h20M2 18l3-10 7 5 7-5 3 10" stroke="#F59E0B" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="5" cy="8" r="2" fill="#F59E0B"/><circle cx="12" cy="5" r="2" fill="#F59E0B"/><circle cx="19" cy="8" r="2" fill="#F59E0B"/></svg></span>
         </div>
-        <div class="sb-user-info">
-          <div style="display:flex;align-items:center;gap:5px">
-            <strong id="sb-uname">—</strong>
-            <span id="sb-crown-s" style="display:none;line-height:0">
-              <svg width="11" height="9" viewBox="0 0 24 20" fill="none">
-                <path d="M2 18h20M2 18l3-10 7 5 7-5 3 10" stroke="#F59E0B" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-                <circle cx="5" cy="8" r="2" fill="#F59E0B"/>
-                <circle cx="12" cy="5" r="2" fill="#F59E0B"/>
-                <circle cx="19" cy="8" r="2" fill="#F59E0B"/>
-              </svg>
-            </span>
-          </div>
-          <small id="sb-urole">ACTV</small>
+        <small id="sb-urole">ACTV</small>
+        <div class="sb-me-act">
+          <button class="sb-set" onclick="openDrawer()" title="ตั้งค่า"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>ตั้งค่า</button>
+          <button class="sb-lo" onclick="logout()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>ออกจากระบบ</button>
         </div>
       </div>
     </div>
@@ -720,17 +734,9 @@ tr:hover td{background:var(--card-2)}
       </div>
       <div class="tb-right">
         <span class="tb-date tb-date-m" id="topbar-date"></span>
-        <div class="tb-user" id="tb-user" onclick="onUserClick()">
-          <div class="tb-av" id="tb-av">A</div>
-          <div><div class="tb-uname" id="tb-uname">—</div><div class="tb-urole" id="tb-urole">ACTV</div></div>
-          <span id="tb-crown" style="display:none;margin-left:3px;line-height:0">
-            <svg width="14" height="12" viewBox="0 0 24 20" fill="none">
-              <path d="M2 18h20M2 18l3-10 7 5 7-5 3 10" stroke="#D97706" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="5" cy="8" r="2.2" fill="#F59E0B"/>
-              <circle cx="12" cy="5" r="2.2" fill="#F59E0B"/>
-              <circle cx="19" cy="8" r="2.2" fill="#F59E0B"/>
-            </svg>
-          </span>
+        <div class="tb-m-act">
+          <button onclick="openDrawer()" title="ตั้งค่า"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button>
+          <button onclick="logout()" title="ออกจากระบบ" class="lo"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
         </div>
       </div>
     </div>
@@ -836,8 +842,8 @@ tr:hover td{background:var(--card-2)}
               <button class="on" data-t="tech" onclick="commTab('tech')">ค่าคอมช่าง<b id="cs-tech">0</b></button>
               <button data-t="sale" onclick="commTab('sale')">ค่าคอมขาย<b id="cs-sale">0</b></button>
             </div>
-            <div class="tw" id="cm-tw-tech"><table><thead><tr><th>ช่าง</th><th>เลขงาน</th><th>วันที่</th><th>ลูกค้า</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th></tr></thead><tbody id="comm-tbody-tech"></tbody></table></div>
-            <div class="tw" id="cm-tw-sale" style="display:none"><table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>วันที่</th><th>ลูกค้า</th><th>มูลค่า</th><th>ค่าคอม</th></tr></thead><tbody id="comm-tbody-sale"></tbody></table></div>
+            <div class="tw" id="cm-tw-tech"><table><thead><tr><th>ช่าง</th><th>เลขงาน</th><th>วันที่แจ้ง</th><th>สมบูรณ์เมื่อ</th><th>ลูกค้า</th><th>ค่าบริการ</th><th>ค่าคอม/คน</th></tr></thead><tbody id="comm-tbody-tech"></tbody></table></div>
+            <div class="tw" id="cm-tw-sale" style="display:none"><table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>วันที่ขาย</th><th>แนบใบเสร็จ</th><th>ลูกค้า</th><th>มูลค่า</th><th>ค่าคอม</th></tr></thead><tbody id="comm-tbody-sale"></tbody></table></div>
           </div>
         </div>
       </div>
@@ -846,6 +852,24 @@ tr:hover td{background:var(--card-2)}
 </div>
 
 <div id="mp-pop"></div>
+
+<!-- ══ PASSWORD MODAL ═════════════════════════════════════ -->
+<div class="ov" id="pw-ov" onclick="coo(event,'pw-ov')">
+  <div class="modal" style="max-width:380px">
+    <div class="mh"><div class="mt" id="pw-mt">เปลี่ยนรหัสผ่าน</div><button class="cx" onclick="cm('pw-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px" id="pw-sub"></div>
+      <div class="f" id="pw-old-f" style="margin-bottom:10px"><label class="fl">รหัสเดิม</label><input type="password" inputmode="numeric" maxlength="6" class="fi" id="pw-old" autocomplete="current-password"></div>
+      <div class="f" style="margin-bottom:10px"><label class="fl">รหัสใหม่ (ตัวเลข 4-6 หลัก)</label><input type="password" inputmode="numeric" maxlength="6" class="fi" id="pw-new" autocomplete="new-password"></div>
+      <div class="f"><label class="fl">ยืนยันรหัสใหม่</label><input type="password" inputmode="numeric" maxlength="6" class="fi" id="pw-new2" autocomplete="new-password" onkeydown="if(event.key==='Enter')savePw()"></div>
+      <div id="pw-err" style="color:var(--red);font-size:12.5px;font-weight:700;min-height:18px;margin-top:8px"></div>
+    </div>
+    <div class="mf" style="display:flex;gap:8px;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--rule)">
+      <button class="btn btn-out" id="pw-reset" onclick="savePw(true)" style="display:none">รีเซ็ตเป็น 1234</button>
+      <div style="display:flex;gap:8px;margin-left:auto"><button class="btn btn-out" onclick="cm('pw-ov')">ยกเลิก</button><button class="btn btn-primary" id="pw-save" onclick="savePw()">บันทึก</button></div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ MODAL: JOB ═════════════════════════════════════════ -->
 <div class="ov" id="job-ov" onclick="coo(event,'job-ov')">
@@ -860,7 +884,7 @@ tr:hover td{background:var(--card-2)}
         <div class="f s2"><label class="fl">รายละเอียดงาน</label><textarea class="fi fta" id="job-details" placeholder="รายละเอียดปัญหา..."></textarea></div>
         <div class="f"><label class="fl">กำหนดส่ง</label><input type="date" class="fi" id="job-due"></div>
         <div class="f"><label class="fl">สถานะ</label>
-          <select class="fsel" id="job-status" onchange="toggleCDate()"><option value="pending">รอดำเนินการ</option><option value="active">กำลังดำเนินการ</option><option value="done">เสร็จสิ้น</option></select>
+          <select class="fsel" id="job-status" onchange="toggleCDate();updCommPrev()"><option value="pending">รอดำเนินการ</option><option value="active">กำลังดำเนินการ</option><option value="done">เสร็จสิ้น</option></select>
         </div>
         <div class="f" id="cdate-grp" style="display:none"><label class="fl">วันที่เสร็จ</label><input type="date" class="fi" id="job-cdate"></div>
         <div class="f"><label class="fl">ค่าบริการ (บาท)</label><input type="number" class="fi" id="job-fee" placeholder="0" oninput="updCommPrev()"></div>
@@ -1107,10 +1131,17 @@ function normDate(d){
 }
 function mLabel(k){if(!k)return'ทุกเดือน';const[y,m]=k.split('-');return`${TH_M[+m-1]} ${+y+543}`;}
 function fDate(d){const n=normDate(d);if(!n)return'—';const p=n.split('-');if(p.length<2||!TH_M[+p[1]-1])return String(d);const yy=String(+p[0]+543).slice(2);return p[2]?`${p[2]}/${p[1]}/${p[0].slice(2)}`:`${TH_MS[+p[1]-1]} ${yy}`;}
-function normAll(){DB.jobs.forEach(j=>{j.reportDate=normDate(j.reportDate);if(j.completedDate)j.completedDate=normDate(j.completedDate);});DB.sales.forEach(x=>{if(x.saleDate)x.saleDate=normDate(x.saleDate);if(x.date)x.date=normDate(x.date);});}
+function normAll(){DB.jobs.forEach(j=>{j.reportDate=normDate(j.reportDate);if(j.completedDate)j.completedDate=normDate(j.completedDate);if(j.completionDate)j.completionDate=normDate(j.completionDate);});DB.sales.forEach(x=>{if(x.saleDate)x.saleDate=normDate(x.saleDate);if(x.date)x.date=normDate(x.date);});}
 function fMoney(n){if(n==null||n==='')return'—';return'฿'+Number(n).toLocaleString('th-TH',{maximumFractionDigits:0});}
 function vFilled(val){if(val===null||val===undefined||val===false||val==='')return false;if(Array.isArray(val))return val.length>0;return true;}
-function cjc(j){const v=j.verify||{};if(!(vFilled(v.v1)&&vFilled(v.v2)&&vFilled(v.v3)&&vFilled(v.v4)&&vFilled(v.v5)))return null;if(!j.serviceFee||j.serviceFee<=0)return null;return(j.serviceFee*0.03)/((j.assignees||[]).length||1);}
+// ค่าคอมช่าง: สถานะสำเร็จ + แนบใบเสร็จ → 3% ของค่าบริการ หารจำนวนช่าง
+function cjc(j){if(j.status!=='done'||!j.receiptData)return null;if(!j.serviceFee||j.serviceFee<=0)return null;return(j.serviceFee*0.03)/((j.assignees||[]).length||1);}
+function cjcWhy(j){if(j.status!=='done'&&!j.receiptData)return'รอปิดงาน+ใบเสร็จ';if(j.status!=='done')return'รอปิดงาน';if(!j.receiptData)return'รอใบเสร็จ';if(!j.serviceFee)return'ไม่มีค่าบริการ';return'';}
+// รอบจ่าย (YYYY-MM)
+// ช่าง: งานสมบูรณ์เมื่อครบทั้ง "สำเร็จ" และ "ใบเสร็จ" → เดือนของวันที่ครบหลังสุด
+function jobCommDate(j){const d=normDate(j.completionDate||j.doneAt||''),r=normDate(j.receiptAt||'');const a=[d,r].filter(x=>x.length>=7).sort();return a.length?a[a.length-1]:normDate(j.reportDate||'');}
+// ขาย: เดือนที่แนบใบเสร็จ
+function saleCommDate(s){return normDate(s.receiptAt||'')||normDate(s.saleDate||s.date||'');}
 function csc(s){if(!s.receiptData)return null;return s.commType==='project'?(s.amount||0)*0.01:300;}
 function sbadge(s){if(s==='done')return`<span class="b b-done"><span class="bd"></span>เสร็จสิ้น</span>`;if(s==='active')return`<span class="b b-active"><span class="bd"></span>กำลังดำเนินการ</span>`;return`<span class="b b-pend"><span class="bd"></span>รอดำเนินการ</span>`;}
 const VLABELS={v1:'เวลาเดินทาง',v2:'ส่งใบงาน',v3:'ภาพปิดงาน',v4:'รายงานตำแหน่ง',v5:'เอกสารอื่นๆ'};
@@ -1150,13 +1181,18 @@ function renderLoginStaff(){
   c.innerHTML=`<div class="login-pick">
     <label for="login-sel">ชื่อผู้ใช้</label>
     <div class="login-sel-wrap">
-      <div class="sl-av" id="login-av">${last?last.charAt(0):'?'}</div>
-      <select id="login-sel" class="login-sel${last?'':' ph'}" onchange="onLoginPick()" onkeydown="if(event.key==='Enter')loginSelected()">
+      <select id="login-sel" class="login-sel${last?'':' ph'}" onchange="onLoginPick()">
         <option value="" disabled ${last?'':'selected'}>— เลือกชื่อของคุณ —</option>
         ${list.map(s=>`<option value="${s.name.replace(/"/g,'&quot;')}"${s.name===last?' selected':''}>${s.name} · ${s.role==='admin'?'แอดมิน':roleLabel(s.role)}</option>`).join('')}
       </select>
     </div>
     <div class="login-count">พนักงานทั้งหมด ${list.length} คน</div>
+    <label for="login-pw">รหัสผ่าน</label>
+    <div class="login-pw-wrap">
+      <input type="password" id="login-pw" class="login-sel login-pw" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginSelected()" oninput="document.getElementById('login-err').textContent=''">
+      <button type="button" class="pw-eye" onclick="const i=document.getElementById('login-pw');i.type=i.type==='password'?'text':'password'" title="แสดงรหัส"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <div class="login-err" id="login-err"></div>
     <button class="btn-login-go" id="login-go" onclick="loginSelected()" ${last?'':'disabled'}>
       เข้าสู่ระบบ
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -1166,14 +1202,28 @@ function renderLoginStaff(){
 function onLoginPick(){
   const sel=document.getElementById('login-sel');const v=sel.value;
   sel.classList.toggle('ph',!v);
-  document.getElementById('login-av').textContent=v?v.charAt(0):'?';
   document.getElementById('login-go').disabled=!v;
+  document.getElementById('login-err').textContent='';
+  if(v)document.getElementById('login-pw')?.focus();
 }
-function loginSelected(){
+async function loginSelected(){
   const v=document.getElementById('login-sel')?.value;
-  if(!v){toast('กรุณาเลือกชื่อ','e');return;}
-  try{localStorage.setItem('lastLogin',v);}catch(e){}
-  loginAs(v);
+  const pwEl=document.getElementById('login-pw'),pw=(pwEl?.value||'').trim();
+  const err=document.getElementById('login-err');
+  if(!v){err.textContent='กรุณาเลือกชื่อ';return;}
+  if(!pw){err.textContent='กรุณากรอกรหัสผ่าน';pwEl?.focus();return;}
+  const st=DB.staff.find(s=>s.name===v);if(!st){err.textContent='ไม่พบพนักงาน';return;}
+  const btn=document.getElementById('login-go');btn.disabled=true;
+  try{
+    const r=await fetch(`/api/staff/${encodeURIComponent(st.id)}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:pw})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok){err.textContent=d.error||'รหัสผ่านไม่ถูกต้อง';pwEl.value='';pwEl.focus();pwEl.classList.remove('shake');void pwEl.offsetWidth;pwEl.classList.add('shake');return;}
+    try{localStorage.setItem('lastLogin',v);}catch(e){}
+    pwEl.value='';
+    loginAs(v,st.id);
+    if(d.isDefault)setTimeout(()=>{toast('คุณยังใช้รหัสเริ่มต้น 1234 — กรุณาเปลี่ยนรหัส','w');openPw('self');},900);
+  }catch(e){err.textContent='เชื่อมต่อไม่ได้: '+e.message;}
+  finally{btn.disabled=false;}
 }
 function playWelcome(){
   const h=new Date().getHours();
@@ -1187,7 +1237,7 @@ function playWelcome(){
     const full=lines.join('\n');let i=0;clearInterval(t._iv);t.innerHTML='';
     setTimeout(()=>{t._iv=setInterval(()=>{i++;t.innerHTML=full.slice(0,i).replace(/\n/g,'<br>');if(i>=full.length)clearInterval(t._iv);},45);},1500);}
 }
-function loginAs(name){currentUser={name,role:'user'};enterApp();}
+function loginAs(name,id){currentUser={name,role:'user',id:id||DB.staff.find(s=>s.name===name)?.id};enterApp();}
 function showPin(mode){
   pinMode=mode;pinEntry='';updPinDots();
   document.getElementById('pin-err').textContent='';
@@ -1245,7 +1295,7 @@ const MP={id:null,year:new Date().getFullYear()};
 const MP_SRC={
   'jobs-mf':()=>DB.jobs.map(j=>j.reportDate),
   'sales-mf':()=>DB.sales.map(x=>x.saleDate||x.date),
-  'comm-mf':()=>[...DB.jobs.map(j=>j.reportDate),...DB.sales.map(x=>x.saleDate||x.date)],
+  'comm-mf':()=>[...DB.jobs.filter(j=>cjc(j)!==null).map(jobCommDate),...DB.sales.filter(x=>csc(x)!==null).map(saleCommDate)],
 };
 const MP_CB={'jobs-mf':()=>{jPage=1;renderJobs();},'sales-mf':()=>renderSales(),'comm-mf':()=>renderCommission()};
 function mpCounts(id){const c={};(MP_SRC[id]?.()||[]).forEach(d=>{const k=normDate(d).slice(0,7);if(k.length===7)c[k]=(c[k]||0)+1;});return c;}
@@ -1312,8 +1362,7 @@ function updAdminUI(){
 }
 function onUserClick(){
   if(!currentUser)return;
-  if(currentUser.role==='admin')openDrawer();
-  else if(confirm(`เข้าสู่ระบบในฐานะ: ${currentUser.name}\nต้องการออกจากระบบ?`))logout();
+  openDrawer();
 }
 
 // ━━━━ DRAWER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1338,6 +1387,10 @@ function openDrawer(){
     drRoleSel.innerHTML=DB.roles.map(r=>`<option value="${r.id}">${r.label}</option>`).join('');
     drRoleSel.value=(currentUser?.staffRole||st?.role||DB.roles[0]?.id||'technician');
   }
+  document.querySelectorAll('#drawer .dr-admin').forEach(e=>e.style.display=isAdmin?'':'none');
+  document.getElementById('dr-mypw-sec').style.display=isAdmin?'none':'';
+  document.getElementById('dr-pill').textContent=isAdmin?'Admin Mode':'พนักงาน';
+  updMyPw();
   renderStaffAdmin();
   renderRolesAdmin();
   document.getElementById('drawer').classList.add('on');
@@ -1350,7 +1403,10 @@ function renderStaffAdmin(){
   el.innerHTML=DB.staff.map(s=>`
     <div class="staff-row">
       <div class="srow-info"><strong>${s.name}</strong><small>${s.role==='admin'?'แอดมิน':roleLabel(s.role)} · ID: ${s.id||'—'}</small></div>
-      <button class="btn-del" onclick="delStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">ลบ</button>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn-pw" onclick="openPw('admin','${s.id}')" title="ตั้ง/รีเซ็ตรหัสผ่าน">🔑 รหัส${+s.default_pin?'<b class="pw-def">1234</b>':''}</button>
+        <button class="btn-del" onclick="delStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">ลบ</button>
+      </div>
     </div>
   `).join('');
 }
@@ -1358,7 +1414,7 @@ async function addStaff(){
   const inp=document.getElementById('new-sname'),name=inp.value.trim();
   const role=document.getElementById('new-srole')?.value||'technician';
   if(!name){toast('กรอกชื่อพนักงาน','e');return;}
-  try{const r=await POST('/api/staff',{name,role});DB.staff.push({id:r.id,name:r.name,role:r.role||role});inp.value='';renderStaffAdmin();renderLoginStaff();populateSels();toast(`เพิ่ม "${name}" แล้ว`);}
+  try{const r=await POST('/api/staff',{name,role});DB.staff.push({id:r.id,name:r.name,role:r.role||role,default_pin:1});inp.value='';renderStaffAdmin();renderLoginStaff();populateSels();toast(`เพิ่ม "${name}" แล้ว`);}
   catch(e){toast('เพิ่มไม่สำเร็จ','e');}
 }
 async function delStaff(id,name){
@@ -1409,6 +1465,49 @@ function populateRoleSels(){
   if(dr&&currentUser?.role!=='admin'){dr.innerHTML=DB.roles.map(r=>`<option value="${r.id}">${r.label}</option>`).join('');}
 }
 function roleLabel(id){return(DB.roles.find(r=>r.id===id)||{label:id}).label;}
+let pwTarget=null;
+function openPw(mode,id){
+  const self=mode==='self';
+  const st=self?DB.staff.find(s=>s.id===currentUser?.id||s.name===currentUser?.name):DB.staff.find(s=>s.id===id);
+  if(!st){toast('ไม่พบข้อมูลพนักงาน','e');return;}
+  pwTarget={self,id:st.id,name:st.name};
+  document.getElementById('pw-mt').textContent=self?'เปลี่ยนรหัสผ่านของฉัน':'ตั้งรหัสผ่านพนักงาน';
+  document.getElementById('pw-sub').innerHTML=self?`ผู้ใช้: <b>${st.name}</b>`:`พนักงาน: <b>${st.name}</b> — แอดมินตั้งรหัสใหม่ได้โดยไม่ต้องใช้รหัสเดิม`;
+  document.getElementById('pw-old-f').style.display=self?'':'none';
+  document.getElementById('pw-reset').style.display=self?'none':'';
+  ['pw-old','pw-new','pw-new2'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('pw-err').textContent='';
+  document.getElementById('pw-ov').classList.add('open');
+  setTimeout(()=>document.getElementById(self?'pw-old':'pw-new').focus(),50);
+}
+async function savePw(reset){
+  if(!pwTarget)return;
+  const err=document.getElementById('pw-err');
+  const o=document.getElementById('pw-old').value.trim(),n=document.getElementById('pw-new').value.trim(),n2=document.getElementById('pw-new2').value.trim();
+  let body;
+  if(reset){if(!confirm(`รีเซ็ตรหัสของ "${pwTarget.name}" เป็น 1234?`))return;body={reset:true,newPin:'1234'};}
+  else{
+    if(pwTarget.self&&!o){err.textContent='กรอกรหัสเดิม';return;}
+    if(!/^\d{4,6}$/.test(n)){err.textContent='รหัสใหม่ต้องเป็นตัวเลข 4-6 หลัก';return;}
+    if(n!==n2){err.textContent='ยืนยันรหัสไม่ตรงกัน';return;}
+    body=pwTarget.self?{oldPin:o,newPin:n}:{reset:true,newPin:n};
+  }
+  const btn=document.getElementById('pw-save');btn.disabled=true;
+  try{
+    const r=await fetch(`/api/staff/${encodeURIComponent(pwTarget.id)}/pin`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok){err.textContent=d.error||'บันทึกไม่สำเร็จ';return;}
+    const st=DB.staff.find(s=>s.id===pwTarget.id);if(st)st.default_pin=d.isDefault?1:0;
+    cm('pw-ov');renderStaffAdmin();updMyPw();
+    toast(reset?`รีเซ็ตรหัสของ ${pwTarget.name} เป็น 1234 แล้ว`:'บันทึกรหัสผ่านใหม่แล้ว');
+  }catch(e){err.textContent='เชื่อมต่อไม่ได้: '+e.message;}
+  finally{btn.disabled=false;}
+}
+function updMyPw(){
+  const el=document.getElementById('dr-mypw-st');if(!el)return;
+  const st=DB.staff.find(s=>s.id===currentUser?.id);
+  el.innerHTML=st&&+st.default_pin?'<span style="color:var(--amber);font-weight:700">⚠ ยังใช้รหัสเริ่มต้น 1234</span>':'รหัสผ่าน: ****';
+}
 function changePin(){closeDrawer();showPin('change-old');}
 function logout(){closeDrawer();currentUser=null;document.getElementById('app').classList.remove('on');document.getElementById('login-screen').style.display='';renderLoginStaff();playWelcome();toast('ออกจากระบบแล้ว','i');}
 
@@ -1475,7 +1574,7 @@ function renderJobs(){
       <td>${sbadge(j.status)}</td>
       <td><div class="vtrack">${vdots(j.verify,j.id)}</div><div style="font-size:10px;color:var(--faint);margin-top:2px;font-weight:700">${vc}/5</div></td>
       <td style="font-weight:700">${j.serviceFee?fMoney(j.serviceFee):'<span style="color:var(--faint)">—</span>'}</td>
-      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">ยังไม่ครบ</span>`}</td>
+      <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>`:`<span class="comm-na">${cjcWhy(j)}</span>`}</td>
       <td>${fileCell}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" onclick="viewJob('${j.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -1540,7 +1639,7 @@ async function saveQuickUpload(){
     jobFormData:quFormD||j.jobFormData,
     jobFormName:quFormN||j.jobFormName,
   };
-  if(quFormD&&quFormOk){body.status='done';body.verify={...(j.verify||{}),v2:j.verify?.v2||true};if(!body.completedDate)body.completedDate=today();}
+  if(quFormD&&quFormOk){body.status='done';body.verify={...(j.verify||{}),v2:j.verify?.v2||true};if(!body.completionDate)body.completionDate=today();}
   try{
     const r=await PUT(`/api/jobs/${quJobId}`,body);
     const i=DB.jobs.findIndex(x=>x.id===quJobId);if(i>=0)DB.jobs[i]=r.job;
@@ -1594,17 +1693,19 @@ function updVI(k){
 }
 function updCommPrev(){
   const fee=parseFloat(document.getElementById('job-fee').value)||0;
-  const allOk=Object.values(VS).every(Boolean);
+  const done=document.getElementById('job-status')?.value==='done';
+  const ej=editJobId?DB.jobs.find(j=>j.id===editJobId):null;
+  const hasR=!!(rcptJ||ej?.receiptData);
   const n=Array.from(document.getElementById('job-assignees').selectedOptions).length||1;
   const el=document.getElementById('cprev');
-  if(allOk&&fee>0){el.classList.add('ok');el.textContent=`✓ ครบแล้ว — ค่าคอม 3% = ${fMoney(fee*0.03)} ÷ ${n} คน = ${fMoney((fee*0.03)/n)}/คน`;}
-  else{el.classList.remove('ok');el.textContent=!fee?'กรอกค่าบริการเพื่อดูค่าคอม':`ยังไม่ครบ ${Object.values(VS).filter(Boolean).length}/5 เงื่อนไข`;}
+  if(done&&hasR&&fee>0){el.classList.add('ok');el.textContent=`✓ ได้ค่าคอม — 3% = ${fMoney(fee*0.03)} ÷ ${n} คน = ${fMoney((fee*0.03)/n)}/คน`;}
+  else{el.classList.remove('ok');el.textContent=!fee?'กรอกค่าบริการเพื่อดูค่าคอม':`ค่าคอมจะคิดเมื่อ ${done?'✓':'○'} สถานะสำเร็จ + ${hasR?'✓':'○'} แนบใบเสร็จ`;}
 }
 function hfu(input,prevId){
   const file=input.files[0];if(!file)return;
   const r=new FileReader();
   r.onload=e=>{
-    if(prevId==='job-rcpt-prev'){rcptJ=e.target.result;rcptJN=file.name;}
+    if(prevId==='job-rcpt-prev'){rcptJ=e.target.result;rcptJN=file.name;updCommPrev();}
     else{rcptS=e.target.result;rcptSN=file.name;updSComm();}
     document.getElementById(prevId).innerHTML=fprev(file.name);
   };r.readAsDataURL(file);
@@ -1818,14 +1919,14 @@ function renderCommission(){
   const mFilter=document.getElementById('comm-mf').value;
   const pp={};const P=n=>pp[n]||(pp[n]={tech:[],sale:[]});
   DB.jobs.forEach(j=>{
-    if(mFilter&&!j.reportDate?.startsWith(mFilter))return;
     const c=cjc(j);if(c===null)return;
-    (j.assignees||[]).forEach(a=>P(a).tech.push({jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:j.reportDate}));
+    const d=jobCommDate(j);if(mFilter&&!d.startsWith(mFilter))return;
+    (j.assignees||[]).forEach(a=>P(a).tech.push({jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:d,open:j.reportDate}));
   });
   DB.sales.forEach(s=>{
-    const d=s.saleDate||s.date;if(mFilter&&!d?.startsWith(mFilter))return;
     const c=csc(s);if(c===null)return;
-    P(s.staff).sale.push({customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d});
+    const d=saleCommDate(s);if(mFilter&&!d.startsWith(mFilter))return;
+    P(s.staff).sale.push({customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d,open:s.saleDate||s.date});
   });
   const sum=a=>a.reduce((x,t)=>x+t.comm,0);
   const people=Object.entries(pp).map(([name,p])=>({name,p,t:sum(p.tech),s:sum(p.sale)})).map(x=>({...x,tot:x.t+x.s})).filter(x=>x.tot>0||x.p.tech.length||x.p.sale.length).sort((a,b)=>b.tot-a.tot);
@@ -1833,11 +1934,11 @@ function renderCommission(){
   const nT=people.reduce((a,x)=>a+x.p.tech.length,0),nS=people.reduce((a,x)=>a+x.p.sale.length,0);
   const pt=tot?totT/tot*100:0;
   document.getElementById('comm-stats').innerHTML=`
-    <div class="cm-tot"><div class="l">ค่าคอมมิชชั่นรวม · ${mLabel(mFilter)}</div><div class="v">${fMoney(tot)}</div>
+    <div class="cm-tot"><div class="l">ค่าคอมมิชชั่นรวม · ${mFilter?"รอบจ่าย "+mLabel(mFilter):"ทุกรอบ"}</div><div class="v">${fMoney(tot)}</div>
       <div class="cm-split"><i style="width:${pt}%;background:#FBBF24"></i><i style="width:${100-pt}%;background:#6EE7B7"></i></div>
       <div class="cm-leg"><span style="--c:#FBBF24">ช่าง ${Math.round(pt)}%</span><span style="--c:#6EE7B7">ขาย ${tot?100-Math.round(pt):0}%</span><span style="margin-left:auto">${people.length} คนได้รับค่าคอม</span></div></div>
-    <div class="cm-k" style="--c:#D97706"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><div class="l">ค่าคอมช่าง</div><div class="v">${fMoney(totT)}</div><div class="s">${nT} งาน · 3% ของค่าบริการ</div></div>
-    <div class="cm-k" style="--c:#059669"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg></div><div class="l">ค่าคอมขาย</div><div class="v">${fMoney(totS)}</div><div class="s">${nS} รายการขาย</div></div>`;
+    <div class="cm-k" style="--c:#D97706"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><div class="l">ค่าคอมช่าง</div><div class="v">${fMoney(totT)}</div><div class="s">${nT} งาน · สำเร็จ+ใบเสร็จ · 3%</div></div>
+    <div class="cm-k" style="--c:#059669"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg></div><div class="l">ค่าคอมขาย</div><div class="v">${fMoney(totS)}</div><div class="s">${nS} รายการ · นับเดือนที่แนบใบเสร็จ</div></div>`;
   const max=Math.max(1,...people.map(x=>x.tot));
   const medal=['🥇','🥈','🥉'];
   document.getElementById('comm-lb').innerHTML=people.length?people.map((x,i)=>`
@@ -1859,9 +1960,9 @@ function renderCommission(){
     x.p.tech.forEach(t=>rowsT.push({name:x.name,...t}));x.p.sale.forEach(t=>rowsS.push({name:x.name,...t}));});
   rowsT.sort((a,b)=>(b.date||'').localeCompare(a.date||''));rowsS.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   document.getElementById('cs-tech').textContent=rowsT.length;document.getElementById('cs-sale').textContent=rowsS.length;
-  const empty=`<tr class="empty"><td colspan="6"><div class="ei">—</div>${selectedCommStaff?`ไม่มีข้อมูลของ ${selectedCommStaff}`:'ยังไม่มีข้อมูล'}</td></tr>`;
-  document.getElementById('comm-tbody-tech').innerHTML=rowsT.length?rowsT.map(r=>`<tr><td>${asgChips([r.name])}</td><td class="tmono" style="font-size:12px">${r.jobNumber||'—'}</td><td style="font-size:12.5px;white-space:nowrap">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.fee)}</td><td><span class="comm-val">${fMoney(r.comm)}</span></td></tr>`).join(''):empty;
-  document.getElementById('comm-tbody-sale').innerHTML=rowsS.length?rowsS.map(r=>`<tr><td>${asgChips([r.name])}</td><td>${r.commType==='project'?`<span class="b b-info"><span class="bd"></span>โปรเจก</span>`:`<span class="b b-active"><span class="bd"></span>เนต+เคเบิล</span>`}</td><td style="font-size:12.5px;white-space:nowrap">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.amount)}</td><td><span class="comm-val">${fMoney(r.comm)}</span></td></tr>`).join(''):empty;
+  const empty=`<tr class="empty"><td colspan="7"><div class="ei">—</div>${selectedCommStaff?`ไม่มีข้อมูลของ ${selectedCommStaff}`:'ยังไม่มีข้อมูล'}</td></tr>`;
+  document.getElementById('comm-tbody-tech').innerHTML=rowsT.length?rowsT.map(r=>`<tr><td>${asgChips([r.name])}</td><td class="tmono" style="font-size:12px">${r.jobNumber||'—'}</td><td style="font-size:12.5px;white-space:nowrap;color:var(--muted)">${fDate(r.open)}</td><td style="font-size:12.5px;white-space:nowrap;font-weight:700">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.fee)}</td><td><span class="comm-val">${fMoney(r.comm)}</span></td></tr>`).join(''):empty;
+  document.getElementById('comm-tbody-sale').innerHTML=rowsS.length?rowsS.map(r=>`<tr><td>${asgChips([r.name])}</td><td>${r.commType==='project'?`<span class="b b-info"><span class="bd"></span>โปรเจก</span>`:`<span class="b b-active"><span class="bd"></span>เนต+เคเบิล</span>`}</td><td style="font-size:12.5px;white-space:nowrap;color:var(--muted)">${fDate(r.open)}</td><td style="font-size:12.5px;white-space:nowrap;font-weight:700">${fDate(r.date)}</td><td>${r.customer}</td><td style="font-weight:600">${fMoney(r.amount)}</td><td><span class="comm-val">${fMoney(r.comm)}</span></td></tr>`).join(''):empty;
   if(selectedCommStaff&&sel){if(!sel.p.tech.length&&sel.p.sale.length)commTab('sale');else if(sel.p.tech.length&&!sel.p.sale.length)commTab('tech');}
 }
 
@@ -1919,16 +2020,15 @@ function printCommReport(){
   // build data
   const pp={tech:[],sale:[]};
   DB.jobs.forEach(j=>{
-    if(mFilter&&!j.reportDate?.startsWith(mFilter))return;
     const c=cjc(j);if(c===null)return;
+    const d=jobCommDate(j);if(mFilter&&!d.startsWith(mFilter))return;
     if(!name||(j.assignees||[]).includes(name)){
-      (j.assignees||[]).filter(a=>!name||a===name).forEach(()=>{pp.tech.push({jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:j.reportDate});});
+      (j.assignees||[]).filter(a=>!name||a===name).forEach(()=>{pp.tech.push({jobNumber:j.jobNumber,customer:j.customer,fee:j.serviceFee,comm:c,date:d});});
     }
   });
   DB.sales.forEach(s=>{
-    const d=s.saleDate||s.date;
-    if(mFilter&&!d?.startsWith(mFilter))return;
     const c=csc(s);if(c===null)return;
+    const d=saleCommDate(s);if(mFilter&&!d.startsWith(mFilter))return;
     if(!name||s.staff===name)pp.sale.push({customer:s.customer,amount:s.amount,comm:c,commType:s.commType,date:d});
   });
   const tT=pp.tech.reduce((a,t)=>a+t.comm,0);
@@ -1946,9 +2046,9 @@ function printCommReport(){
   .sum-item{text-align:center}.sum-label{font-size:11px;color:#6b7280;margin-bottom:2px}.sum-val{font-size:18px;font-weight:800}
   @media print{body{padding:12px}}</style></head><body>
   <h2>สรุปค่าคอมมิชชั่น${name?' – '+name:' (ทุกคน)'}</h2>
-  <p class="sub">พิมพ์เมื่อ: ${dateStr}${mFilter?' · เดือน '+mFilter.split('-').reverse().join('/'):''}  |  ACTV System</p>
-  ${pp.tech.length?`<h3>ค่าคอมช่าง (3% ค่าบริการ)</h3><table><thead><tr><th>เลขงาน</th><th>ลูกค้า</th><th>วันที่</th><th style="text-align:right">ค่าบริการ</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${techRows}</tbody></table>`:''}
-  ${pp.sale.length?`<h3>ค่าคอมขาย</h3><table><thead><tr><th>ประเภท</th><th>ลูกค้า</th><th>วันที่</th><th style="text-align:right">มูลค่า</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${saleRows}</tbody></table>`:''}
+  <p class="sub">พิมพ์เมื่อ: ${dateStr}${mFilter?' · รอบจ่าย '+mLabel(mFilter):' · ทุกรอบ'}  |  ACTV System</p>
+  ${pp.tech.length?`<h3>ค่าคอมช่าง (3% ค่าบริการ · งานสำเร็จ+แนบใบเสร็จ)</h3><table><thead><tr><th>เลขงาน</th><th>ลูกค้า</th><th>สมบูรณ์เมื่อ</th><th style="text-align:right">ค่าบริการ</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${techRows}</tbody></table>`:''}
+  ${pp.sale.length?`<h3>ค่าคอมขาย</h3><table><thead><tr><th>ประเภท</th><th>ลูกค้า</th><th>แนบใบเสร็จ</th><th style="text-align:right">มูลค่า</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${saleRows}</tbody></table>`:''}
   <div class="summary">
     <div class="sum-item"><div class="sum-label">ค่าคอมช่าง</div><div class="sum-val" style="color:#d97706">${fMoney(tT)}</div></div>
     <div class="sum-item"><div class="sum-label">ค่าคอมขาย</div><div class="sum-val" style="color:#2563eb">${fMoney(tS)}</div></div>
