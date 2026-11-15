@@ -201,7 +201,7 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .cnt{font-size:12px;color:var(--muted)}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{padding:9px 14px;text-align:left;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;background:var(--card-2);border-bottom:1px solid var(--rule);white-space:nowrap;position:sticky;top:58px}
+th{padding:9px 14px;text-align:left;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;background:var(--card-2);border-bottom:1px solid var(--rule);white-space:nowrap;position:sticky;top:58px;z-index:2}
 td{padding:11px 14px;border-bottom:1px solid var(--rule);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:0}
 tr:hover td{background:var(--card-2)}
@@ -952,7 +952,7 @@ function renderStaffAdmin(){
 async function addStaff(){
   const inp=document.getElementById('new-sname'),name=inp.value.trim();
   if(!name){toast('กรอกชื่อพนักงาน','e');return;}
-  try{const r=await POST('/api/staff',{name});DB.staff.push(r.staff);inp.value='';renderStaffAdmin();renderLoginStaff();populateSels();toast(`เพิ่ม "${name}" แล้ว`);}
+  try{const r=await POST('/api/staff',{name});DB.staff.push({id:r.id,name:r.name});inp.value='';renderStaffAdmin();renderLoginStaff();populateSels();toast(`เพิ่ม "${name}" แล้ว`);}
   catch(e){toast('เพิ่มไม่สำเร็จ','e');}
 }
 async function delStaff(id,name){
@@ -1350,7 +1350,8 @@ function renderCommission(){
     <div class="stat c-blue"><div class="stat-label">รวมทั้งหมด</div><div class="stat-num" style="font-size:20px">${fMoney(totT+totS)}</div><div class="stat-sub">บาท</div></div>
     <div class="stat c-violet"><div class="stat-label">พนักงาน</div><div class="stat-num">${DB.staff.length}</div><div class="stat-sub">คน</div></div>
   `;
-  const cards=DB.staff.map(s=>{const p=pp[s.name]||{tech:[],sale:[]};const tT=p.tech.reduce((a,t)=>a+t.comm,0),tS=p.sale.reduce((a,t)=>a+t.comm,0);return{name:s.name,p,tT,tS,g:tT+tS};}).filter(x=>x.g>0||x.p.tech.length||x.p.sale.length);
+  const allNames=new Set([...DB.staff.map(s=>s.name),...Object.keys(pp)]);
+  const cards=[...allNames].map(name=>{const p=pp[name]||{tech:[],sale:[]};const tT=p.tech.reduce((a,t)=>a+t.comm,0),tS=p.sale.reduce((a,t)=>a+t.comm,0);return{name,p,tT,tS,g:tT+tS};}).filter(x=>x.g>0||x.p.tech.length||x.p.sale.length);
   document.getElementById('comm-grid').innerHTML=cards.map(({name,p,tT,tS,g})=>`
     <div class="scard">
       <div class="scard-top"><div class="sc-av">${name.charAt(0)}</div><div><div class="sc-name">${name}</div><div class="sc-sub">${p.tech.length} งานช่าง · ${p.sale.length} งานขาย</div></div></div>
@@ -1362,7 +1363,7 @@ function renderCommission(){
     </div>
   `).join('')||`<p style="color:var(--muted);padding:16px;grid-column:1/-1">ยังไม่มีค่าคอมที่คำนวณได้</p>`;
   const rows=[];
-  DB.staff.forEach(s=>{const p=pp[s.name]||{tech:[],sale:[]};p.tech.forEach(t=>rows.push({name:s.name,type:'ช่าง',ref:t.jobNumber||'—',detail:t.customer,amount:t.fee,comm:t.comm}));p.sale.forEach(sv=>rows.push({name:s.name,type:'ขาย',ref:sv.commType==='project'?'โปรเจก':'เนต+เคเบิล',detail:sv.customer,amount:sv.amount,comm:sv.comm}));});
+  allNames.forEach(name=>{const p=pp[name]||{tech:[],sale:[]};p.tech.forEach(t=>rows.push({name,type:'ช่าง',ref:t.jobNumber||'—',detail:t.customer,amount:t.fee,comm:t.comm}));p.sale.forEach(sv=>rows.push({name,type:'ขาย',ref:sv.commType==='project'?'โปรเจก':'เนต+เคเบิล',detail:sv.customer,amount:sv.amount,comm:sv.comm}));});
   const tb=document.getElementById('comm-tbody');
   if(!rows.length){tb.innerHTML=`<tr class="empty"><td colspan="6"><div class="ei">—</div>ยังไม่มีข้อมูล</td></tr>`;return;}
   tb.innerHTML=rows.map(r=>`<tr>
