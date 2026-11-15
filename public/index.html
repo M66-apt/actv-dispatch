@@ -38,8 +38,12 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 /* left blue panel */
 .lp{
   background:linear-gradient(145deg,#1565C0 0%,#1A56AB 40%,#0D47A1 100%);
-  padding:48px 40px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;
+  padding:40px 40px 32px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;
 }
+.lp-hero{text-align:center;position:relative;z-index:1;margin-bottom:22px}
+.lp-hero-name{margin-top:8px}
+.lp-hero-name .ang{font-size:26px;font-weight:900;color:#fff;letter-spacing:.01em;display:block;line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,.2)}
+.lp-hero-name .ctv{font-size:15px;font-weight:700;color:#F5C842;letter-spacing:.18em;font-style:italic;display:block;margin-top:3px;text-shadow:0 1px 8px rgba(0,0,0,.2)}
 /* decorative spheres */
 .lp::before{content:'';position:absolute;width:220px;height:220px;border-radius:50%;
   background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.25),rgba(100,160,255,.15) 50%,transparent 70%);
@@ -377,23 +381,38 @@ tr:hover td{background:var(--card-2)}
     <div class="lp">
       <div class="lp-sphere s1"></div>
       <div class="lp-sphere s2"></div>
-      <div class="lp-logo">
-        <div class="lp-logo-box">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M5 8.5a26 26 0 0114 0" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            <path d="M7.5 12a16 16 0 019 0" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>
-            <path d="M10 15.5a8 8 0 014 0" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
-            <circle cx="12" cy="18" r="1.6" fill="white"/>
-            <path d="M12 19.6V22" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            <path d="M9 22h6" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="lp-brand">
-          <strong>ACTV</strong>
-          <span>Angthong Cable TV</span>
+      <div class="lp-hero">
+        <svg width="140" height="116" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg-la" x1="8" y1="95" x2="60" y2="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6B4400"/>
+              <stop offset="38%" stop-color="#B87800"/>
+              <stop offset="72%" stop-color="#E8B820"/>
+              <stop offset="100%" stop-color="#F5D040"/>
+            </linearGradient>
+            <linearGradient id="lg-ra" x1="112" y1="95" x2="60" y2="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6B4400"/>
+              <stop offset="38%" stop-color="#B87800"/>
+              <stop offset="72%" stop-color="#E8B820"/>
+              <stop offset="100%" stop-color="#F5D040"/>
+            </linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- Left arch leg -->
+          <path d="M 8,95 C 5,60 20,22 60,5 C 55,8 52,16 50,26 C 36,40 26,65 30,95 Z" fill="url(#lg-la)" filter="url(#glow)"/>
+          <!-- Right arch leg -->
+          <path d="M 112,95 C 115,60 100,22 60,5 C 65,8 68,16 70,26 C 84,40 94,65 90,95 Z" fill="url(#lg-ra)" filter="url(#glow)"/>
+          <!-- Inner white highlight -->
+          <path d="M 50,26 C 52,16 55,8 60,5 C 65,8 68,16 70,26 C 65,20 60,15 60,15 C 55,15 55,20 50,26 Z" fill="white" opacity="0.6"/>
+          <!-- Subtle base shadow -->
+          <ellipse cx="60" cy="97" rx="40" ry="3" fill="rgba(0,0,0,0.15)"/>
+        </svg>
+        <div class="lp-hero-name">
+          <span class="ang">Angthong</span>
+          <span class="ctv">Cable TV</span>
         </div>
       </div>
-      <h1>WELCOME<br>TO ACTV</h1>
+      <h1>WELCOME</h1>
       <p class="lp-sub">ระบบจัดการงานช่างและงานขาย<br>สำหรับทีมงานอ่างทองเคเบิลทีวี<br>เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
       <div class="lp-footer">v2.0 · Cloudflare Pages + D1</div>
     </div>
@@ -476,12 +495,23 @@ tr:hover td{background:var(--card-2)}
 <div id="app">
   <nav class="sb">
     <div class="sb-logo">
-      <div class="sb-logo-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M5 8.5a26 26 0 0114 0" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          <path d="M7.5 12a16 16 0 019 0" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>
-          <circle cx="12" cy="16" r="1.6" fill="white"/>
-          <path d="M12 17.6V20M9.5 20h5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+      <div class="sb-logo-icon" style="background:transparent;box-shadow:none;overflow:visible;width:34px;height:28px;border-radius:0">
+        <svg width="34" height="28" viewBox="0 0 120 100" fill="none">
+          <defs>
+            <linearGradient id="slg-l" x1="8" y1="95" x2="60" y2="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#7B5000"/>
+              <stop offset="50%" stop-color="#D4A020"/>
+              <stop offset="100%" stop-color="#F0C040"/>
+            </linearGradient>
+            <linearGradient id="slg-r" x1="112" y1="95" x2="60" y2="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#7B5000"/>
+              <stop offset="50%" stop-color="#D4A020"/>
+              <stop offset="100%" stop-color="#F0C040"/>
+            </linearGradient>
+          </defs>
+          <path d="M 8,95 C 5,60 20,22 60,5 C 55,8 52,16 50,26 C 36,40 26,65 30,95 Z" fill="url(#slg-l)"/>
+          <path d="M 112,95 C 115,60 100,22 60,5 C 65,8 68,16 70,26 C 84,40 94,65 90,95 Z" fill="url(#slg-r)"/>
+          <path d="M 50,26 C 52,16 55,8 60,5 C 65,8 68,16 70,26 C 65,20 60,15 60,15 C 55,15 55,20 50,26 Z" fill="white" opacity="0.5"/>
         </svg>
       </div>
       <div class="sb-logo-text"><strong>Angthong Cable TV</strong><span>ACTV System v2</span></div>
@@ -505,8 +535,24 @@ tr:hover td{background:var(--card-2)}
     </div>
     <div class="sb-foot">
       <div class="sb-user" onclick="onUserClick()">
-        <div class="sb-av" id="sb-av">A</div>
-        <div class="sb-user-info"><strong id="sb-uname">—</strong><small id="sb-urole">ACTV</small></div>
+        <div style="position:relative;flex-shrink:0">
+          <div class="sb-av" id="sb-av">A</div>
+          <span id="sb-admin-dot" style="display:none;position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#FCD34D);border:2px solid var(--sb);box-shadow:0 0 6px rgba(245,158,11,.5)"></span>
+        </div>
+        <div class="sb-user-info">
+          <div style="display:flex;align-items:center;gap:5px">
+            <strong id="sb-uname">—</strong>
+            <span id="sb-crown-s" style="display:none;line-height:0">
+              <svg width="11" height="9" viewBox="0 0 24 20" fill="none">
+                <path d="M2 18h20M2 18l3-10 7 5 7-5 3 10" stroke="#F59E0B" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+                <circle cx="5" cy="8" r="2" fill="#F59E0B"/>
+                <circle cx="12" cy="5" r="2" fill="#F59E0B"/>
+                <circle cx="19" cy="8" r="2" fill="#F59E0B"/>
+              </svg>
+            </span>
+          </div>
+          <small id="sb-urole">ACTV</small>
+        </div>
       </div>
     </div>
   </nav>
@@ -524,7 +570,14 @@ tr:hover td{background:var(--card-2)}
         <div class="tb-user" id="tb-user" onclick="onUserClick()">
           <div class="tb-av" id="tb-av">A</div>
           <div><div class="tb-uname" id="tb-uname">—</div><div class="tb-urole" id="tb-urole">ACTV</div></div>
-          <span id="tb-crown" style="display:none;font-size:13px;margin-left:1px">👑</span>
+          <span id="tb-crown" style="display:none;margin-left:3px;line-height:0">
+            <svg width="14" height="12" viewBox="0 0 24 20" fill="none">
+              <path d="M2 18h20M2 18l3-10 7 5 7-5 3 10" stroke="#D97706" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="5" cy="8" r="2.2" fill="#F59E0B"/>
+              <circle cx="12" cy="5" r="2.2" fill="#F59E0B"/>
+              <circle cx="19" cy="8" r="2.2" fill="#F59E0B"/>
+            </svg>
+          </span>
         </div>
       </div>
     </div>
@@ -905,8 +958,10 @@ function updUserUI(){
   ['sb-av','tb-av'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=ini;el.className=(id==='sb-av'?'sb-av':'tb-av')+(currentUser.role==='admin'?' admin':'');}});
   ['sb-uname','tb-uname'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=currentUser.name;});
   ['sb-urole','tb-urole'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=currentUser.role==='admin'?'แอดมิน':'พนักงาน';});
-  const crown=document.getElementById('tb-crown');if(crown)crown.style.display=currentUser.role==='admin'?'':'none';
+  const crown=document.getElementById('tb-crown');if(crown)crown.style.display=currentUser.role==='admin'?'inline':'none';
   const tbUser=document.getElementById('tb-user');if(tbUser)tbUser.className='tb-user'+(currentUser.role==='admin'?' admin':'');
+  const sbCrown=document.getElementById('sb-crown-s');if(sbCrown)sbCrown.style.display=currentUser.role==='admin'?'inline':'none';
+  const sbDot=document.getElementById('sb-admin-dot');if(sbDot)sbDot.style.display=currentUser.role==='admin'?'':'none';
 }
 function updAdminUI(){
   const on=currentUser&&currentUser.role==='admin';
