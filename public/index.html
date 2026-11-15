@@ -1000,7 +1000,7 @@ tr:hover td{background:var(--card-2)}
           <select class="fi fmsel" id="job-assignees" multiple onchange="updCommPrev()"></select>
           <div class="fhint">Ctrl/Cmd เพื่อเลือกหลายคน</div>
         </div>
-        <div class="f s2"><label class="fl">รายงานช่าง / การแก้ไขก่อนปิดงาน</label><textarea class="fi fta" id="job-tech" placeholder="ช่างแก้ไขอะไรไปบ้างก่อนปิดงาน..."></textarea></div>
+        <div class="f s2"><label class="fl">รายงานช่าง / การแก้ไขก่อนปิดงาน <span id="tech-auto-hint" style="display:none;color:var(--blue);font-weight:700;text-transform:none;letter-spacing:0">· เปลี่ยนสถานะเป็นกำลังดำเนินการแล้ว</span></label><textarea class="fi fta" id="job-tech" placeholder="ช่างแก้ไขอะไรไปบ้างก่อนปิดงาน..." oninput="techAuto()"></textarea></div>
         <div class="f"><label class="fl">แนบใบเสร็จ</label><input type="file" class="fi" id="job-rcpt" accept="image/*,.pdf" onchange="hfu(this,'job-rcpt-prev')"><div id="job-rcpt-prev"></div></div>
         <div class="f"><label class="fl">แนบใบงาน</label><input type="file" class="fi" id="job-form" accept="image/*,.pdf" onchange="hJFU(this)"><div id="job-form-prev"></div><div class="fhint" id="jfhint">ชื่อไฟล์ตรง MTC... = ปิดงานอัตโนมัติ</div></div>
         <div class="vsec">
@@ -1081,7 +1081,7 @@ tr:hover td{background:var(--card-2)}
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/></svg>เลือกไฟล์
             </button>
           </div>
-          <div class="fhint">ค่าคอมช่างคิดเมื่องานสำเร็จ + แนบใบเสร็จ</div>
+          <div class="fhint">ค่าคอมช่างคิดเมื่องานสำเร็จ + แนบใบเสร็จ + ตรวจสอบครบ 5 ขั้น</div>
         </div>
         <div class="qu-slot" id="qu-form-slot">
           <div class="qu-slot-top"><strong>📋 ใบงาน</strong><span id="qu-form-status" style="font-size:11.5px;color:var(--muted)"></span></div>
@@ -1261,12 +1261,13 @@ function fDate(d){const n=normDate(d);if(!n)return'—';const p=n.split('-');if(
 function normAll(){DB.jobs.forEach(j=>{j.reportDate=normDate(j.reportDate);if(j.completedDate)j.completedDate=normDate(j.completedDate);if(j.completionDate)j.completionDate=normDate(j.completionDate);if(j.dueDate)j.dueDate=normDate(j.dueDate);});DB.sales.forEach(x=>{if(x.saleDate)x.saleDate=normDate(x.saleDate);if(x.date)x.date=normDate(x.date);});}
 function fMoney(n){if(n==null||n==='')return'—';return'฿'+Number(n).toLocaleString('th-TH',{maximumFractionDigits:0});}
 function vFilled(val){if(val===null||val===undefined||val===false||val==='')return false;if(Array.isArray(val))return val.length>0;return true;}
-// ค่าคอมช่าง: สถานะสำเร็จ + แนบใบเสร็จ → 3% ของค่าบริการ หารจำนวนช่าง
-function cjc(j){if(j.status!=='done'||!j.receiptData)return null;if(!j.serviceFee||j.serviceFee<=0)return null;return(j.serviceFee*0.03)/((j.assignees||[]).length||1);}
-function cjcWhy(j){if(j.status!=='done'&&!j.receiptData)return'รอปิดงาน+ใบเสร็จ';if(j.status!=='done')return'รอปิดงาน';if(!j.receiptData)return'รอใบเสร็จ';if(!j.serviceFee)return'ไม่มีค่าบริการ';return'';}
+// ค่าคอมช่าง: สถานะสำเร็จ + แนบใบเสร็จ + ตรวจสอบครบ 5 ขั้น → 3% ของค่าบริการ หารจำนวนช่าง
+function vCount(v){return['v1','v2','v3','v4','v5'].filter(k=>vFilled(v?.[k])).length;}
+function cjc(j){if(j.status!=='done'||!j.receiptData||vCount(j.verify)<5)return null;if(!j.serviceFee||j.serviceFee<=0)return null;return(j.serviceFee*0.03)/((j.assignees||[]).length||1);}
+function cjcWhy(j){const m=[];if(j.status!=='done')m.push('รอปิดงาน');if(!j.receiptData)m.push('รอใบเสร็จ');const n=vCount(j.verify);if(n<5)m.push(`ตรวจ ${n}/5`);if(!m.length&&!j.serviceFee)m.push('ไม่มีค่าบริการ');return m.join(' · ');}
 // รอบจ่าย (YYYY-MM)
 // ช่าง: งานสมบูรณ์เมื่อครบทั้ง "สำเร็จ" และ "ใบเสร็จ" → เดือนของวันที่ครบหลังสุด
-function jobCommDate(j){const d=normDate(j.completionDate||j.doneAt||''),r=normDate(j.receiptAt||'');const a=[d,r].filter(x=>x.length>=7).sort();return a.length?a[a.length-1]:normDate(j.reportDate||'');}
+function jobCommDate(j){const d=normDate(j.completionDate||j.doneAt||''),r=normDate(j.receiptAt||''),v=normDate(j.verifiedAt||'');const a=[d,r,v].filter(x=>x.length>=7).sort();return a.length?a[a.length-1]:normDate(j.reportDate||'');}
 // ขาย: เดือนที่แนบใบเสร็จ
 // ป้ายรอบชำระ — เดือนที่เข้าเงื่อนไข = รอบจ่ายเดือนนั้น (กดเพื่อดูรอบนั้นในหน้าค่าคอม)
 function payTag(d,manual){const k=normDate(d||'').slice(0,7);if(k.length!==7)return'';const[y,m]=k.split('-');
@@ -1935,6 +1936,7 @@ async function saveQuickUpload(){
 // ━━━━ JOB MODAL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function openJobModal(id=null){
   editJobId=id;const job=id?DB.jobs.find(j=>j.id===id):null;
+  {const h=document.getElementById('tech-auto-hint');if(h)h.style.display='none';}
   document.getElementById('job-mt').textContent=id?'แก้ไขงาน':'เพิ่มงานใหม่';
   ['v1','v2','v3','v4','v5'].forEach(k=>{VS[k]=false;updVI(k);});
   rcptJ='';rcptJN='';formJ='';formJN='';
@@ -1977,6 +1979,9 @@ function updVI(k){
   else{vi.classList.remove('ok');cb.style.background='';cb.style.borderColor='';}
   document.getElementById('vprog').textContent=`${Object.values(VS).filter(Boolean).length}/5`;
 }
+function techAuto(){const st=document.getElementById('job-status');
+  if(document.getElementById('job-tech').value.trim()&&st.value==='pending'){st.value='active';toggleCDate();updCommPrev();
+    const h=document.getElementById('tech-auto-hint');if(h)h.style.display='';}}
 function updCommPrev(){
   const fee=parseFloat(document.getElementById('job-fee').value)||0;
   const done=document.getElementById('job-status')?.value==='done';
@@ -1984,8 +1989,9 @@ function updCommPrev(){
   const hasR=!!(rcptJ||ej?.receiptData);
   const n=Array.from(document.getElementById('job-assignees').selectedOptions).length||1;
   const el=document.getElementById('cprev');
-  if(done&&hasR&&fee>0){el.classList.add('ok');el.textContent=`✓ ได้ค่าคอม — 3% = ${fMoney(fee*0.03)} ÷ ${n} คน = ${fMoney((fee*0.03)/n)}/คน`;}
-  else{el.classList.remove('ok');el.textContent=!fee?'กรอกค่าบริการเพื่อดูค่าคอม':`ค่าคอมจะคิดเมื่อ ${done?'✓':'○'} สถานะสำเร็จ + ${hasR?'✓':'○'} แนบใบเสร็จ`;}
+  const vc=vCount(VS);
+  if(done&&hasR&&vc===5&&fee>0){el.classList.add('ok');el.textContent=`✓ ได้ค่าคอม — 3% = ${fMoney(fee*0.03)} ÷ ${n} คน = ${fMoney((fee*0.03)/n)}/คน`;}
+  else{el.classList.remove('ok');el.textContent=!fee?'กรอกค่าบริการเพื่อดูค่าคอม':`ค่าคอมจะคิดเมื่อ ${done?'✓':'○'} สถานะสำเร็จ + ${hasR?'✓':'○'} แนบใบเสร็จ + ${vc===5?'✓':'○'} ตรวจสอบครบ (${vc}/5)`;}
 }
 function hfu(input,prevId){
   const file=input.files[0];if(!file)return;
@@ -2080,14 +2086,16 @@ function viewJob(id){
         ${j.completionDate?`<div class="di"><div class="dl">วันที่เสร็จ</div><div class="dv">${fDate(j.completionDate)}</div></div>`:''}
       </div>
       <div style="margin-bottom:14px"><div class="dl" style="font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">รายละเอียด</div><div class="dbox">${j.details||'—'}</div></div>
+      <div style="margin-bottom:14px"><div class="dl" style="font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">รายงานช่าง / การแก้ไขก่อนปิดงาน</div><div class="dbox" style="white-space:pre-wrap">${(j.techReport||'').replace(/</g,'&lt;')||'<span style="color:var(--faint)">ยังไม่มีรายงานจากช่าง</span>'}</div></div>
+      <div style="margin-bottom:14px"><div class="dl" style="font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">ตรวจสอบ ${vCount(j.verify)}/5</div><div class="vtrack" style="flex-wrap:wrap">${vdots(j.verify,null)}</div></div>
       <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">ผู้รับมอบหมาย</span>
-        ${(j.assignees||[]).map(a=>`<span class="chip ch-gold">${a}</span>`).join('')||'<span style="color:var(--faint)">—</span>'}
+        ${asgChips(j.assignees)}
       </div>
       <div class="dsep"></div>
       <div class="dmet">
         <div class="dm"><div class="dmv">${fMoney(j.serviceFee)}</div><div class="dml">ค่าบริการ</div></div>
-        <div class="dm"><div class="dmv" style="color:${comm!==null?'var(--green)':'var(--muted)'}">${comm!==null?fMoney(comm):cjcWhy(j)}</div><div class="dml">ค่าคอม / คน</div>${comm!==null?`<div style="display:flex;justify-content:center">${payTag(jobPayMonth(j),!!j.payCycle)}</div>`:''}</div>
+        <div class="dm"><div class="dmv" style="color:${comm!==null?'var(--green)':'var(--muted)'};${comm!==null?'':'font-size:13.5px;line-height:1.5'}">${comm!==null?fMoney(comm):cjcWhy(j)}</div><div class="dml">ค่าคอม / คน</div>${comm!==null?`<div style="display:flex;justify-content:center">${payTag(jobPayMonth(j),!!j.payCycle)}</div>`:''}</div>
       </div>
       <div class="dsep"></div>
       <div style="display:flex;gap:8px">
@@ -2250,7 +2258,7 @@ function renderCommission(){
     <div class="cm-tot"><div class="l">ค่าคอมมิชชั่นรวม · ${mFilter?"รอบจ่าย "+mLabel(mFilter):"ทุกรอบ"}</div><div class="v">${fMoney(tot)}</div>
       <div class="cm-split"><i style="width:${pt}%;background:#FBBF24"></i><i style="width:${100-pt}%;background:#6EE7B7"></i></div>
       <div class="cm-leg"><span style="--c:#FBBF24">ช่าง ${Math.round(pt)}%</span><span style="--c:#6EE7B7">ขาย ${tot?100-Math.round(pt):0}%</span><span style="margin-left:auto">${people.length} คนได้รับค่าคอม</span></div></div>
-    <div class="cm-k" style="--c:#D97706"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><div class="l">ค่าคอมช่าง</div><div class="v">${fMoney(totT)}</div><div class="s">${nT} งาน · สำเร็จ+ใบเสร็จ · 3%</div></div>
+    <div class="cm-k" style="--c:#D97706"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><div class="l">ค่าคอมช่าง</div><div class="v">${fMoney(totT)}</div><div class="s">${nT} งาน · สำเร็จ+ใบเสร็จ+ตรวจครบ · 3%</div></div>
     <div class="cm-k" style="--c:#059669"><div class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg></div><div class="l">ค่าคอมขาย</div><div class="v">${fMoney(totS)}</div><div class="s">${nS} รายการ · นับเดือนที่แนบใบเสร็จ</div></div>`;
   const max=Math.max(1,...people.map(x=>x.tot));
   const medal=['🥇','🥈','🥉'];
@@ -2363,7 +2371,7 @@ function printCommReport(){
   @media print{body{padding:12px}}</style></head><body>
   <h2>สรุปค่าคอมมิชชั่น${name?' – '+name:' (ทุกคน)'}</h2>
   <p class="sub">พิมพ์เมื่อ: ${dateStr}${mFilter?' · รอบจ่าย '+mLabel(mFilter):' · ทุกรอบ'}  |  ACTV System</p>
-  ${pp.tech.length?`<h3>ค่าคอมช่าง (3% ค่าบริการ · งานสำเร็จ+แนบใบเสร็จ)</h3><table><thead><tr><th>เลขงาน</th><th>ลูกค้า</th><th>สมบูรณ์เมื่อ</th><th style="text-align:right">ค่าบริการ</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${techRows}</tbody></table>`:''}
+  ${pp.tech.length?`<h3>ค่าคอมช่าง (3% ค่าบริการ · งานสำเร็จ+แนบใบเสร็จ+ตรวจสอบครบ 5 ขั้น)</h3><table><thead><tr><th>เลขงาน</th><th>ลูกค้า</th><th>สมบูรณ์เมื่อ</th><th style="text-align:right">ค่าบริการ</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${techRows}</tbody></table>`:''}
   ${pp.sale.length?`<h3>ค่าคอมขาย</h3><table><thead><tr><th>ประเภท</th><th>ลูกค้า</th><th>แนบใบเสร็จ</th><th style="text-align:right">มูลค่า</th><th style="text-align:right">ค่าคอม</th></tr></thead><tbody>${saleRows}</tbody></table>`:''}
   <div class="summary">
     <div class="sum-item"><div class="sum-label">ค่าคอมช่าง</div><div class="sum-val" style="color:#d97706">${fMoney(tT)}</div></div>
