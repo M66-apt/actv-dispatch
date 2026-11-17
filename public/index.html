@@ -198,7 +198,10 @@ tr.od-row td:first-child{box-shadow:inset 4px 0 0 #EF4444}
 .due-tag{display:inline-block;margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;background:#EF4444;padding:0 7px;border-radius:10px;white-space:nowrap}
 .due-tag.soon{background:#F59E0B}
 .cap-rpt tr.od td{background:#FEF2F2!important}
-.cap-rpt tr.od td:first-child{box-shadow:inset 4px 0 0 #EF4444}
+.cap-rpt tr.od td:first-child{border-left:5px solid #EF4444}
+.cap-rpt tr.dn td{background:#F0FDF4!important}
+.cap-rpt tr.dn td:first-child{border-left:5px solid #10B981}
+.cap-rpt tr.cap-sep td{background:#ECFDF5!important;color:#047857;font-weight:800;font-size:14px;padding:10px;border-top:2px solid #10B981}
 .cap-rpt .odt{font-size:11.5px;font-weight:800;color:#DC2626}
 .staff-row.editing{border-color:var(--blue);background:var(--blue-bg);align-items:stretch;gap:10px}
 /* ══ BATCH 5 ═══ */
@@ -842,7 +845,7 @@ tr:hover td{background:var(--card-2)}
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 นำเข้า
               </button>
-              <button class="btn btn-out" onclick="printJobReport()" title="บันทึกภาพรายงานงานที่ยังไม่เสร็จ (PNG)">
+              <button class="btn btn-out" onclick="printJobReport()" title="บันทึกภาพรายงาน: รอดำเนินการ, กำลังดำเนินการ และงานที่ปิดวันนี้ (PNG)">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 บันทึกภาพรายงาน
               </button>
@@ -1241,7 +1244,7 @@ const getPin=()=>localStorage.getItem('actv_pin')||'1234';
 let impType='jobs',impRows=[],impStep=1,impTab='paste';
 
 // ━━━━ HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const TH_M=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const TH_MS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function normDate(d){
@@ -2295,12 +2298,16 @@ async function printJobReport(){
   const list=DB.jobs.filter(j=>['pending','active'].includes(j.status)&&(!mFilter||j.reportDate?.startsWith(mFilter)))
     .sort((a,b)=>(overdueDays(b)>0)-(overdueDays(a)>0)||overdueDays(b)-overdueDays(a)||(a.reportDate||'').localeCompare(b.reportDate||''));
   const nOd=list.filter(j=>overdueDays(j)>0).length;
-  if(!list.length){toast('ไม่มีงานที่รอดำเนินการ / กำลังดำเนินการ','w');return;}
+  // งานที่ปิดในวันนี้ (ไม่ขึ้นกับตัวกรองเดือน)
+  const t0=today();
+  const closed=DB.jobs.filter(j=>j.status==='done'&&normDate(j.completionDate||j.doneAt||'')===t0).sort((a,b)=>(a.jobNumber||'').localeCompare(b.jobNumber||''));
+  const nOpen=list.length;list.push(...closed);
+  if(!list.length){toast('ไม่มีงานค้าง และไม่มีงานที่ปิดวันนี้','w');return;}
   toast('กำลังสร้างภาพรายงาน...','i');
   try{if(!window.html2canvas)await loadScript(['https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js','https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js']);}
   catch(e){toast(e.message,'e');return;}
-  const SL={pending:['รอดำเนินการ','#B45309','#FEF3C7'],active:['กำลังดำเนินการ','#1D4ED8','#DBEAFE']};
-  const pend=list.filter(j=>j.status==='pending').length,act=list.length-pend;
+  const SL={pending:['รอดำเนินการ','#B45309','#FEF3C7'],active:['กำลังดำเนินการ','#1D4ED8','#DBEAFE'],done:['ปิดงานวันนี้','#047857','#D1FAE5']};
+  const pend=list.filter(j=>j.status==='pending').length,act=list.filter(j=>j.status==='active').length;
   const n=new Date();
   const logo=document.querySelector('.lp-logo-img')?.src||'';
   const box=document.createElement('div');
@@ -2308,17 +2315,18 @@ async function printJobReport(){
   box.innerHTML=`
     <div class="cap-hd">
       ${logo?`<img src="${logo}" class="cap-logo">`:''}
-      <div style="flex:1"><div class="cap-t">รายงานงานช่าง · งานที่ยังไม่เสร็จ</div>
+      <div style="flex:1"><div class="cap-t">รายงานงานช่างประจำวัน</div>
       <div class="cap-s">${mFilter?'ประจำเดือน '+mLabel(mFilter)+' · ':''}ข้อมูล ณ วัน${['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'][n.getDay()]}ที่ ${n.getDate()} ${TH_M[n.getMonth()]} ${n.getFullYear()+543} เวลา ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')} น.</div></div>
     </div>
     <div class="cap-sum">
-      <div><b>${list.length}</b><span>งานค้างทั้งหมด</span></div>
+      <div><b>${nOpen}</b><span>งานค้างทั้งหมด</span></div>
       <div style="--c:#B45309"><b>${pend}</b><span>รอดำเนินการ</span></div>
       <div style="--c:#1D4ED8"><b>${act}</b><span>กำลังดำเนินการ</span></div>
       <div style="--c:#DC2626"><b>${nOd}</b><span>เลยกำหนดส่ง</span></div>
+      <div style="--c:#047857"><b>${closed.length}</b><span>ปิดงานวันนี้</span></div>
     </div>
     <table><thead><tr><th>#</th><th>เลขงาน</th><th>วันที่แจ้ง</th><th>กำหนดส่ง</th><th>ลูกค้า</th><th>รายละเอียด</th><th>ช่าง</th><th>สถานะ</th></tr></thead><tbody>
-    ${list.map((j,i)=>{const od=overdueDays(j);return`<tr class="${od?'od':''}"><td>${i+1}</td><td class="m">${j.jobNumber||'—'}</td><td>${fDate(j.reportDate)}</td><td>${jobDue(j)?fDate(jobDue(j)):'—'}${od?`<div class="odt">เลย ${od} วัน</div>`:''}</td><td><b>${j.customer||'—'}</b>${j.phone?`<div class="ph">${j.phone}</div>`:''}</td><td class="dt">${j.details||'—'}</td><td>${(j.assignees||[]).join(', ')||'—'}</td><td><span class="st" style="color:${SL[j.status][1]};background:${SL[j.status][2]}">${SL[j.status][0]}</span></td></tr>`;}).join('')}
+    ${list.map((j,i)=>{const od=overdueDays(j);return`${i===nOpen&&closed.length?`<tr class="cap-sep"><td colspan="8">✓ ปิดงานวันนี้ (${closed.length} งาน)</td></tr>`:''}<tr class="${od?'od':j.status==='done'?'dn':''}"><td>${i+1}</td><td class="m">${j.jobNumber||'—'}</td><td>${fDate(j.reportDate)}</td><td>${jobDue(j)?fDate(jobDue(j)):'—'}${od?`<div class="odt">เลย ${od} วัน</div>`:''}</td><td><b>${j.customer||'—'}</b>${j.phone?`<div class="ph">${j.phone}</div>`:''}</td><td class="dt">${j.details||'—'}${j.status==='done'&&j.techReport?`<div style="color:#047857;font-size:12.5px;margin-top:3px">🔧 ${j.techReport}</div>`:''}</td><td>${(j.assignees||[]).join(', ')||'—'}</td><td><span class="st" style="color:${SL[j.status][1]};background:${SL[j.status][2]}">${SL[j.status][0]}</span></td></tr>`;}).join('')}
     </tbody></table>
     <div class="cap-ft">Angthong Cable TV · ACTV Dispatch</div>`;
   document.body.appendChild(box);
