@@ -141,6 +141,189 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 12: signal monitor (report) ═══ */
+.sgm{margin-top:22px;border-radius:18px;padding:18px 20px 16px;background:linear-gradient(160deg,#0B1220 0%,#111C33 55%,#0E1A2E 100%);color:#E2E8F0;border:1px solid #1E293B}
+.sgm-hd{display:flex;align-items:center;gap:14px;padding-bottom:12px;border-bottom:1px solid rgba(148,163,184,.15)}
+.sgm-ic{position:relative;width:38px;height:38px;flex-shrink:0}
+.sgm-ic span{position:absolute;left:50%;top:50%;border:2.5px solid #38BDF8;border-color:#38BDF8 transparent transparent transparent;border-radius:50%;transform:translate(-50%,-50%)}
+.sgm-ic span:nth-child(1){width:14px;height:14px;opacity:1}
+.sgm-ic span:nth-child(2){width:26px;height:26px;opacity:.7}
+.sgm-ic span:nth-child(3){width:38px;height:38px;opacity:.4}
+.sgm-ic b{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#38BDF8}
+.sgm-t{font-size:17px;font-weight:900;color:#fff}
+.sgm-st{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#64748B;margin-top:1px}
+.sgm-meter{display:flex;align-items:center;gap:10px;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.15);border-radius:12px;padding:8px 14px}
+.sgm-meter b{display:block;font-family:'IBM Plex Mono',monospace;font-size:20px;line-height:1}
+.sgm-meter span{font-size:11px;color:#94A3B8}
+.sgm-leg{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 10px;font-size:12.5px;color:#94A3B8}
+.sgm-leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.sgm-leg b{color:#fff;font-family:'IBM Plex Mono',monospace;margin-left:2px}
+.sgm-grid{display:grid;grid-template-columns:repeat(15,1fr);gap:5px}
+.sgt{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:5px 6px;border-radius:7px;background:rgba(30,41,59,.65);border:1px solid rgba(148,163,184,.08)}
+.sgt b{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#CBD5E1}
+.sgt.s-down{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.6)}.sgt.s-down b{color:#FCA5A5}
+.sgt.s-fixed{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.45)}.sgt.s-fixed b{color:#FCD34D}
+.sgt.s-none b{color:#475569}
+.sgb{display:inline-flex;align-items:flex-end;gap:1.5px;height:15px}
+.sgb i{display:block;width:3px;border-radius:1px}
+.sgb.big{height:28px;gap:3px}.sgb.big i{width:6px;border-radius:2px}
+.sgm-bad{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(148,163,184,.15)}
+.sgm-bad>span{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;background:rgba(30,41,59,.8)}
+.sgm-bad>span.s-down{color:#FCA5A5;border:1px solid rgba(239,68,68,.5)}
+.sgm-bad>span.s-fixed{color:#FCD34D;border:1px solid rgba(245,158,11,.4)}
+.sgm-bad b{font-family:'IBM Plex Mono',monospace;color:#fff}
+/* ══ BATCH 11: slot check ═══ */
+#sc-ov,#rs-ov{z-index:1600}
+.ck-hero{background:linear-gradient(135deg,#0D47A1,#1565C0 55%,#1E88E5);border-radius:20px;padding:18px 20px;margin-bottom:16px;color:#fff;box-shadow:0 12px 30px rgba(21,101,192,.25);position:relative;overflow:hidden}
+.ck-hero::after{content:'';position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%)}
+.ck-hero .ck-row{position:relative;z-index:1}
+.ck-hero .ck-dl{color:#fff}
+.ck-hero .ck-nav{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+.ck-hero .ck-nav:hover{background:rgba(255,255,255,.22);color:#fff}
+.ck-hero .btn-out{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.ck-hero .btn-primary{background:#fff;color:#0D47A1;border-color:#fff}
+.ck-duty{position:relative;z-index:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ck-duty-l{font-size:13px;font-weight:700;opacity:.9}.ck-duty-l small{opacity:.75;font-weight:600}
+.ck-duty .asg{background:#fff;border-color:#fff}
+.ck-me{font-size:12px;font-weight:800;background:#FCD34D;color:#78350F;padding:3px 10px;border-radius:20px}
+.ck-stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.ck-st{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;justify-content:center}
+.ck-st b{font-size:26px;font-weight:900;line-height:1.1}
+.ck-st span{font-size:12px;font-weight:600;opacity:.85}
+.ck-st:not(.ck-st-p) b{color:#fff}
+.ck-st-p{flex-direction:row;align-items:center;gap:12px}
+.ck-ring{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#6EE7B7 calc(var(--p)*1%),rgba(255,255,255,.18) 0);flex-shrink:0;position:relative}
+.ck-ring::before{content:'';position:absolute;inset:6px;border-radius:50%;background:#1565C0}
+.ck-ring b{position:relative;font-size:14px!important}
+.sl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.sl-card{background:var(--card);border:1.5px solid var(--rule);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--sh-xs);transition:var(--fast);position:relative}
+.sl-card.st-done{border-color:#A7F3D0;background:linear-gradient(180deg,#F0FDF4,#fff 55%)}
+.sl-card.st-due{border-color:#F59E0B;box-shadow:0 0 0 4px rgba(245,158,11,.15),var(--sh-xs)}
+.sl-card.st-late,.sl-card.st-miss{border-color:#FCA5A5;background:linear-gradient(180deg,#FEF2F2,#fff 55%)}
+.sl-card.now{transform:translateY(-3px)}
+.sl-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.sl-time{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.02em;line-height:1}
+.sl-time small{font-family:'Sarabun',sans-serif;font-size:12px;color:var(--muted);margin-left:3px;font-weight:600}
+.sl-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--c);background:color-mix(in srgb,var(--c) 10%,white);padding:3px 9px;border-radius:20px;white-space:nowrap}
+.sl-dot{width:7px;height:7px;border-radius:50%;background:var(--c);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.6)}100%{box-shadow:0 0 0 8px rgba(245,158,11,0)}}
+.sl-staff{display:flex;flex-direction:column;gap:6px}
+.sl-btn{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:12px;border:1.5px solid var(--rule);background:var(--card);font-family:inherit;text-align:left;cursor:pointer;transition:var(--fast);color:var(--ink)}
+.sl-btn i{font-style:normal;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;background:#94A3B8}
+.sl-btn span{display:flex;flex-direction:column;min-width:0;flex:1}
+.sl-btn b{font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-btn small{font-size:11px;color:var(--muted);font-weight:600}
+.sl-btn.go{border-color:var(--blue);background:var(--blue-bg)}
+.sl-btn.go small{color:var(--blue)}
+.sl-btn.go:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(21,101,192,.18)}
+.sl-card.st-due .sl-btn.go{border-color:#F59E0B;background:#FFFBEB}.sl-card.st-due .sl-btn.go small{color:#B45309}
+.sl-btn.done{border-color:#A7F3D0;background:#fff}
+.sl-btn.done small{color:#047857}
+.sl-btn.off{cursor:default;opacity:.65;background:var(--card-2)}
+.sl-btn em{font-style:normal;font-weight:800}
+.pu-late{color:#B91C1C}.pu-early{color:#1D4ED8}.pu-ok{color:#047857}
+.sl-none,.sl-wait{font-size:12px;color:var(--faint)}
+.sl-res{border-top:1px dashed var(--rule);padding-top:8px;min-height:24px}
+.sl-good{font-size:12.5px;font-weight:800;color:#047857}
+.sl-bad{font-size:12.5px;font-weight:800;color:#B91C1C}
+.sl-chs{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.sl-chs span{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;background:#FEE2E2;color:#B91C1C}
+.sl-chs span.fx{background:#FEF3C7;color:#B45309;text-decoration:line-through}
+.ck-two{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
+.ck-leg{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.ck-leg span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--c);margin-right:4px;vertical-align:-1px}
+.ck-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:4px;padding:4px 16px 16px}
+.ckm{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:700;text-align:center;padding:5px 0;border-radius:7px;background:#F1F5F9;color:#94A3B8}
+.ckm.ok{background:#D1FAE5;color:#047857}.ckm.fixed{background:#FEF3C7;color:#B45309}.ckm.down{background:#EF4444;color:#fff}
+.sc-sub{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:4px}
+.sc-allok{display:flex;align-items:center;gap:14px;width:100%;padding:14px 18px;border-radius:16px;border:2px solid #10B981;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);cursor:pointer;font-family:inherit;text-align:left;transition:var(--fast)}
+.sc-allok:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,185,129,.25)}
+.sc-allok b{width:44px;height:44px;border-radius:50%;background:#10B981;color:#fff;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.sc-allok strong{display:block;font-size:17px;color:#047857}
+.sc-allok small{font-size:12.5px;color:#059669}
+.sc-or{display:flex;align-items:center;gap:10px;margin:14px 0 10px;font-size:12.5px;color:var(--muted)}
+.sc-or::before,.sc-or::after{content:'';flex:1;height:1px;background:var(--rule)}
+.sc-tools{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sc-cnt{font-size:13px;margin-left:auto}
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px;max-height:38vh;overflow:auto;padding:2px}
+.sct{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:10px;border:1.5px solid var(--rule);background:var(--card);cursor:pointer;font-family:inherit;transition:var(--fast)}
+.sct b{font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--ink)}
+.sct span{font-size:10px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sct:hover:not(:disabled){border-color:#EF4444}
+.sct.bad{background:#EF4444;border-color:#EF4444}.sct.bad b,.sct.bad span{color:#fff}
+.sct.fx{background:#FEF3C7;border-color:#F59E0B}.sct.fx b{color:#B45309}
+.sct:disabled{cursor:default}
+.sc-lh{font-size:13px;font-weight:800;margin:16px 0 8px;color:#B91C1C}
+.sc-it{border:1.5px solid #FCA5A5;background:#FFF7F7;border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.sc-it.fx{border-color:#FCD34D;background:#FFFBEB}
+.sc-it-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sc-it-h b{font-size:16px}.sc-it-h span{font-size:13px;font-weight:600;color:var(--muted);flex:1}
+.sc-it-b{display:grid;grid-template-columns:180px 1fr auto;gap:8px;align-items:center}
+.sc-it-b .fi,.sc-it-b .fs{font-size:13px;padding:7px 10px}
+.sc-fx{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#047857;white-space:nowrap;cursor:pointer}
+.sc-fx input{width:16px;height:16px;accent-color:#10B981}
+.sc-x{border:none;background:var(--card-2);border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--muted);flex-shrink:0}
+.sc-x:hover{background:#FEE2E2;color:#DC2626}
+.sc-stamp{font-size:12.5px;color:var(--muted)}
+.rs-slots{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rs-slot{display:flex;gap:4px;align-items:center}.rs-slot .fi{width:120px;padding:7px 10px}
+.rs-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;font-size:13px}
+.rs-row input[type=number]{width:64px;padding:7px 8px}
+.rs-row .rs-n{flex:1;min-width:120px;padding:7px 10px}
+.rs-w{font-size:12.5px;color:#B45309;background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:8px 12px;margin-bottom:6px}
+@media(max-width:1200px){.sl-grid{grid-template-columns:repeat(3,1fr)}.ck-two{grid-template-columns:1fr}}
+@media(max-width:900px){.sl-grid{grid-template-columns:1fr 1fr}.ck-stats{grid-template-columns:1fr 1fr}.sc-it-b{grid-template-columns:1fr}.ck-hero{padding:14px}}
+@media(max-width:560px){.sl-grid{grid-template-columns:1fr}}
+/* ══ BATCH 10: channel check ═══ */
+#ck-ov,#chm-ov{z-index:1600}
+.ck-top{padding:16px 18px;margin-bottom:16px}
+.ck-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ck-date{display:flex;align-items:center;gap:8px}
+.ck-nav{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--rule);background:var(--card);font-size:20px;font-weight:700;cursor:pointer;color:var(--ink)}
+.ck-nav:hover{border-color:var(--blue);color:var(--blue)}
+.ck-dwrap{position:relative;padding:0 6px}
+.ck-dl{font-size:17px;font-weight:900;color:var(--ink);white-space:nowrap}
+.ck-dwrap input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.ck-dwrap input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.ck-acts{display:flex;gap:8px;flex-wrap:wrap}
+.ck-prog{height:8px;border-radius:8px;background:var(--card-2);overflow:hidden;display:flex;margin-top:14px}
+.ck-prog i,.ck-bar i{display:block;height:100%;transition:width .3s}
+.ck-bar{display:flex;width:100%}
+.ck-chips{display:flex;gap:6px;flex-wrap:wrap}
+.ck-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--rule);background:var(--card);font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.ck-chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.ck-chip b{font-weight:900}
+.ck-chip.on{border-color:var(--c,var(--blue));background:var(--b,var(--blue-bg))}
+.ck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.ck-grp{grid-column:1/-1;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.05em;margin:8px 2px 0}
+.ck-t{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:10px 11px 9px;border-radius:12px;border:1.5px solid var(--rule);background:var(--card);cursor:pointer;font-family:inherit;text-align:left;min-height:82px;transition:transform .1s,box-shadow .15s;box-shadow:var(--sh-xs);overflow:hidden}
+.ck-t:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(15,23,42,.1)}
+.ck-t::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#CBD5E1}
+.ck-n{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:var(--ink);line-height:1.1}
+.ck-nm{font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ck-s{margin-top:auto;font-size:10.5px;font-weight:800;color:#94A3B8}
+.ck-t.st-ok{border-color:#A7F3D0;background:#F0FDF4}.ck-t.st-ok::before{background:#10B981}.ck-t.st-ok .ck-s{color:#059669}
+.ck-t.st-warn{border-color:#FCD34D;background:#FFFBEB}.ck-t.st-warn::before{background:#F59E0B}.ck-t.st-warn .ck-s{color:#B45309}
+.ck-t.st-down{border-color:#FCA5A5;background:#FEF2F2}.ck-t.st-down::before{background:#EF4444}.ck-t.st-down .ck-s{color:#DC2626}
+.ck-t.st-down .ck-n{color:#B91C1C}
+.ck-sbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ck-sb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 6px 10px;border-radius:14px;border:2px solid var(--rule);background:var(--card);font-family:inherit;font-weight:800;font-size:13.5px;cursor:pointer;transition:var(--fast)}
+.ck-sb b{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;color:#fff}
+.ck-sb small{font-size:10px;font-weight:600;color:var(--faint)}
+.ck-sb.ok{color:#047857}.ck-sb.ok b{background:#10B981}.ck-sb.ok:hover,.ck-sb.ok.cur{border-color:#10B981;background:#ECFDF5}
+.ck-sb.warn{color:#B45309}.ck-sb.warn b{background:#F59E0B}.ck-sb.warn:hover,.ck-sb.warn.cur{border-color:#F59E0B;background:#FFFBEB}
+.ck-sb.down{color:#B91C1C}.ck-sb.down b{background:#EF4444}.ck-sb.down:hover,.ck-sb.down.cur{border-color:#EF4444;background:#FEF2F2}
+.ck-sb:disabled{opacity:.5;cursor:default}
+.chm-in{padding:6px 8px!important;font-size:13px!important}
+.chm-imp summary{cursor:pointer;font-weight:700;color:var(--blue);font-size:13.5px}
+.cap-ckg{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.cap-ck{border-radius:8px;padding:6px 7px;background:#F1F5F9;border-left:4px solid #CBD5E1;min-height:46px}
+.cap-ck b{display:block;font-family:'IBM Plex Mono',monospace;font-size:15px}
+.cap-ck span{display:block;font-size:10px;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cap-ck.st-ok{background:#ECFDF5;border-left-color:#10B981}
+.cap-ck.st-warn{background:#FFFBEB;border-left-color:#F59E0B}
+.cap-ck.st-down{background:#FEE2E2;border-left-color:#EF4444}.cap-ck.st-down b{color:#B91C1C}
+@media(max-width:900px){.ck-grid{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}.ck-t{min-height:62px;padding:7px 7px 6px}.ck-n{font-size:16px}.ck-nm{font-size:10px}.ck-s{font-size:9.5px}.ck-dl{font-size:14px}.ck-acts{width:100%}.ck-acts .btn{flex:1;justify-content:center;font-size:12px}}
 /* ══ BATCH 9 ═══ */
 .cy-ck{width:34px;text-align:center}
 .cy-ck input{width:16px;height:16px;cursor:pointer;accent-color:var(--blue)}
@@ -807,7 +990,11 @@ tr:hover td{background:var(--card-2)}
     </div>
 
     <div class="tabs">
-      <div class="tab on" data-perm="jobs.view" id="tab-jobs" onclick="showSec('jobs')">
+      <div class="tab on" data-perm="ch.view" id="tab-channels" onclick="showSec('channels')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M17 2l-5 5-5-5"/></svg>
+        เช็คช่องสัญญาณ <span class="tab-ct" id="tc-ch" style="display:none">0</span>
+      </div>
+      <div class="tab" data-perm="jobs.view" id="tab-jobs" onclick="showSec('jobs')">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         จ่ายงานช่าง <span class="tab-ct" id="tc-jobs">0</span>
       </div>
@@ -827,8 +1014,41 @@ tr:hover td{background:var(--card-2)}
 
     </div><!-- /sticky-head -->
     <div class="content">
+      <!-- CHANNEL CHECK -->
+      <div class="section on" id="section-channels">
+        <div class="ck-hero">
+          <div class="ck-row">
+            <div class="ck-date">
+              <button class="ck-nav" onclick="ckShift(-1)" title="วันก่อนหน้า">‹</button>
+              <div class="ck-dwrap"><div class="ck-dl" id="ck-dlabel">—</div><input type="date" id="ck-date" onchange="ckLoad(this.value)"></div>
+              <button class="ck-nav" onclick="ckShift(1)" title="วันถัดไป">›</button>
+              <button class="btn btn-out" id="ck-today" onclick="ckLoad(today())" style="font-size:12px;padding:6px 12px">วันนี้</button>
+            </div>
+            <div class="ck-acts">
+              <button class="btn btn-primary" onclick="ckCapture()">📷 บันทึกภาพรายงาน</button>
+              <button class="btn btn-out" data-perm="ch.manage" style="display:none" onclick="rsOpen()">🗓️ เวร / ช่วงเวลา</button>
+              <button class="btn btn-out" data-perm="ch.manage" style="display:none" onclick="ckManage()">📺 รายชื่อช่อง</button>
+            </div>
+          </div>
+          <div class="ck-duty" id="ck-duty"></div>
+          <div class="ck-stats" id="ck-stats"></div>
+        </div>
+        <div class="sl-grid" id="sl-grid"></div>
+        <div class="ck-two">
+          <div class="card" id="ck-issues-card">
+            <div class="ch"><div class="ch-left"><h2>ช่องที่ผิดปกติวันนี้</h2><span class="cnt" id="ck-issues-n"></span></div></div>
+            <div class="tw"><table><thead><tr><th>รอบ</th><th>ช่อง</th><th>อาการ</th><th>การแก้ไข</th><th>สถานะ</th><th>ผู้เช็ค</th></tr></thead><tbody id="ck-issues"></tbody></table></div>
+          </div>
+          <div class="card ck-ov-card">
+            <div class="ch"><div class="ch-left"><h2>สถานะช่องล่าสุด</h2><span class="cnt" id="ck-ovn"></span></div>
+              <div class="ck-leg"><span style="--c:#10B981">ปกติ</span><span style="--c:#F59E0B">แก้ไขแล้ว</span><span style="--c:#EF4444">ยังรับชมไม่ได้</span><span style="--c:#CBD5E1">ยังไม่เช็ค</span></div></div>
+            <div class="ck-mini" id="ck-mini"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- JOBS -->
-      <div class="section on" id="section-jobs">
+      <div class="section" id="section-jobs">
         <div class="stat-row" id="jobs-stats"></div>
         <div class="card">
           <div class="ch">
@@ -900,7 +1120,7 @@ tr:hover td{background:var(--card-2)}
               </div>
               <input type="hidden" id="logs-mf" value=""><button type="button" class="mp-btn" id="logs-mf-btn" onclick="mpOpen('logs-mf',this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="mp-lbl">ทุกเดือน</span><svg class="mp-car" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
               <select class="fs" id="logs-actor" onchange="loadLogs(true)"><option value="">ทุกคน</option></select>
-              <select class="fs" id="logs-entity" onchange="loadLogs(true)"><option value="">ทุกประเภท</option><option value="job">งานช่าง</option><option value="sale">งานขาย</option><option value="staff">พนักงาน</option><option value="role">บทบาท/สิทธิ์</option><option value="auth">การเข้าระบบ</option></select>
+              <select class="fs" id="logs-entity" onchange="loadLogs(true)"><option value="">ทุกประเภท</option><option value="job">งานช่าง</option><option value="sale">งานขาย</option><option value="staff">พนักงาน</option><option value="role">บทบาท/สิทธิ์</option><option value="check">เช็คช่องสัญญาณ</option><option value="channel">รายชื่อช่อง</option><option value="auth">การเข้าระบบ</option></select>
             </div>
           </div>
           <div class="tw"><table><thead><tr><th style="width:120px">เวลา</th><th>ผู้ใช้</th><th>การกระทำ</th><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody id="logs-tbody"></tbody></table></div>
@@ -943,6 +1163,68 @@ tr:hover td{background:var(--card-2)}
 </div>
 
 <div id="mp-pop"></div>
+
+<!-- ══ SLOT CHECK ═════════════════════════════════════════ -->
+<div class="ov" id="sc-ov" onclick="coo(event,'sc-ov')">
+  <div class="modal" style="max-width:900px;width:96vw">
+    <div class="mh"><div><div class="mt" id="sc-mt">บันทึกการเช็คช่อง</div><div class="sc-sub" id="sc-sub"></div></div><button class="cx" onclick="cm('sc-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb" style="padding-top:10px">
+      <div id="sc-quick">
+        <button class="sc-allok" id="sc-allok" onclick="ckSave(true)"><b>✓</b><span><strong>ปกติทุกช่อง</strong><small id="sc-allok-s">รับชมได้ครบทุกช่อง — กดบันทึกได้ทันที</small></span></button>
+        <div class="sc-or"><span>หรือ แตะเลือกช่องที่ <b>รับชมไม่ได้ / ผิดปกติ</b></span></div>
+      </div>
+      <div class="sc-tools">
+        <div class="sbox" style="flex:1;max-width:280px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="si" type="text" id="sc-q" placeholder="ค้นหาเลข / ชื่อช่อง..." oninput="scGrid()"></div>
+        <span class="sc-cnt" id="sc-cnt"></span>
+      </div>
+      <div class="sc-grid" id="sc-grid"></div>
+      <div id="sc-list"></div>
+      <label class="fl" style="display:block;margin:14px 0 5px">หมายเหตุ (ถ้ามี)</label>
+      <textarea class="fi fta" id="sc-note" placeholder="เช่น สัญญาณดาวเทียมอ่อนช่วงฝนตก..." style="min-height:60px"></textarea>
+    </div>
+    <div class="mf" style="display:flex;gap:8px;align-items:center;padding:14px 20px;border-top:1px solid var(--rule)">
+      <div class="sc-stamp" id="sc-stamp"></div>
+      <button class="btn btn-out" style="margin-left:auto" onclick="cm('sc-ov')">ปิด</button>
+      <button class="btn btn-primary" id="sc-save" onclick="ckSave(false)">บันทึกการเช็ค</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROSTER / SLOTS ═════════════════════════════════════ -->
+<div class="ov" id="rs-ov" onclick="coo(event,'rs-ov')">
+  <div class="modal" style="max-width:640px;width:96vw">
+    <div class="mh"><div class="mt">🗓️ ตั้งค่าเวร และช่วงเวลาเช็คช่อง</div><button class="cx" onclick="cm('rs-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb">
+      <div class="fl" style="margin-bottom:6px">ช่วงเวลาเช็ค (รอบต่อวัน)</div>
+      <div class="rs-slots" id="rs-slots"></div>
+      <div class="fl" style="margin:18px 0 6px">ผู้รับผิดชอบตามวันที่ของเดือน</div>
+      <div id="rs-roster"></div>
+      <button class="btn btn-out" style="margin-top:8px;font-size:12px" onclick="RS.roster.push({from:1,to:31,staff:['','']});rsRender()">+ เพิ่มช่วงวันที่</button>
+      <div id="rs-warn" style="margin-top:12px"></div>
+      <datalist id="rs-names"></datalist>
+    </div>
+    <div class="mf" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--rule)">
+      <button class="btn btn-out" onclick="cm('rs-ov')">ยกเลิก</button><button class="btn btn-primary" onclick="rsSave()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHANNEL LIST MANAGER ═══════════════════════════════ -->
+<div class="ov" id="chm-ov" onclick="coo(event,'chm-ov')">
+  <div class="modal" style="max-width:760px;width:96vw">
+    <div class="mh"><div class="mt">⚙️ จัดการรายชื่อช่อง</div><button class="cx" onclick="cm('chm-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb">
+      <details class="chm-imp"><summary>📋 วางรายชื่อช่องทีเดียว (จาก Excel)</summary>
+        <div style="font-size:12.5px;color:var(--muted);margin:8px 0">หนึ่งบรรทัดต่อหนึ่งช่อง: <code>เลขช่อง, ชื่อช่อง, กลุ่ม</code> (กลุ่มไม่บังคับ) · เลขที่มีอยู่แล้วจะถูกแก้ชื่อ เลขใหม่จะถูกเพิ่ม</div>
+        <textarea class="fi fta" id="chm-paste" placeholder="1, Thai PBS, ฟรีทีวี&#10;2, ช่อง 3 HD, ฟรีทีวี&#10;3, ช่อง 5, ฟรีทีวี" style="min-height:110px;font-family:'IBM Plex Mono',monospace;font-size:12.5px"></textarea>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="ckImport()">นำเข้า</button>
+      </details>
+      <div class="tw" style="max-height:52vh;overflow:auto;margin-top:12px"><table><thead><tr><th style="width:80px">เลข</th><th>ชื่อช่อง</th><th style="width:150px">กลุ่ม</th><th style="width:70px">ใช้งาน</th><th style="width:50px"></th></tr></thead><tbody id="chm-body"></tbody></table></div>
+      <button class="btn btn-out" style="margin-top:10px" onclick="ckAddCh()">+ เพิ่มช่อง</button>
+    </div>
+    <div class="mf" style="display:flex;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--rule)"><button class="btn btn-primary" onclick="cm('chm-ov')">เสร็จ</button></div>
+  </div>
+</div>
 
 <!-- ══ ROLES & PERMISSIONS ════════════════════════════════ -->
 <div class="ov" id="role-ov" onclick="coo(event,'role-ov')">
@@ -1483,6 +1765,235 @@ function dueCell(j,od){const d=jobDue(j);if(!d)return'<span style="color:var(--f
   if(j.status!=='done'&&d===today())return`<div style="font-weight:700;color:var(--amber)">${fDate(d)}</div><div class="due-tag soon">ครบวันนี้</div>`;
   return fDate(d);}
 
+// ━━━━ CHANNEL CHECK (ห้องส่ง) — 5 รอบ/วัน ตามเวร ━━━━━━━━━━━
+const CK={date:'',checks:[],cfg:{slots:['08:30','12:00','14:00','16:00','18:00'],roster:[]},cfgOk:false,sel:null,iss:{},ro:false};
+const ckActive=()=>(DB.channels||[]).filter(c=>c.active).sort((a,b)=>a.num-b.num||String(a.name).localeCompare(b.name));
+const ckName=c=>c.name&&c.name!==`ช่อง ${c.num}`?c.name:'';
+const CK_PROB=['ไม่มีสัญญาณ','ภาพค้าง / กระตุก','ภาพแตก / เป็นบล็อก','จอดำ','ไม่มีเสียง','เสียงไม่ตรงภาพ','ช่องผิด / ผังผิด','อื่นๆ'];
+const TH_DAY=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+function ckThDate(d){const[y,m,dd]=d.split('-').map(Number);const dt=new Date(y,m-1,dd);return`วัน${TH_DAY[dt.getDay()]}ที่ ${dd} ${TH_M[m-1]} ${y+543}`;}
+function ckRange(d){const day=+d.slice(8,10);return CK.cfg.roster.find(r=>day>=r.from&&day<=r.to)||{from:0,to:0,staff:[]};}
+const ckDuty=d=>ckRange(d).staff||[];
+const ckMin=t=>{const[h,m]=String(t).split(':').map(Number);return h*60+m;};
+const ckNowMin=()=>{const n=new Date();return n.getHours()*60+n.getMinutes();};
+const ckOpenAt=slot=>{const m=ckMin(slot)-15;return`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;};
+// สถานะของคนที่ยังไม่เช็ค ตามเวลา (ไม่ขึ้นกับว่าอีกคนเช็คแล้วหรือยัง)
+function ckPState(slot){const t=today();if(CK.date<t)return['ไม่ได้เช็ค','#B91C1C'];if(CK.date>t)return['ยังไม่ถึงเวลา','#94A3B8'];
+  const n=ckNowMin(),m=ckMin(slot);if(n<m-15)return['ยังไม่ถึงเวลา','#94A3B8'];if(n<=m+60)return['ยังไม่เช็ค','#B45309'];return['ไม่ได้เช็ค','#B91C1C'];}
+const ckOf=(slot,staff)=>CK.checks.find(k=>k.slot===slot&&k.staff===staff);
+function ckState(slot){
+  if(CK.checks.some(k=>k.slot===slot))return'done';
+  const t=today();if(CK.date>t)return'wait';if(CK.date<t)return'miss';
+  const n=ckNowMin(),s=ckMin(slot);if(n<s-15)return'wait';if(n<=s+60)return'due';return'late';
+}
+const CK_STATE={done:['เช็คแล้ว','#047857'],due:['ถึงเวลาเช็ค','#B45309'],wait:['รอเวลา','#64748B'],late:['เลยเวลา ยังไม่เช็ค','#B91C1C'],miss:['ไม่ได้เช็ค','#B91C1C']};
+function ckPunct(slot,at){const m=ckMin((at||'').slice(11,16))-ckMin(slot);if(m<-15)return[`ก่อนเวลา ${-m} นาที`,'early'];if(m<=15)return['ตรงเวลา','ok'];return[`ช้า ${m} นาที`,'late'];}
+function ckCanPress(name,slot){return can('ch.check')&&(can('ch.manage')||(name===currentUser?.name&&CK.date===today()&&(!slot||ckState(slot)!=='wait')));}
+async function ckLoad(d){
+  if(!d)return;CK.date=d;
+  document.getElementById('ck-date').value=d;
+  document.getElementById('ck-dlabel').textContent=ckThDate(d)+(d===today()?' · วันนี้':'');
+  document.getElementById('ck-today').style.display=d===today()?'none':'';
+  try{
+    const[c,k]=await Promise.all([CK.cfgOk?null:GET('/api/chk-config'),GET('/api/slot-checks?date='+d)]);
+    if(c){CK.cfg=c;CK.cfgOk=true;}
+    if(CK.date!==d)return;CK.checks=k.checks||[];
+  }catch(e){CK.checks=[];}
+  ckRender();
+}
+function ckShift(n){const[y,m,d]=CK.date.split('-').map(Number);const dt=new Date(y,m-1,d+n);ckLoad(`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`);}
+// สถานะล่าสุดของแต่ละช่องในวันนั้น
+function ckChState(){
+  const done=[...new Set(CK.checks.map(k=>k.slot))].sort();const last=done[done.length-1];const st={};
+  CK.checks.forEach(k=>k.issues.forEach(i=>{st[i.ch]=st[i.ch]==='down'?'down':'fixed';}));
+  if(last)CK.checks.filter(k=>k.slot===last).forEach(k=>k.issues.forEach(i=>{if(!i.fixed)st[i.ch]='down';}));
+  // ช่องที่เสียในรอบก่อน แต่รอบล่าสุดไม่ได้แจ้งซ้ำ ถือว่ากลับมาปกติแล้ว
+  Object.keys(st).forEach(id=>{if(st[id]==='down'&&last&&!CK.checks.some(k=>k.slot===last&&k.issues.some(i=>i.ch===id&&!i.fixed)))st[id]='fixed';});
+  return{st,any:!!done.length};
+}
+function ckIssues(){return CK.checks.flatMap(k=>k.issues.map(i=>({...i,slot:k.slot,staff:k.staff,at:k.checked_at}))).sort((a,b)=>a.slot.localeCompare(b.slot)||a.num-b.num);}
+function ckRender(){
+  if(!CK.date)return;
+  const d=CK.date,duty=ckDuty(d),rg=ckRange(d),slots=CK.cfg.slots;
+  document.getElementById('ck-duty').innerHTML=`<span class="ck-duty-l">เวรประจำวัน${rg.from?` <small>(วันที่ ${rg.from}–${rg.to})</small>`:''}</span>${duty.length?duty.map(n=>`<span class="asg" style="--ac:${avCol(n)}"><i>${n.charAt(0)}</i>${n}</span>`).join(''):'<span style="color:var(--faint)">ยังไม่ได้ตั้งเวร</span>'}`+
+    (duty.includes(currentUser?.name)&&d===today()?'<span class="ck-me">✋ วันนี้คุณเข้าเวร</span>':'');
+  const doneN=slots.filter(s=>ckState(s)==='done').length,iss=ckIssues();
+  const chs=new Set(iss.map(i=>i.ch)),{st,any}=ckChState(),down=Object.values(st).filter(x=>x==='down').length,fixed=Object.values(st).filter(x=>x==='fixed').length;
+  const pct=slots.length?doneN/slots.length*100:0;
+  document.getElementById('ck-stats').innerHTML=`
+    <div class="ck-st ck-st-p"><div class="ck-ring" style="--p:${pct}"><b>${doneN}/${slots.length}</b></div><span>รอบที่เช็คแล้ว</span></div>
+    <div class="ck-st" style="--c:#DC2626"><b>${chs.size}</b><span>ช่องที่พบปัญหา</span></div>
+    <div class="ck-st" style="--c:#D97706"><b>${fixed}</b><span>แก้ไขแล้ว</span></div>
+    <div class="ck-st" style="--c:#B91C1C"><b>${down}</b><span>ยังรับชมไม่ได้</span></div>`;
+  const nowS=d===today()?slots.find(s=>['due','late'].includes(ckState(s))):null;
+  document.getElementById('sl-grid').innerHTML=slots.map(slot=>{
+    const state=ckState(slot),lab=CK_STATE[state];
+    const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)).map(k=>k.staff)];
+    const ks=CK.checks.filter(k=>k.slot===slot);const sIss=[...new Map(ks.flatMap(k=>k.issues).map(i=>[i.ch,i])).values()];
+    return`<div class="sl-card st-${state}${slot===nowS?' now':''}">
+      <div class="sl-top"><div class="sl-time">${slot}<small>น.</small></div><span class="sl-pill" style="--c:${lab[1]}">${state==='due'?'<i class="sl-dot"></i>':''}${lab[0]}</span></div>
+      <div class="sl-staff">${names.length?names.map(n=>{const k=ckOf(slot,n);const cp=ckCanPress(n,slot);
+        if(k){const p=ckPunct(slot,k.checked_at);return`<button class="sl-btn done" onclick="ckOpen('${slot}','${n.replace(/'/g,"\\'")}')"><i style="background:${avCol(n)}">${n.charAt(0)}</i><span><b>${n}</b><small>✓ ${k.checked_at.slice(11,16)} น. · <em class="pu-${p[1]}">${p[0]}</em></small></span></button>`;}
+        if(cp)return`<button class="sl-btn go" onclick="ckOpen('${slot}','${n.replace(/'/g,"\\'")}')"><i style="background:${avCol(n)}">${n.charAt(0)}</i><span><b>${n}</b><small>แตะเพื่อบันทึกการเช็ค</small></span><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>`;
+        return`<div class="sl-btn off"><i>${n.charAt(0)}</i><span><b>${n}</b><small>${state==='wait'&&n===currentUser?.name&&d===today()?`เปิดให้เช็คเวลา ${ckOpenAt(slot)} น.`:ckPState(slot)[0]}</small></span></div>`;}).join(''):'<div class="sl-none">ยังไม่ได้ตั้งเวร</div>'}</div>
+      <div class="sl-res">${ks.length?(sIss.length?`<div class="sl-bad">⚠ ผิดปกติ ${sIss.length} ช่อง</div><div class="sl-chs">${sIss.slice(0,12).map(i=>`<span class="${i.fixed?'fx':''}" title="${(i.problem||'').replace(/"/g,'&quot;')}">${i.num}</span>`).join('')}${sIss.length>12?`<span>+${sIss.length-12}</span>`:''}</div>`:'<div class="sl-good">✓ ปกติทุกช่อง</div>'):'<div class="sl-wait">—</div>'}</div>
+    </div>`;}).join('');
+  document.getElementById('ck-issues-n').textContent=`${iss.length} รายการ`;
+  document.getElementById('ck-issues').innerHTML=iss.length?iss.map(i=>`<tr class="${i.fixed?'':'od-row'}"><td class="tmono">${i.slot}</td><td><b class="tmono">${i.num}</b> ${i.name&&i.name!==`ช่อง ${i.num}`?i.name:''}</td><td>${i.problem||'—'}</td><td style="font-size:12.5px;max-width:260px">${(i.fix||'—').replace(/</g,'&lt;')}</td><td>${i.fixed?'<span class="lg-act" style="color:#047857;background:#D1FAE5">แก้ไขแล้ว</span>':'<span class="lg-act" style="color:#B91C1C;background:#FEE2E2">ยังไม่หาย</span>'}</td><td>${asgChips([i.staff])}</td></tr>`).join(''):`<tr class="empty"><td colspan="6"><div class="ei">✓</div>${CK.checks.length?'ไม่พบช่องผิดปกติ':'ยังไม่มีการเช็คในวันนี้'}</td></tr>`;
+  const all=ckActive();
+  document.getElementById('ck-ovn').textContent=`${all.length} ช่อง`;
+  document.getElementById('ck-mini').innerHTML=all.map(c=>{const x=st[c.id]||(any?'ok':'none');return`<span class="ckm ${x}" title="ช่อง ${c.num} ${ckName(c)}">${c.num}</span>`;}).join('');
+  if(d===today()){const tc=document.getElementById('tc-ch');if(tc){const n=slots.filter(s=>['due','late'].includes(ckState(s))).length+down;tc.textContent=down?down:n;tc.style.display=(down||n)?'':'none';tc.style.background=down?'#FEE2E2':'#FEF3C7';tc.style.color=down?'#DC2626':'#B45309';}}
+  updAdminUI();
+}
+setInterval(()=>{if(CK.date===today()&&document.getElementById('section-channels')?.classList.contains('on')&&!document.getElementById('sc-ov').classList.contains('open'))ckRender();},60000);
+// ── check popup ──
+function ckOpen(slot,name){
+  const k=ckOf(slot,name),cp=ckCanPress(name,slot);
+  if(!k&&!cp)return;
+  CK.sel={slot,name};CK.ro=!cp;
+  CK.iss=Object.fromEntries((k?.issues||[]).map(i=>[i.ch,{problem:i.problem,fix:i.fix,fixed:i.fixed}]));
+  document.getElementById('sc-mt').textContent=`${CK.ro?'ผลการเช็ค':'บันทึกการเช็คช่อง'} · รอบ ${slot} น.`;
+  document.getElementById('sc-sub').innerHTML=`${asgChips([name])} <span>${ckThDate(CK.date)}</span>`;
+  document.getElementById('sc-note').value=k?.note||'';document.getElementById('sc-note').disabled=CK.ro;
+  document.getElementById('sc-q').value='';
+  document.getElementById('sc-quick').style.display=CK.ro?'none':'';
+  document.getElementById('sc-save').style.display=CK.ro?'none':'';
+  const n=new Date(),hm=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('sc-stamp').innerHTML=k?`🕒 เช็คเมื่อ <b>${k.checked_at.slice(11,16)} น.</b> (${ckPunct(slot,k.checked_at)[0]})${k.updated_at&&k.updated_at!==k.checked_at?` · แก้ไขล่าสุด ${k.updated_at.slice(11,16)} น.`:''}${k.created_by&&k.created_by!==k.staff?` · บันทึกโดย ${k.created_by}`:''}`:`🕒 เวลาจะถูกบันทึกเมื่อกดบันทึก (ตอนนี้ ${hm} น.)`;
+  scGrid();document.getElementById('sc-ov').classList.add('open');
+}
+function scGrid(){
+  const q=(document.getElementById('sc-q').value||'').trim().toLowerCase();
+  const list=ckActive().filter(c=>!q||String(c.num).includes(q)||String(c.name||'').toLowerCase().includes(q));
+  const n=Object.keys(CK.iss).length;
+  document.getElementById('sc-cnt').innerHTML=n?`<b style="color:#DC2626">ผิดปกติ ${n} ช่อง</b>`:`<span style="color:var(--muted)">ทั้งหมด ${ckActive().length} ช่อง</span>`;
+  document.getElementById('sc-allok-s').textContent=n?`จะล้างช่องที่เลือก ${n} ช่อง แล้วบันทึกว่าปกติทั้งหมด`:`รับชมได้ครบ ${ckActive().length} ช่อง — กดบันทึกได้ทันที`;
+  document.getElementById('sc-grid').innerHTML=list.map(c=>{const x=CK.iss[c.id];return`<button class="sct${x?(x.fixed?' fx':' bad'):''}" ${CK.ro?'disabled':''} onclick="scToggle('${c.id}')" title="${(c.name||'').replace(/"/g,'&quot;')}"><b>${c.num}</b><span>${ckName(c)||'&nbsp;'}</span></button>`;}).join('')||'<div style="grid-column:1/-1;color:var(--muted);padding:14px;text-align:center">ไม่พบช่อง</div>';
+  const sel=ckActive().filter(c=>CK.iss[c.id]);
+  document.getElementById('sc-list').innerHTML=sel.length?`<div class="sc-lh">ระบุอาการและการแก้ไข (${sel.length} ช่อง)</div>`+sel.map(c=>{const x=CK.iss[c.id];return`<div class="sc-it${x.fixed?' fx':''}">
+    <div class="sc-it-h"><b class="tmono">${c.num}</b><span>${ckName(c)}</span>${CK.ro?'':`<button class="sc-x" onclick="scToggle('${c.id}')" title="เอาออก">✕</button>`}</div>
+    <div class="sc-it-b">
+      <select class="fs" ${CK.ro?'disabled':''} onchange="CK.iss['${c.id}'].problem=this.value"><option value="">— อาการ —</option>${CK_PROB.map(p=>`<option${p===x.problem?' selected':''}>${p}</option>`).join('')}</select>
+      <input class="fi" ${CK.ro?'disabled':''} placeholder="การแก้ไข เช่น รีสตาร์ทเครื่องรับ, แจ้งต้นทาง..." value="${(x.fix||'').replace(/"/g,'&quot;')}" oninput="CK.iss['${c.id}'].fix=this.value">
+      <label class="sc-fx"><input type="checkbox" ${x.fixed?'checked':''} ${CK.ro?'disabled':''} onchange="CK.iss['${c.id}'].fixed=this.checked;this.closest('.sc-it').classList.toggle('fx',this.checked);scGridOnly()"> แก้ไขแล้ว รับชมได้</label>
+    </div></div>`;}).join(''):'';
+}
+function scGridOnly(){const keep=document.getElementById('sc-list').innerHTML;scGrid();}
+function scToggle(id){if(CK.ro)return;if(CK.iss[id])delete CK.iss[id];else CK.iss[id]={problem:'',fix:'',fixed:false};scGrid();}
+async function ckSave(allOk){
+  if(CK.ro||!CK.sel)return;
+  const n=Object.keys(CK.iss).length;
+  if(allOk&&n&&!confirm(`ล้างช่องที่เลือกไว้ ${n} ช่อง แล้วบันทึกว่า "ปกติทุกช่อง"?`))return;
+  const issues=allOk?[]:ckActive().filter(c=>CK.iss[c.id]).map(c=>({ch:c.id,num:c.num,name:c.name,...CK.iss[c.id]}));
+  const miss=issues.filter(i=>!i.problem||!String(i.fix||'').trim());
+  if(miss.length){toast(`กรุณาระบุอาการและการแก้ไขให้ครบ (ช่อง ${miss.map(i=>i.num).join(', ')})`,'e');return;}
+  const btn=document.getElementById('sc-save');btn.disabled=true;document.getElementById('sc-allok').disabled=true;
+  try{
+    const r=await PUT(`/api/slot-checks/${CK.date}/${encodeURIComponent(CK.sel.slot)}`,{staff:CK.sel.name,issues,note:document.getElementById('sc-note').value.trim()});
+    CK.checks=CK.checks.filter(k=>!(k.slot===CK.sel.slot&&k.staff===CK.sel.name));CK.checks.push(r.check);
+    cm('sc-ov');ckRender();
+    toast(issues.length?`บันทึกแล้ว — ผิดปกติ ${issues.length} ช่อง`:`บันทึกแล้ว — รอบ ${CK.sel.slot} ปกติทุกช่อง`);
+  }catch(e){toast('บันทึกไม่สำเร็จ: '+e.message,'e');}
+  finally{btn.disabled=false;document.getElementById('sc-allok').disabled=false;}
+}
+// ── roster / slots settings ──
+let RS={slots:[],roster:[]};
+function rsOpen(){RS={slots:[...CK.cfg.slots],roster:CK.cfg.roster.map(r=>({...r,staff:[...r.staff]}))};rsRender();document.getElementById('rs-ov').classList.add('open');}
+function rsRender(){
+  document.getElementById('rs-names').innerHTML=DB.staff.map(x=>`<option value="${x.name}">`).join('');
+  document.getElementById('rs-slots').innerHTML=RS.slots.map((t,i)=>`<div class="rs-slot"><input type="time" class="fi" value="${t}" onchange="RS.slots[${i}]=this.value"><button class="sc-x" onclick="RS.slots.splice(${i},1);rsRender()">✕</button></div>`).join('')+`<button class="btn btn-out" style="font-size:12px" onclick="RS.slots.push('20:00');rsRender()">+ เพิ่มรอบ</button>`;
+  document.getElementById('rs-roster').innerHTML=RS.roster.map((r,i)=>`<div class="rs-row">
+    <span>วันที่</span><input type="number" min="1" max="31" class="fi" value="${r.from}" onchange="RS.roster[${i}].from=+this.value"><span>ถึง</span><input type="number" min="1" max="31" class="fi" value="${r.to}" onchange="RS.roster[${i}].to=+this.value">
+    ${[0,1].map(j=>`<input class="fi rs-n" list="rs-names" placeholder="ผู้รับผิดชอบ ${j+1}" value="${(r.staff[j]||'').replace(/"/g,'&quot;')}" onchange="RS.roster[${i}].staff[${j}]=this.value.trim();rsWarn()">`).join('')}
+    <button class="sc-x" onclick="RS.roster.splice(${i},1);rsRender()">✕</button></div>`).join('');
+  rsWarn();
+}
+function rsWarn(){const names=new Set(DB.staff.map(x=>x.name));const bad=[...new Set(RS.roster.flatMap(r=>r.staff).filter(n=>n&&!names.has(n)))];
+  const days=new Set();RS.roster.forEach(r=>{for(let d=r.from;d<=r.to;d++)days.add(d);});const gap=[];for(let d=1;d<=31;d++)if(!days.has(d))gap.push(d);
+  document.getElementById('rs-warn').innerHTML=(bad.length?`<div class="rs-w">⚠ ยังไม่มีบัญชีพนักงานชื่อ: <b>${bad.join(', ')}</b> — ต้องเพิ่มในจัดการพนักงานก่อน จึงจะเข้าระบบมากดเช็คได้</div>`:'')+(gap.length?`<div class="rs-w">⚠ วันที่ยังไม่มีเวร: ${gap.join(', ')}</div>`:'');}
+async function rsSave(){
+  try{const r=await PUT('/api/chk-config',{slots:RS.slots,roster:RS.roster.map(x=>({...x,staff:x.staff.filter(Boolean)}))});CK.cfg=r;cm('rs-ov');ckRender();toast('บันทึกเวรและช่วงเวลาแล้ว');}
+  catch(e){toast(e.message,'e');}
+}
+// manage list
+function ckManage(){ckMgRender();document.getElementById('chm-ov').classList.add('open');}
+function ckMgRender(){
+  const list=[...(DB.channels||[])].sort((a,b)=>a.num-b.num);
+  document.getElementById('chm-body').innerHTML=list.map(c=>`<tr>
+    <td><input class="fi chm-in" type="number" value="${c.num}" onchange="ckUpd('${c.id}',{num:+this.value})"></td>
+    <td><input class="fi chm-in" value="${String(c.name||'').replace(/"/g,'&quot;')}" onchange="ckUpd('${c.id}',{name:this.value})"></td>
+    <td><input class="fi chm-in" value="${String(c.grp||'').replace(/"/g,'&quot;')}" placeholder="—" onchange="ckUpd('${c.id}',{grp:this.value})"></td>
+    <td style="text-align:center"><input type="checkbox" ${c.active?'checked':''} onchange="ckUpd('${c.id}',{active:this.checked})" style="width:17px;height:17px;accent-color:var(--blue)"></td>
+    <td><button class="btn-del" onclick="ckDelCh('${c.id}')">ลบ</button></td></tr>`).join('');
+}
+async function ckUpd(id,patch){try{const r=await PUT('/api/channels/'+id,patch);const c=DB.channels.find(x=>x.id===id);Object.assign(c,r.channel);ckRender();toast('บันทึกแล้ว','s');}catch(e){toast(e.message,'e');ckMgRender();}}
+async function ckAddCh(){const n=Math.max(0,...(DB.channels||[]).map(c=>c.num))+1;try{const r=await POST('/api/channels',{num:n,name:`ช่อง ${n}`});DB.channels.push(r.channel);ckMgRender();ckRender();const b=document.getElementById('chm-body');b.lastElementChild?.querySelectorAll('input')[1]?.select();}catch(e){toast(e.message,'e');}}
+async function ckDelCh(id){const c=DB.channels.find(x=>x.id===id);if(!c||!confirm(`ลบช่อง ${c.num} ${ckName(c)}?\nผลเช็คย้อนหลังของช่องนี้จะไม่แสดงอีก`))return;try{await DEL('/api/channels/'+id);DB.channels=DB.channels.filter(x=>x.id!==id);ckMgRender();ckRender();}catch(e){toast(e.message,'e');}}
+async function ckImport(){
+  const rows=parseCSV(document.getElementById('chm-paste').value.replace(/\t/g,',')).map(r=>({num:parseInt(r[0],10),name:r[1]||'',grp:r[2]||''})).filter(r=>r.num>0);
+  if(!rows.length){toast('ไม่พบข้อมูล — ใช้รูปแบบ เลข, ชื่อ, กลุ่ม','e');return;}
+  try{const r=await POST('/api/channels/import',{rows});const d=await GET('/api/channels');DB.channels=d.channels||[];ckMgRender();ckRender();document.getElementById('chm-paste').value='';toast(`นำเข้าแล้ว — แก้ ${r.updated} · เพิ่ม ${r.added} ช่อง`);}
+  catch(e){toast(e.message,'e');}
+}
+// ── Signal monitor (รายงานภาพ) ──
+const SIG={ok:[4,'#22C55E','ปกติ'],fixed:[3,'#F59E0B','แก้ไขแล้ว'],down:[1,'#EF4444','ยังรับชมไม่ได้'],none:[0,'#475569','ยังไม่เช็ค']};
+function sigBars(x,big,ovr){const[lv,c]=ovr||SIG[x];return`<span class="sgb${big?' big':''}">${[1,2,3,4].map(i=>`<i style="height:${(big?6:3)+i*(big?5:3)}px;background:${i<=lv?c:'rgba(148,163,184,.22)'}${i<=lv&&x!=='none'?`;box-shadow:0 0 6px ${c}`:''}"></i>`).join('')}</span>`;}
+function sigMonitor(st,any){
+  const all=ckActive(),cnt={ok:0,fixed:0,down:0,none:0};
+  const xs=all.map(c=>{const x=st[c.id]||(any?'ok':'none');cnt[x]++;return[c,x];});
+  const pct=all.length?Math.round((cnt.ok+cnt.fixed)/all.length*100):0;
+  const lvl=!any?'none':cnt.down?'down':cnt.fixed?'fixed':'ok';
+  const mc=!any?'#475569':pct>=100?'#22C55E':pct>=95?'#F59E0B':'#EF4444',mv=!any?0:pct>=100?4:pct>=95?3:pct>=80?2:1;
+  const bad=xs.filter(([c,x])=>x==='down'||x==='fixed');
+  return`<div class="sgm">
+    <div class="sgm-hd">
+      <div class="sgm-ic"><span></span><span></span><span></span><b></b></div>
+      <div style="flex:1"><div class="sgm-t">สถานะสัญญาณล่าสุด</div><div class="sgm-st">SIGNAL MONITOR · ${all.length} CHANNELS</div></div>
+      <div class="sgm-meter">${sigBars(lvl,true,[mv,mc])}<div><b style="color:${mc}">${any?pct+'%':'—'}</b><span>รับชมได้</span></div></div>
+    </div>
+    <div class="sgm-leg">${['ok','fixed','down','none'].map(k=>`<span><i style="background:${SIG[k][1]}"></i>${SIG[k][2]} <b>${cnt[k]}</b></span>`).join('')}</div>
+    <div class="sgm-grid">${xs.map(([c,x])=>`<div class="sgt s-${x}"><b>${String(c.num).padStart(2,'0')}</b>${sigBars(x)}</div>`).join('')}</div>
+    ${bad.length?`<div class="sgm-bad">${bad.map(([c,x])=>`<span class="s-${x}">${sigBars(x)} <b>${c.num}</b> ${ckName(c)||''} · ${x==='down'?'NO SIGNAL':'กลับมาปกติ'}</span>`).join('')}</div>`:''}
+  </div>`;
+}
+// report image
+async function ckCapture(){
+  if(!CK.date){toast('ยังไม่มีข้อมูล','w');return;}
+  toast('กำลังสร้างภาพรายงาน...','i');
+  try{if(!window.html2canvas)await loadScript(['https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js','https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js']);}catch(e){toast(e.message,'e');return;}
+  const d=CK.date,duty=ckDuty(d),slots=CK.cfg.slots,iss=ckIssues(),{st,any}=ckChState();
+  const doneN=slots.filter(s=>ckState(s)==='done').length,chs=new Set(iss.map(i=>i.ch));
+  const down=Object.values(st).filter(x=>x==='down').length,fixed=Object.values(st).filter(x=>x==='fixed').length;
+  const logo=document.querySelector('.lp-logo-img')?.src||'';const n=new Date();
+  const rows=slots.map(slot=>{const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)).map(k=>k.staff)];const state=ckState(slot);
+    return names.map((nm,i)=>{const k=ckOf(slot,nm);const p=k?ckPunct(slot,k.checked_at):null;const ni=k?k.issues.length:0;
+      return`<tr class="${!k&&['miss','late'].includes(state)?'od':''}">${i===0?`<td rowspan="${names.length}" class="m" style="font-size:16px;font-weight:800;vertical-align:middle">${slot}</td>`:''}<td><b>${nm}</b></td><td>${k?`<b>${k.checked_at.slice(11,16)} น.</b>`:'—'}</td><td>${p?`<span class="st" style="color:${p[1]==='late'?'#B91C1C':p[1]==='early'?'#1D4ED8':'#047857'};background:${p[1]==='late'?'#FEE2E2':p[1]==='early'?'#DBEAFE':'#D1FAE5'}">${p[0]}</span>`:`${(()=>{const ps=ckPState(slot);return`<span style="color:${ps[1]};font-weight:700">${ps[0]}</span>`;})()}`}</td><td>${k?(ni?`<b style="color:#B91C1C">ผิดปกติ ${ni} ช่อง</b>: ${k.issues.map(x=>x.num).join(', ')}`:'<b style="color:#047857">✓ ปกติทุกช่อง</b>'):'—'}${k?.note?`<div class="ph">📝 ${k.note}</div>`:''}</td></tr>`;}).join('')||`<tr><td class="m">${slot}</td><td colspan="4">ยังไม่ได้ตั้งเวร</td></tr>`;}).join('');
+  const box=document.createElement('div');box.className='cap-rpt';
+  box.innerHTML=`<div class="cap-hd">${logo?`<img src="${logo}" class="cap-logo">`:''}<div style="flex:1"><div class="cap-t">รายงานการเช็คช่องสัญญาณ ห้องส่ง</div>
+      <div class="cap-s">${ckThDate(d)} · เวร: ${duty.join(', ')||'—'} · บันทึกภาพเวลา ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')} น.</div></div></div>
+    <div class="cap-sum">
+      <div><b>${doneN}/${slots.length}</b><span>รอบที่เช็คแล้ว</span></div>
+      <div style="--c:#DC2626"><b>${chs.size}</b><span>ช่องที่พบปัญหา</span></div>
+      <div style="--c:#D97706"><b>${fixed}</b><span>แก้ไขแล้ว</span></div>
+      <div style="--c:#B91C1C"><b>${down}</b><span>ยังรับชมไม่ได้</span></div>
+    </div>
+    <table><thead><tr><th style="width:90px">รอบ</th><th>ผู้รับผิดชอบ</th><th>เวลาที่เช็ค</th><th>ความตรงเวลา</th><th>ผลการเช็ค</th></tr></thead><tbody>${rows}</tbody></table>
+    ${iss.length?`<div style="font-size:17px;font-weight:900;margin:22px 0 8px">รายละเอียดช่องที่ผิดปกติ (${iss.length})</div>
+    <table><thead><tr><th>รอบ</th><th>ช่อง</th><th>อาการ</th><th>การแก้ไข</th><th>สถานะ</th><th>ผู้เช็ค</th></tr></thead><tbody>
+    ${iss.map(i=>`<tr class="${i.fixed?'dn':'od'}"><td class="m">${i.slot}</td><td><b>${i.num}</b> ${i.name&&i.name!==`ช่อง ${i.num}`?i.name:''}</td><td>${i.problem||'—'}</td><td class="dt">${i.fix||'—'}</td><td><span class="st" style="color:${i.fixed?'#047857':'#B91C1C'};background:${i.fixed?'#D1FAE5':'#FEE2E2'}">${i.fixed?'แก้ไขแล้ว':'ยังไม่หาย'}</span></td><td>${i.staff}</td></tr>`).join('')}
+    </tbody></table>`:`<div style="margin-top:18px;padding:14px;border-radius:12px;background:#ECFDF5;color:#047857;font-weight:800;text-align:center">${CK.checks.length?'✓ ไม่พบช่องผิดปกติในวันนี้':'ยังไม่มีการเช็คในวันนี้'}</div>`}
+    ${sigMonitor(st,any)}
+    <div class="cap-ft">Angthong Cable TV · ACTV Dispatch</div>`;
+  document.body.appendChild(box);
+  try{await document.fonts?.ready;const cv=await html2canvas(box,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+    const fn=`เช็คช่อง_${d}.png`;const blob=await new Promise(r=>cv.toBlob(r,'image/png'));const file=new File([blob],fn,{type:'image/png'});
+    if(navigator.canShare?.({files:[file]})&&/Mobi|Android|iPhone/i.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'รายงานเช็คช่อง'});}catch(e){}}
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
+    toast('บันทึกภาพรายงานแล้ว');}
+  catch(e){toast('สร้างภาพไม่สำเร็จ: '+e.message,'e');}finally{box.remove();}
+}
+
 // ━━━━ ASSIGNEE CHIP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const AV_COL=['#2563EB','#D97706','#059669','#7C3AED','#DB2777','#0891B2','#DC2626','#4F46E5'];
 function avCol(n){let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))>>>0;return AV_COL[h%AV_COL.length];}
@@ -1500,7 +2011,8 @@ async function enterApp(){
   startClock();
   try{
     const safe=p=>GET(p).catch(e=>{if(e.status===403)return{};throw e;});
-    const[jr,sr,str,rr]=await Promise.all([safe('/api/jobs'),safe('/api/sales'),GET('/api/staff'),safe('/api/roles')]);
+    const[jr,sr,str,rr,chr]=await Promise.all([safe('/api/jobs'),safe('/api/sales'),GET('/api/staff'),safe('/api/roles'),safe('/api/channels')]);
+    DB.channels=chr.channels||[];
     DB.jobs=jr.jobs||[];DB.sales=sr.sales||[];DB.staff=str.staff||[];if(rr.roles)DB.roles=rr.roles;normAll();
     populateSels();renderJobs();renderSales();updBadges();['jobs-mf','sales-mf','comm-mf','logs-mf'].forEach(mpSync);updAdminUI();showFirstSec();
   }catch(e){if(e.status!==401)toast('ไม่สามารถเชื่อมต่อ API — '+e.message,'e');}
@@ -1521,11 +2033,11 @@ function updAdminUI(){
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=on?'':'none');
   document.querySelectorAll('[data-perm]').forEach(el=>el.style.display=el.dataset.perm.split('|').some(can)?'':'none');
 }
-const SEC_PERM={jobs:'jobs.view',sales:'sales.view',commission:'comm.view|comm.all',logs:'@admin'};
+const SEC_PERM={channels:'ch.view',jobs:'jobs.view',sales:'sales.view',commission:'comm.view|comm.all',logs:'@admin'};
 function secAllowed(n){const p=SEC_PERM[n];if(p==='@admin')return currentUser?.role==='admin';return p.split('|').some(can);}
 function showFirstSec(){const cur=document.querySelector('.section.on')?.id.replace('section-','');
   if(cur&&secAllowed(cur)){showSec(cur);return;}
-  const f=['jobs','sales','commission','logs'].find(secAllowed);
+  const f=['channels','jobs','sales','commission','logs'].find(secAllowed);
   if(f)showSec(f);else{document.querySelectorAll('.section').forEach(x=>x.classList.remove('on'));document.getElementById('topbar-title').textContent='ไม่มีสิทธิ์เข้าถึงข้อมูล';}}
 function onUserClick(){
   if(!currentUser)return;
@@ -1690,6 +2202,7 @@ const PERM_GROUPS=[
   {g:'jobs',t:'งานช่าง',items:[['jobs.view','ดูรายการงาน'],['jobs.create','เพิ่ม / นำเข้างาน'],['jobs.edit','แก้ไขงาน'],['jobs.delete','ลบงาน'],['jobs.upload','แนบใบเสร็จ / ใบงาน'],['jobs.verify','ติ๊กตรวจสอบ / เปลี่ยนสถานะ']]},
   {g:'sales',t:'งานขาย',items:[['sales.view','ดูรายการขาย'],['sales.create','เพิ่ม / นำเข้ารายการ'],['sales.edit','แก้ไขรายการ'],['sales.delete','ลบรายการ'],['sales.upload','แนบใบเสร็จ']]},
   {g:'comm',t:'ค่าคอมมิชชั่น',items:[['comm.view','ดูค่าคอมของตัวเอง'],['comm.all','ดูค่าคอมของทุกคน']]},
+  {g:'ch',t:'เช็คช่องสัญญาณ',items:[['ch.view','ดูผลเช็คช่อง'],['ch.check','บันทึกผลเช็คช่อง'],['ch.manage','จัดการรายชื่อช่อง']]},
 ];
 const PERM_LABEL=Object.fromEntries(PERM_GROUPS.flatMap(g=>g.items.map(([k,l])=>[k,g.t+': '+l])));
 let RE=[];
@@ -1707,7 +2220,7 @@ function rmToggle(i,k,on){
   else{P.delete(k);if(k===g+'.view'&&g!=='comm')[...P].filter(x=>x.startsWith(g+'.')).forEach(x=>P.delete(x));if(k==='comm.view')P.delete('comm.all');}
   RE[i].perms=[...P];renderRoleMatrix();
 }
-function rmPreset(i,t){RE[i].perms=t==='all'?PERM_GROUPS.flatMap(g=>g.items.map(x=>x[0])):t==='ro'?['jobs.view','sales.view','comm.view']:[];renderRoleMatrix();}
+function rmPreset(i,t){RE[i].perms=t==='all'?PERM_GROUPS.flatMap(g=>g.items.map(x=>x[0])):t==='ro'?['ch.view','jobs.view','sales.view','comm.view']:[];renderRoleMatrix();}
 async function saveRoles(){
   const btn=document.getElementById('role-save');btn.disabled=true;let n=0;
   try{
@@ -1734,14 +2247,15 @@ async function delRole(id){
 // ━━━━ AUDIT LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let LG={rows:[],total:0,eid:null,elabel:''};
 const LOG_ACT={create:['เพิ่ม','#059669','#D1FAE5'],update:['แก้ไข','#1D4ED8','#DBEAFE'],delete:['ลบ','#DC2626','#FEE2E2'],login:['เข้าระบบ','#475569','#F1F5F9'],login_fail:['เข้าระบบไม่สำเร็จ','#B45309','#FEF3C7'],pin_change:['เปลี่ยนรหัส','#7C3AED','#EDE9FE'],pin_reset:['ตั้งรหัสให้','#7C3AED','#EDE9FE']};
-const LOG_ENT={job:'งานช่าง',sale:'งานขาย',staff:'พนักงาน',role:'บทบาท',auth:'ระบบ'};
-const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ'};
+const LOG_ENT={check:'เช็คช่อง',channel:'รายชื่อช่อง',job:'งานช่าง',sale:'งานขาย',staff:'พนักงาน',role:'บทบาท',auth:'ระบบ'};
+const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ',chStatus:'สถานะช่อง',note:'หมายเหตุ',chAllOk:'เช็คทั้งหมด',import:'นำเข้า',num:'เลขช่อง',grp:'กลุ่ม',active:'ใช้งาน',slots:'ช่วงเวลา',roster:'เวร',result:'ผลการเช็ค',slot:'รอบ'};
 const ST_L={pending:'รอดำเนินการ',active:'กำลังดำเนินการ',done:'สำเร็จ'};
 function fmtV(f,v){
   if((v===''||v==null)&&f==='payCycle')return'<i class="lg-e">อัตโนมัติ</i>';
   if(v===''||v==null)return'<i class="lg-e">ว่าง</i>';
   if(f==='status')return ST_L[v]||v;
   if(f==='payCycle')return mLabel(v);
+  if(f==='active')return(v===1||v===true||v==='1')?'ใช้งาน':'ปิด';
   if(f==='serviceFee'||f==='amount')return fMoney(v);
   if(/Date$/.test(f))return fDate(v);
   if(f==='role')return v==='admin'?'แอดมิน':roleLabel(v);
@@ -1756,6 +2270,7 @@ function fmtChanges(l){
   if(Array.isArray(c))return c.map(x=>{
     if(x.f==='verify'){const a=x.from||{},b=x.to||{};const ks=['v1','v2','v3','v4','v5'].filter(k=>vFilled(a[k])!==vFilled(b[k]));
       return ks.map(k=>`<div><b>${VLABELS[k]}</b>: ${vFilled(b[k])?'<span class="lg-on">✓ ติ๊ก</span>':'<span class="lg-off">✗ เอาออก</span>'}</div>`).join('');}
+    if(x.f==='import'||x.f==='chAllOk')return`<div><b>${F_LABEL[x.f]}</b>: ${fmtV(x.f,x.to)}</div>`;
     if(x.f==='perms+'||x.f==='perms-')return`<div><b>${F_LABEL[x.f]}</b>: ${fmtV(x.f,x.f==='perms+'?x.to:x.from)}</div>`;
     return`<div><b>${F_LABEL[x.f]||x.f}</b>: <span class="lg-old">${fmtV(x.f,x.from)}</span> → <span class="lg-new">${fmtV(x.f,x.to)}</span></div>`;}).join('');
   const ent=Object.entries(c).filter(([k,v])=>v!==''&&v!=null&&!(Array.isArray(v)&&!v.length)&&!(k==='verify'));
@@ -1783,7 +2298,7 @@ async function loadLogs(reset){
         <td style="white-space:nowrap;font-size:12.5px">${fDate(t.slice(0,10))}<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted)">${t.slice(11,16)} น.</div></td>
         <td>${asgChips([l.actor])}<div style="font-size:10.5px;color:var(--faint);margin-top:2px">${l.actor_role==='admin'?'แอดมิน':l.actor_role?roleLabel(l.actor_role):''}</div></td>
         <td><span class="lg-act" style="color:${a[1]};background:${a[2]}">${a[0]}</span><div style="font-size:11px;color:var(--muted);margin-top:3px">${LOG_ENT[l.entity]||l.entity}</div></td>
-        <td style="max-width:220px"><div style="font-weight:700;font-size:13px">${(l.label||'—').replace(/</g,'&lt;')}</div>${['job','sale','staff','role'].includes(l.entity)&&!LG.eid?`<a href="#" class="lg-hist" onclick="event.preventDefault();logsFor('${l.entity_id}','${(l.label||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">ดูประวัติ</a>`:''}</td>
+        <td style="max-width:220px"><div style="font-weight:700;font-size:13px">${(l.label||'—').replace(/</g,'&lt;')}</div>${['job','sale','staff','role','channel'].includes(l.entity)&&l.entity_id!=='import'&&!LG.eid?`<a href="#" class="lg-hist" onclick="event.preventDefault();logsFor('${l.entity_id}','${(l.label||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">ดูประวัติ</a>`:''}</td>
         <td class="lg-ch">${fmtChanges(l)}</td></tr>`;}).join(''):'<tr class="empty"><td colspan="5"><div class="ei">—</div>ไม่พบบันทึก</td></tr>';
     document.getElementById('logs-more').innerHTML=LG.rows.length<LG.total?`<button class="btn btn-out" onclick="loadLogs(false)">โหลดเพิ่ม (${LG.total-LG.rows.length})</button>`:'';
   }catch(e){if(reset)tb.innerHTML=`<tr class="empty"><td colspan="5">โหลดไม่สำเร็จ: ${e.message}</td></tr>`;}
@@ -1794,7 +2309,7 @@ function changePin(){closeDrawer();showPin('change-old');}
 function logout(silent){if(currentUser?.token)fetch('/api/auth/logout',{method:'POST',headers:authH()}).catch(()=>{});closeDrawer();currentUser=null;DB.jobs=[];DB.sales=[];document.getElementById('app').classList.remove('on');document.getElementById('login-screen').style.display='';renderLoginStaff();playWelcome();if(silent!==true)toast('ออกจากระบบแล้ว','i');}
 
 // ━━━━ NAV ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const TITLES={jobs:'จ่ายงานช่าง',sales:'รายงานงานขาย',commission:'ค่าคอมมิชชั่น',logs:'บันทึกการใช้งาน'};
+const TITLES={channels:'เช็คช่องสัญญาณ ห้องส่ง',jobs:'จ่ายงานช่าง',sales:'รายงานงานขาย',commission:'ค่าคอมมิชชั่น',logs:'บันทึกการใช้งาน'};
 function showSec(name){
   if(currentUser&&!secAllowed(name)){toast('ไม่มีสิทธิ์เข้าดูหน้านี้','w');return;}
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
@@ -1806,6 +2321,7 @@ function showSec(name){
   document.getElementById('topbar-title').textContent=TITLES[name];
   if(name==='commission')renderCommission();
   if(name==='logs')loadLogs(true);
+  if(name==='channels')ckLoad(CK.date||today());
 }
 function updBadges(){
   updToday();
