@@ -36,6 +36,7 @@
  *   GET    /api/chk-config              [ch.view]   { slots, roster }      · PUT [ch.manage]
  *   GET    /api/slot-checks?date=       [ch.view]   · ?month= daily summary
  *   PUT    /api/slot-checks/:date/:slot { staff, issues:[{ch,num,name,problem,fix,fixed}], note }  [ch.check]
+ *   POST   /api/slot-checks/:date/:slot/rename { from, to }   fix a wrongly chosen name [ch.proxy today · ch.manage any]
  *          (staff = the signed-in person, today only; anyone may add an extra check — ch.manage may record for others / other days)
  */
 
@@ -77,7 +78,7 @@ const ALL_PERMS = [
   'jobs.view', 'jobs.create', 'jobs.edit', 'jobs.delete', 'jobs.upload', 'jobs.verify',
   'sales.view', 'sales.create', 'sales.edit', 'sales.delete', 'sales.upload',
   'comm.view', 'comm.all',
-  'ch.view', 'ch.check', 'ch.manage',
+  'ch.view', 'ch.check', 'ch.manage', 'ch.proxy',
 ];
 // Same as what non-admin staff could do before permissions existed
 const DEFAULT_STAFF_PERMS = ['jobs.view', 'jobs.upload', 'jobs.verify', 'sales.view', 'sales.upload', 'comm.view', 'comm.all', 'ch.view', 'ch.check'];
@@ -130,6 +131,7 @@ async function ensureCols(env) {
   }
   await run(`CREATE TABLE IF NOT EXISTS slot_checks (date TEXT, slot TEXT, staff TEXT, checked_at TEXT, updated_at TEXT,
     issues TEXT DEFAULT '[]', note TEXT DEFAULT '', created_by TEXT, PRIMARY KEY (date, slot, staff))`);
+  await run(`ALTER TABLE slot_checks ADD COLUMN updated_by TEXT`);
   // one-time: give existing roles view+check on the new channel page
   const mig = await env.DB.prepare(`SELECT value FROM settings WHERE key='mig_ch_perms'`).first();
   if (!mig) {
@@ -339,7 +341,8 @@ export async function onRequest(context) {
     }
     if (resource === 'slot-checks') {
       if (!id && method === 'GET') return me.can('ch.view') ? await getSlotChecks(request, env) : deny(me);
-      if (id && sub && method === 'PUT') return me.can('ch.check') ? await putSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
+      if (id && sub && !route[3] && method === 'PUT') return me.can('ch.check') ? await putSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
+      if (id && sub && route[3] === 'rename' && method === 'POST') return me.can('ch.check') ? await renameSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
     }
     if (resource === 'checks') {
       // GET /api/checks?date=YYYY-MM-DD   ·   GET /api/checks?month=YYYY-MM (daily summary)
@@ -861,11 +864,16 @@ async function putSlotCheck(date, slot, request, env, me) {
   const boss = me.isAdmin || me.can('ch.manage');
   const todayBkk = nowLocal().slice(0, 10);
   if (!boss) {
-    if (staff !== me.name) return deny(me, 'บันทึกได้เฉพาะชื่อของตัวเอง');
+    // ch.proxy = may record a check on behalf of another person (entered-by is kept)
+    if (staff !== me.name && !me.can('ch.proxy')) return deny(me, 'ไม่มีสิทธิ์บันทึกการเช็คแทนผู้อื่น');
     if (date !== todayBkk) return deny(me, 'บันทึกได้เฉพาะวันนี้');
     // คนที่ไม่ได้อยู่เวรก็เช็คเพิ่มเติมได้ (บันทึกในชื่อตัวเอง)
     const hm = nowLocal().slice(11, 16), toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
     if (toMin(hm) < toMin(slot) - 15) return deny(me, `ยังไม่ถึงเวลาเช็ครอบ ${slot} (เปิดให้เช็คก่อนเวลา 15 นาที)`);
+  }
+  if (staff !== me.name) {
+    const ex = await env.DB.prepare(`SELECT id FROM staff WHERE name=?`).bind(staff).first();
+    if (!ex) return json({ error: `ไม่พบพนักงานชื่อ "${staff}"` }, 400);
   }
   const issues = (Array.isArray(b.issues) ? b.issues : []).slice(0, 200).map(i => ({
     ch: String(i.ch ?? ''), num: +i.num || 0, name: String(i.name ?? '').slice(0, 80),
@@ -874,11 +882,11 @@ async function putSlotCheck(date, slot, request, env, me) {
   const note = String(b.note ?? '').trim().slice(0, 500);
   const now = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' });
   const old = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).first();
-  await env.DB.prepare(`INSERT INTO slot_checks (date,slot,staff,checked_at,updated_at,issues,note,created_by) VALUES (?,?,?,?,?,?,?,?)
-    ON CONFLICT(date,slot,staff) DO UPDATE SET issues=excluded.issues, note=excluded.note, updated_at=excluded.updated_at`)
-    .bind(date, slot, staff, now, now, JSON.stringify(issues), note, me.name).run();
+  await env.DB.prepare(`INSERT INTO slot_checks (date,slot,staff,checked_at,updated_at,issues,note,created_by,updated_by) VALUES (?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(date,slot,staff) DO UPDATE SET issues=excluded.issues, note=excluded.note, updated_at=excluded.updated_at, updated_by=excluded.updated_by`)
+    .bind(date, slot, staff, now, now, JSON.stringify(issues), note, me.name, me.name).run();
   const sum = is => is.length ? is.map(i => `ช่อง ${i.num}${i.problem ? ' (' + i.problem + ')' : ''}${i.fixed ? ' ✓' : ''}`).join(', ') : 'ปกติทุกช่อง';
-  const label = `เช็คช่อง ${slot} · ${date} · ${staff}`;
+  const label = `เช็คช่อง ${slot} · ${date} · ${staff}${staff !== me.name ? ' (ลงข้อมูลโดย ' + me.name + ')' : ''}`;
   if (!old) await audit(env, request, me, 'create', 'check', `${date}:${slot}:${staff}`, label, { slot, staff, result: sum(issues), note });
   else {
     const ch = [];
@@ -888,6 +896,29 @@ async function putSlotCheck(date, slot, request, env, me) {
     if (ch.length) await audit(env, request, me, 'update', 'check', `${date}:${slot}:${staff}`, label, ch);
   }
   const row = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).first();
+  return json({ check: parseSlot(row) });
+}
+
+async function renameSlotCheck(date, slot, request, env, me) {
+  const { from, to } = await request.json();
+  const f = String(from ?? '').trim(), t = String(to ?? '').trim();
+  if (!f || !t || f === t) return json({ error: 'ระบุชื่อให้ถูกต้อง' }, 400);
+  const boss = me.isAdmin || me.can('ch.manage');
+  if (!boss) {
+    if (!me.can('ch.proxy')) return deny(me, 'ไม่มีสิทธิ์แก้ชื่อผู้เช็ค');
+    if (date !== nowLocal().slice(0, 10)) return deny(me, 'แก้ชื่อได้เฉพาะรายการของวันนี้');
+  }
+  const old = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, f).first();
+  if (!old) return json({ error: 'ไม่พบรายการเช็ค' }, 404);
+  const ex = await env.DB.prepare(`SELECT id FROM staff WHERE name=?`).bind(t).first();
+  if (!ex) return json({ error: `ไม่พบพนักงานชื่อ "${t}"` }, 400);
+  const dup = await env.DB.prepare(`SELECT 1 AS x FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, t).first();
+  if (dup) return json({ error: `${t} มีรายการเช็ครอบ ${slot} อยู่แล้ว` }, 409);
+  const now = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' });
+  await env.DB.prepare(`UPDATE slot_checks SET staff=?, updated_at=?, updated_by=? WHERE date=? AND slot=? AND staff=?`)
+    .bind(t, now, me.name, date, slot, f).run();
+  await audit(env, request, me, 'update', 'check', `${date}:${slot}:${t}`, `เช็คช่อง ${slot} · ${date} · ${t}`, [{ f: 'checker', from: f, to: t }]);
+  const row = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, t).first();
   return json({ check: parseSlot(row) });
 }
 
