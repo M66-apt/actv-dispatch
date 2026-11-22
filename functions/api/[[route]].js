@@ -36,6 +36,7 @@
  *   GET    /api/chk-config              [ch.view]   { slots, roster }      · PUT [ch.manage]
  *   GET    /api/slot-checks?date=       [ch.view]   · ?month= daily summary
  *   PUT    /api/slot-checks/:date/:slot { staff, issues:[{ch,num,name,problem,fix,fixed}], note }  [ch.check]
+ *   DELETE /api/slot-checks/:date/:slot?staff=   undo a check (own / entered by you, today · ch.proxy today · ch.manage any)
  *   POST   /api/slot-checks/:date/:slot/rename { from, to }   fix a wrongly chosen name [ch.proxy today · ch.manage any]
  *          (staff = the signed-in person, today only; anyone may add an extra check — ch.manage may record for others / other days)
  */
@@ -342,6 +343,7 @@ export async function onRequest(context) {
     if (resource === 'slot-checks') {
       if (!id && method === 'GET') return me.can('ch.view') ? await getSlotChecks(request, env) : deny(me);
       if (id && sub && !route[3] && method === 'PUT') return me.can('ch.check') ? await putSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
+      if (id && sub && !route[3] && method === 'DELETE') return me.can('ch.check') ? await deleteSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
       if (id && sub && route[3] === 'rename' && method === 'POST') return me.can('ch.check') ? await renameSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
     }
     if (resource === 'checks') {
@@ -906,6 +908,25 @@ async function putSlotCheck(date, slot, request, env, me) {
   }
   const row = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).first();
   return json({ check: parseSlot(row) });
+}
+
+async function deleteSlotCheck(date, slot, request, env, me) {
+  const staff = String(new URL(request.url).searchParams.get('staff') ?? '').trim();
+  const old = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).first();
+  if (!old) return json({ error: 'ไม่พบรายการเช็ค' }, 404);
+  const boss = me.isAdmin || me.can('ch.manage');
+  if (!boss) {
+    if (date !== nowLocal().slice(0, 10)) return deny(me, 'ยกเลิกได้เฉพาะรายการของวันนี้');
+    const mine = old.staff === me.name || old.created_by === me.name;
+    if (!mine && !me.can('ch.proxy')) return deny(me, 'ยกเลิกได้เฉพาะรายการของตัวเอง หรือที่ตัวเองลงข้อมูล');
+  }
+  await env.DB.prepare(`DELETE FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).run();
+  const is = safeJSON(old.issues, []);
+  await audit(env, request, me, 'delete', 'check', `${date}:${slot}:${staff}`, `เช็คช่อง ${slot} · ${date} · ${staff}`, {
+    slot, checker: staff, result: is.length ? is.map(i => `ช่อง ${i.num}${i.problem ? ' (' + i.problem + ')' : ''}`).join(', ') : 'ปกติทุกช่อง',
+    note: old.note || '', entered: `${String(old.checked_at || '').slice(11, 16)} น. โดย ${old.created_by || staff}`,
+  });
+  return json({ success: true });
 }
 
 async function renameSlotCheck(date, slot, request, env, me) {
