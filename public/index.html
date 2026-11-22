@@ -1824,7 +1824,8 @@ function exOpen(slot){
   document.getElementById('ex-ov').classList.add('open');
 }
 function exGo(){const n=document.getElementById('ex-sel').value;cm('ex-ov');if(n)ckOpen(CK.exSlot,n);}
-const ckOf=(slot,staff)=>CK.checks.find(k=>k.slot===slot&&k.staff===staff);
+const ckFirst=n=>String(n||'').trim().split(/\s+/)[0];
+const ckOf=(slot,staff)=>CK.checks.find(k=>k.slot===slot&&k.staff===staff)||CK.checks.find(k=>k.slot===slot&&k.staff===ckFirst(staff)&&k.staff!==staff);
 function ckState(slot){
   if(CK.checks.some(k=>k.slot===slot))return'done';
   const t=today();if(CK.date>t)return'wait';if(CK.date<t)return'miss';
@@ -1874,7 +1875,7 @@ function ckRender(){
   const nowS=d===today()?slots.find(s=>['due','late'].includes(ckState(s))):null;
   document.getElementById('sl-grid').innerHTML=slots.map(slot=>{
     const state=ckState(slot),lab=CK_STATE[state];
-    const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)).map(k=>k.staff)];
+    const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)&&!duty.some(d=>ckFirst(d)===k.staff)).map(k=>k.staff)];
     const ks=CK.checks.filter(k=>k.slot===slot);const sIss=[...new Map(ks.flatMap(k=>k.issues).map(i=>[i.ch,i])).values()];
     return`<div class="sl-card st-${state}${slot===nowS?' now':''}">
       <div class="sl-top"><div class="sl-time">${slot}<small>น.</small></div><span class="sl-pill" style="--c:${lab[1]}">${state==='due'?'<i class="sl-dot"></i>':''}${lab[0]}</span></div>
@@ -1974,7 +1975,7 @@ function rsRender(){
     <button class="sc-x" onclick="RS.roster.splice(${i},1);rsRender()">✕</button></div>`).join('');
   rsWarn();
 }
-function rsWarn(){const names=new Set(DB.staff.map(x=>x.name));const bad=[...new Set(RS.roster.flatMap(r=>r.staff).filter(n=>n&&!names.has(n)))];
+function rsWarn(){const names=new Set(DB.staff.map(x=>x.name));const bad=[...new Set(RS.roster.flatMap(r=>r.staff).filter(n=>n&&!names.has(n)&&DB.staff.filter(x=>ckFirst(x.name)===n).length!==1))];
   const days=new Set();RS.roster.forEach(r=>{for(let d=r.from;d<=r.to;d++)days.add(d);});const gap=[];for(let d=1;d<=31;d++)if(!days.has(d))gap.push(d);
   document.getElementById('rs-warn').innerHTML=(bad.length?`<div class="rs-w">⚠ ยังไม่มีบัญชีพนักงานชื่อ: <b>${bad.join(', ')}</b> — ต้องเพิ่มในจัดการพนักงานก่อน จึงจะเข้าระบบมากดเช็คได้</div>`:'')+(gap.length?`<div class="rs-w">⚠ วันที่ยังไม่มีเวร: ${gap.join(', ')}</div>`:'');}
 async function rsSave(){
@@ -2031,7 +2032,7 @@ async function ckCapture(){
   const doneN=slots.filter(s=>ckState(s)==='done').length,chs=new Set(iss.map(i=>i.ch));
   const down=Object.values(st).filter(x=>x==='down').length,fixed=Object.values(st).filter(x=>x==='fixed').length;
   const logo=document.querySelector('.lp-logo-img')?.src||'';const n=new Date();
-  const rows=slots.map(slot=>{const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)).map(k=>k.staff)];const state=ckState(slot);
+  const rows=slots.map(slot=>{const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)&&!duty.some(d=>ckFirst(d)===k.staff)).map(k=>k.staff)];const state=ckState(slot);
     return names.map((nm,i)=>{const k=ckOf(slot,nm);const p=k?ckPunct(slot,k.checked_at):null;const ni=k?k.issues.length:0;const ex=!duty.includes(nm);
       return`<tr class="${!k&&['miss','late'].includes(state)?'od':''}">${i===0?`<td rowspan="${names.length}" class="m" style="font-size:16px;font-weight:800;vertical-align:middle">${slot}</td>`:''}<td><b>${nm}</b>${ex?' <span class="st" style="color:#6D28D9;background:#EDE9FE;font-size:11px">เพิ่มเติม</span>':''}${k&&k.created_by&&k.created_by!==nm?`<div class="ph">✍️ ลงข้อมูลโดย ${k.created_by}</div>`:''}</td><td>${k?`<b>${k.checked_at.slice(11,16)} น.</b>`:'—'}</td><td>${p?`<span class="st" style="color:${p[1]==='late'?'#B91C1C':p[1]==='early'?'#1D4ED8':'#047857'};background:${p[1]==='late'?'#FEE2E2':p[1]==='early'?'#DBEAFE':'#D1FAE5'}">${p[0]}</span>`:`${(()=>{const ps=ckPState(slot);return`<span style="color:${ps[1]};font-weight:700">${ps[0]}</span>`;})()}`}</td><td>${k?(ni?`<b style="color:#B91C1C">ผิดปกติ ${ni} ช่อง</b>: ${k.issues.map(x=>x.num).join(', ')}`:'<b style="color:#047857">✓ ปกติทุกช่อง</b>'):'—'}${k?.note?`<div class="ph">📝 ${k.note}</div>`:''}</td></tr>`;}).join('')||`<tr><td class="m">${slot}</td><td colspan="4">ยังไม่ได้ตั้งเวร</td></tr>`;}).join('');
   const box=document.createElement('div');box.className='cap-rpt';
