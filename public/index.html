@@ -1201,7 +1201,8 @@ tr:hover td{background:var(--card-2)}
     </div>
     <div class="mf" style="display:flex;gap:8px;align-items:center;padding:14px 20px;border-top:1px solid var(--rule)">
       <div class="sc-stamp" id="sc-stamp"></div>
-      <button class="btn btn-out" style="margin-left:auto" onclick="cm('sc-ov')">ปิด</button>
+      <button class="btn btn-red-ghost" id="sc-del" style="display:none;margin-left:auto" onclick="ckDel()">🗑️ ยกเลิกการเช็คนี้</button>
+      <button class="btn btn-out" id="sc-close" style="margin-left:auto" onclick="cm('sc-ov')">ปิด</button>
       <button class="btn btn-primary" id="sc-save" onclick="ckSave(false)">บันทึกการเช็ค</button>
     </div>
   </div>
@@ -1911,7 +1912,18 @@ function ckOpen(slot,name){
   document.getElementById('sc-save').style.display=CK.ro?'none':'';
   const n=new Date(),hm=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
   document.getElementById('sc-stamp').innerHTML=k?`🕒 เช็คเมื่อ <b>${k.checked_at.slice(11,16)} น.</b> (${ckPunct(slot,k.checked_at)[0]})${k.updated_at&&k.updated_at!==k.checked_at?` · แก้ไขล่าสุด ${k.updated_at.slice(11,16)} น.`:''}${k.created_by&&k.created_by!==k.staff?` · ลงข้อมูลโดย <b>${k.created_by}</b>`:''}${k.updated_by&&(k.updated_by!==k.created_by)&&k.updated_at!==k.checked_at?` · แก้ไขล่าสุดโดย ${k.updated_by}`:''}`:`🕒 เวลาจะถูกบันทึกเมื่อกดบันทึก (ตอนนี้ ${hm} น.)`;
+  const canDel=!!k&&can('ch.check')&&(can('ch.manage')||(CK.date===today()&&(k.staff===currentUser?.name||k.created_by===currentUser?.name||can('ch.proxy'))));
+  document.getElementById('sc-del').style.display=canDel?'':'none';
+  document.getElementById('sc-close').style.marginLeft=canDel?'0':'auto';
   scGrid();document.getElementById('sc-ov').classList.add('open');
+}
+async function ckDel(){
+  const {slot,name}=CK.sel;const k=ckOf(slot,name);if(!k)return;
+  if(!confirm(`ยกเลิกการเช็ครอบ ${slot} น. ของ "${k.staff}"?\n\nรายการนี้จะถูกลบ และรอบนี้จะกลับเป็น "ยังไม่เช็ค" (ประวัติยังเก็บไว้ในบันทึกการใช้งาน)`))return;
+  try{
+    await DEL(`/api/slot-checks/${CK.date}/${encodeURIComponent(slot)}?staff=${encodeURIComponent(k.staff)}`);
+    CK.checks=CK.checks.filter(x=>x!==k);cm('sc-ov');ckRender();toast(`ยกเลิกการเช็ครอบ ${slot} ของ ${k.staff} แล้ว`,'w');
+  }catch(e){toast(e.message,'e');}
 }
 function rnShow(){
   const {slot,name}=CK.sel;const duty=ckDuty(CK.date);
@@ -2314,7 +2326,7 @@ async function delRole(id){
 let LG={rows:[],total:0,eid:null,elabel:''};
 const LOG_ACT={create:['เพิ่ม','#059669','#D1FAE5'],update:['แก้ไข','#1D4ED8','#DBEAFE'],delete:['ลบ','#DC2626','#FEE2E2'],login:['เข้าระบบ','#475569','#F1F5F9'],login_fail:['เข้าระบบไม่สำเร็จ','#B45309','#FEF3C7'],pin_change:['เปลี่ยนรหัส','#7C3AED','#EDE9FE'],pin_reset:['ตั้งรหัสให้','#7C3AED','#EDE9FE']};
 const LOG_ENT={check:'เช็คช่อง',channel:'รายชื่อช่อง',job:'งานช่าง',sale:'งานขาย',staff:'พนักงาน',role:'บทบาท',auth:'ระบบ'};
-const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ',chStatus:'สถานะช่อง',note:'หมายเหตุ',chAllOk:'เช็คทั้งหมด',import:'นำเข้า',num:'เลขช่อง',grp:'กลุ่ม',active:'ใช้งาน',slots:'ช่วงเวลา',roster:'เวร',result:'ผลการเช็ค',slot:'รอบ',checker:'ชื่อผู้เช็ค'};
+const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ',chStatus:'สถานะช่อง',note:'หมายเหตุ',chAllOk:'เช็คทั้งหมด',import:'นำเข้า',num:'เลขช่อง',grp:'กลุ่ม',active:'ใช้งาน',slots:'ช่วงเวลา',roster:'เวร',result:'ผลการเช็ค',slot:'รอบ',checker:'ชื่อผู้เช็ค',entered:'เช็คเมื่อ'};
 const ST_L={pending:'รอดำเนินการ',active:'กำลังดำเนินการ',done:'สำเร็จ'};
 function fmtV(f,v){
   if((v===''||v==null)&&f==='payCycle')return'<i class="lg-e">อัตโนมัติ</i>';
