@@ -819,8 +819,17 @@ const DEFAULT_ROSTER = [
 async function getChkConfig(env) {
   const r = await env.DB.prepare(`SELECT key, value FROM settings WHERE key IN ('ch_slots','ch_roster')`).all();
   const m = Object.fromEntries(r.results.map(x => [x.key, safeJSON(x.value, null)]));
+  const roster = Array.isArray(m.ch_roster) && m.ch_roster.length ? m.ch_roster : DEFAULT_ROSTER;
+  // roster may hold first names only ("อภิชัย") while accounts hold full names ("อภิชัย มุกน้อย")
+  const { results: st } = await env.DB.prepare(`SELECT name FROM staff`).all();
+  const names = st.map(x => x.name);
+  const full = n => {
+    if (!n || names.includes(n)) return n;
+    const hit = names.filter(x => x.trim().split(/\s+/)[0] === n.trim());
+    return hit.length === 1 ? hit[0] : n;
+  };
   return { slots: Array.isArray(m.ch_slots) && m.ch_slots.length ? m.ch_slots : DEFAULT_SLOTS,
-           roster: Array.isArray(m.ch_roster) && m.ch_roster.length ? m.ch_roster : DEFAULT_ROSTER };
+           roster: roster.map(r => ({ ...r, staff: (r.staff || []).map(full) })) };
 }
 const dutyFor = (cfg, date) => { const d = +String(date).slice(8, 10); return (cfg.roster.find(r => d >= r.from && d <= r.to) || { staff: [] }).staff; };
 
