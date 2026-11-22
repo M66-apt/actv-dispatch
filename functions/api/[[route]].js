@@ -28,6 +28,15 @@
  *   POST/PUT/DELETE /api/roles[/:id]
  *   PUT    /api/auth/admin-pin  { oldPin, newPin }
  *   GET    /api/logs?limit&offset&actor&entity&q&month
+ * Channel check (ห้องส่ง):
+ *   GET    /api/channels                [ch.view]   · POST/PUT/DELETE, POST /api/channels/import  [ch.manage]
+ *   GET    /api/checks?date= | ?month=  [ch.view]
+ *   PUT    /api/checks/:date/:channelId { status: ok|warn|down|'', note }   [ch.check]
+ *   POST   /api/checks/:date/all-ok     [ch.check]
+ *   GET    /api/chk-config              [ch.view]   { slots, roster }      · PUT [ch.manage]
+ *   GET    /api/slot-checks?date=       [ch.view]   · ?month= daily summary
+ *   PUT    /api/slot-checks/:date/:slot { staff, issues:[{ch,num,name,problem,fix,fixed}], note }  [ch.check]
+ *          (staff = the signed-in person, today only — ch.manage may record for others / other days)
  */
 
 const CORS = {
@@ -68,9 +77,12 @@ const ALL_PERMS = [
   'jobs.view', 'jobs.create', 'jobs.edit', 'jobs.delete', 'jobs.upload', 'jobs.verify',
   'sales.view', 'sales.create', 'sales.edit', 'sales.delete', 'sales.upload',
   'comm.view', 'comm.all',
+  'ch.view', 'ch.check', 'ch.manage',
 ];
 // Same as what non-admin staff could do before permissions existed
-const DEFAULT_STAFF_PERMS = ['jobs.view', 'jobs.upload', 'jobs.verify', 'sales.view', 'sales.upload', 'comm.view', 'comm.all'];
+const DEFAULT_STAFF_PERMS = ['jobs.view', 'jobs.upload', 'jobs.verify', 'sales.view', 'sales.upload', 'comm.view', 'comm.all', 'ch.view', 'ch.check'];
+const CH_STATUS = ['ok', 'warn', 'down'];
+const CH_COUNT = 90;
 const DEFAULT_ROLES = [
   ['technician', 'ช่างเทคนิค'],
   ['sale', 'พนักงานขาย'],
@@ -99,6 +111,15 @@ async function ensureCols(env) {
     action TEXT, entity TEXT, entity_id TEXT, label TEXT, changes TEXT, ip TEXT)`);
   await run(`CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at DESC)`);
   await run(`CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity, entity_id)`);
+  // channel check (ห้องส่ง)
+  await run(`CREATE TABLE IF NOT EXISTS channels (id TEXT PRIMARY KEY, num INTEGER, name TEXT, grp TEXT DEFAULT '', active INTEGER DEFAULT 1)`);
+  await run(`CREATE TABLE IF NOT EXISTS channel_checks (date TEXT, channel_id TEXT, status TEXT, note TEXT, checked_by TEXT, checked_at TEXT, PRIMARY KEY (date, channel_id))`);
+  const cc = await env.DB.prepare(`SELECT COUNT(*) AS n FROM channels`).first();
+  if (!cc?.n) {
+    const st = [];
+    for (let i = 1; i <= CH_COUNT; i++) st.push(env.DB.prepare(`INSERT OR IGNORE INTO channels (id,num,name) VALUES (?,?,?)`).bind('ch' + i, i, `ช่อง ${i}`));
+    for (let i = 0; i < st.length; i += 50) await env.DB.batch(st.slice(i, i + 50));
+  }
   // seed roles once
   const c = await env.DB.prepare(`SELECT COUNT(*) AS n FROM roles`).first();
   if (!c?.n) {
@@ -106,6 +127,18 @@ async function ensureCols(env) {
       await env.DB.prepare(`INSERT OR IGNORE INTO roles (id,label,perms,sort) VALUES (?,?,?,?)`)
         .bind(id, label, JSON.stringify(DEFAULT_STAFF_PERMS), i).run();
     }
+  }
+  await run(`CREATE TABLE IF NOT EXISTS slot_checks (date TEXT, slot TEXT, staff TEXT, checked_at TEXT, updated_at TEXT,
+    issues TEXT DEFAULT '[]', note TEXT DEFAULT '', created_by TEXT, PRIMARY KEY (date, slot, staff))`);
+  // one-time: give existing roles view+check on the new channel page
+  const mig = await env.DB.prepare(`SELECT value FROM settings WHERE key='mig_ch_perms'`).first();
+  if (!mig) {
+    const { results: rs } = await env.DB.prepare(`SELECT id, perms FROM roles`).all();
+    for (const r of rs) {
+      const p = new Set(safeJSON(r.perms, [])); p.add('ch.view'); p.add('ch.check');
+      await env.DB.prepare(`UPDATE roles SET perms=? WHERE id=?`).bind(JSON.stringify([...p]), r.id).run();
+    }
+    await env.DB.prepare(`INSERT OR REPLACE INTO settings (key,value) VALUES ('mig_ch_perms','1')`).run();
   }
   // Backfill commission dates for rows that existed before these columns
   await env.DB.prepare(`UPDATE jobs SET receipt_at = substr(updated_at,1,10)
@@ -291,6 +324,30 @@ export async function onRequest(context) {
     }
 
     if (resource === 'logs' && method === 'GET') return me.isAdmin ? await getLogs(request, env) : deny(me);
+
+    if (resource === 'channels') {
+      if (!id && method === 'GET') return me.can('ch.view') ? await getChannels(env) : deny(me);
+      if (!me.can('ch.manage')) return deny(me);
+      if (id === 'import' && method === 'POST') return await importChannels(request, env, me);
+      if (!id && method === 'POST') return await createChannel(request, env, me);
+      if (id && method === 'PUT') return await updateChannel(id, request, env, me);
+      if (id && method === 'DELETE') return await deleteChannel(id, request, env, me);
+    }
+    if (resource === 'chk-config') {
+      if (method === 'GET') return me.can('ch.view') ? json(await getChkConfig(env)) : deny(me);
+      if (method === 'PUT') return me.can('ch.manage') ? await putChkConfig(request, env, me) : deny(me);
+    }
+    if (resource === 'slot-checks') {
+      if (!id && method === 'GET') return me.can('ch.view') ? await getSlotChecks(request, env) : deny(me);
+      if (id && sub && method === 'PUT') return me.can('ch.check') ? await putSlotCheck(id, decodeURIComponent(sub), request, env, me) : deny(me);
+    }
+    if (resource === 'checks') {
+      // GET /api/checks?date=YYYY-MM-DD   ·   GET /api/checks?month=YYYY-MM (daily summary)
+      if (!id && method === 'GET') return me.can('ch.view') ? await getChecks(request, env) : deny(me);
+      if (!me.can('ch.check')) return deny(me);
+      if (id && sub === 'all-ok' && method === 'POST') return await checksAllOk(id, request, env, me);
+      if (id && sub && method === 'PUT') return await setCheck(id, sub, request, env, me);
+    }
 
     return json({ error: 'Not found' }, 404);
   } catch (err) {
@@ -745,4 +802,199 @@ async function getLogs(request, env) {
     logs: results.map(r => ({ ...r, changes: safeJSON(r.changes, null) })),
     total: total?.n ?? 0, actors: actors.results.map(a => a.actor),
   });
+}
+
+// ════════════════════════════════════════════════════════════════
+// SLOT CHECK — 5 rounds a day, two people on duty by day-of-month
+// ════════════════════════════════════════════════════════════════
+const DEFAULT_SLOTS = ['08:30', '12:00', '14:00', '16:00', '18:00'];
+const DEFAULT_ROSTER = [
+  { from: 1, to: 10, staff: ['อภิชัย', 'พรชัย'] },
+  { from: 11, to: 20, staff: ['สงกรานต์', 'ชรัมภ์'] },
+  { from: 21, to: 31, staff: ['สงกรานต์', 'อภิชัย'] },
+];
+async function getChkConfig(env) {
+  const r = await env.DB.prepare(`SELECT key, value FROM settings WHERE key IN ('ch_slots','ch_roster')`).all();
+  const m = Object.fromEntries(r.results.map(x => [x.key, safeJSON(x.value, null)]));
+  return { slots: Array.isArray(m.ch_slots) && m.ch_slots.length ? m.ch_slots : DEFAULT_SLOTS,
+           roster: Array.isArray(m.ch_roster) && m.ch_roster.length ? m.ch_roster : DEFAULT_ROSTER };
+}
+const dutyFor = (cfg, date) => { const d = +String(date).slice(8, 10); return (cfg.roster.find(r => d >= r.from && d <= r.to) || { staff: [] }).staff; };
+
+async function putChkConfig(request, env, me) {
+  const b = await request.json();
+  const old = await getChkConfig(env);
+  const slots = [...new Set((b.slots || []).map(String).filter(t => /^\d{2}:\d{2}$/.test(t)))].sort();
+  if (!slots.length) return json({ error: 'ต้องมีอย่างน้อย 1 ช่วงเวลา' }, 400);
+  const roster = (b.roster || []).map(r => ({ from: Math.max(1, Math.min(31, +r.from || 1)), to: Math.max(1, Math.min(31, +r.to || 31)),
+    staff: (r.staff || []).map(x => String(x).trim()).filter(Boolean) })).filter(r => r.to >= r.from).sort((a, c) => a.from - c.from);
+  const up = (k, v) => env.DB.prepare(`INSERT INTO settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`).bind(k, JSON.stringify(v));
+  await env.DB.batch([up('ch_slots', slots), up('ch_roster', roster)]);
+  const fmtR = rs => rs.map(r => `${r.from}-${r.to}: ${r.staff.join(', ')}`).join(' | ');
+  const ch = [];
+  if (old.slots.join() !== slots.join()) ch.push({ f: 'slots', from: old.slots.join(', '), to: slots.join(', ') });
+  if (fmtR(old.roster) !== fmtR(roster)) ch.push({ f: 'roster', from: fmtR(old.roster), to: fmtR(roster) });
+  if (ch.length) await audit(env, request, me, 'update', 'check', 'config', 'ตั้งค่าเวร/ช่วงเวลาเช็คช่อง', ch);
+  return json({ slots, roster });
+}
+
+function parseSlot(r) { return { ...r, issues: safeJSON(r.issues, []) }; }
+async function getSlotChecks(request, env) {
+  const u = new URL(request.url);
+  const month = u.searchParams.get('month');
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    const { results } = await env.DB.prepare(`SELECT date, slot, staff, issues FROM slot_checks WHERE date LIKE ?`).bind(month + '%').all();
+    return json({ checks: results.map(parseSlot) });
+  }
+  const date = u.searchParams.get('date');
+  if (!isDate(date)) return json({ error: 'วันที่ไม่ถูกต้อง' }, 400);
+  const { results } = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? ORDER BY slot, checked_at`).bind(date).all();
+  return json({ date, checks: results.map(parseSlot) });
+}
+
+async function putSlotCheck(date, slot, request, env, me) {
+  if (!isDate(date)) return json({ error: 'วันที่ไม่ถูกต้อง' }, 400);
+  const cfg = await getChkConfig(env);
+  if (!cfg.slots.includes(slot)) return json({ error: 'ไม่พบช่วงเวลานี้' }, 400);
+  const b = await request.json();
+  const staff = String(b.staff ?? me.name).trim();
+  const boss = me.isAdmin || me.can('ch.manage');
+  const todayBkk = nowLocal().slice(0, 10);
+  if (!boss) {
+    if (staff !== me.name) return deny(me, 'บันทึกได้เฉพาะชื่อของตัวเอง');
+    if (date !== todayBkk) return deny(me, 'บันทึกได้เฉพาะวันนี้');
+    if (!dutyFor(cfg, date).includes(staff)) return deny(me, 'วันนี้ไม่ใช่เวรของคุณ');
+    const hm = nowLocal().slice(11, 16), toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+    if (toMin(hm) < toMin(slot) - 15) return deny(me, `ยังไม่ถึงเวลาเช็ครอบ ${slot} (เปิดให้เช็คก่อนเวลา 15 นาที)`);
+  }
+  const issues = (Array.isArray(b.issues) ? b.issues : []).slice(0, 200).map(i => ({
+    ch: String(i.ch ?? ''), num: +i.num || 0, name: String(i.name ?? '').slice(0, 80),
+    problem: String(i.problem ?? '').slice(0, 120), fix: String(i.fix ?? '').slice(0, 500), fixed: !!i.fixed,
+  })).filter(i => i.num > 0);
+  const note = String(b.note ?? '').trim().slice(0, 500);
+  const now = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' });
+  const old = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).first();
+  await env.DB.prepare(`INSERT INTO slot_checks (date,slot,staff,checked_at,updated_at,issues,note,created_by) VALUES (?,?,?,?,?,?,?,?)
+    ON CONFLICT(date,slot,staff) DO UPDATE SET issues=excluded.issues, note=excluded.note, updated_at=excluded.updated_at`)
+    .bind(date, slot, staff, now, now, JSON.stringify(issues), note, me.name).run();
+  const sum = is => is.length ? is.map(i => `ช่อง ${i.num}${i.problem ? ' (' + i.problem + ')' : ''}${i.fixed ? ' ✓' : ''}`).join(', ') : 'ปกติทุกช่อง';
+  const label = `เช็คช่อง ${slot} · ${date} · ${staff}`;
+  if (!old) await audit(env, request, me, 'create', 'check', `${date}:${slot}:${staff}`, label, { slot, staff, result: sum(issues), note });
+  else {
+    const ch = [];
+    const oi = safeJSON(old.issues, []);
+    if (JSON.stringify(oi) !== JSON.stringify(issues)) ch.push({ f: 'result', from: sum(oi), to: sum(issues) });
+    if ((old.note || '') !== note) ch.push({ f: 'note', from: old.note || '', to: note });
+    if (ch.length) await audit(env, request, me, 'update', 'check', `${date}:${slot}:${staff}`, label, ch);
+  }
+  const row = await env.DB.prepare(`SELECT * FROM slot_checks WHERE date=? AND slot=? AND staff=?`).bind(date, slot, staff).first();
+  return json({ check: parseSlot(row) });
+}
+
+// ════════════════════════════════════════════════════════════════
+// CHANNEL CHECK (ห้องส่ง)
+// ════════════════════════════════════════════════════════════════
+const isDate = d => /^\d{4}-\d{2}-\d{2}$/.test(String(d || ''));
+const chLabel = c => `ช่อง ${c.num}${c.name && c.name !== `ช่อง ${c.num}` ? ' · ' + c.name : ''}`;
+const CH_ST_TH = { ok: 'ปกติ', warn: 'มีปัญหา', down: 'ไม่มีสัญญาณ', '': 'ยังไม่เช็ค' };
+
+async function getChannels(env) {
+  const { results } = await env.DB.prepare(`SELECT * FROM channels ORDER BY num, name`).all();
+  return json({ channels: results.map(c => ({ ...c, active: !!c.active })) });
+}
+function chFromBody(b) {
+  return { num: parseInt(b.num, 10) || 0, name: String(b.name ?? '').trim(), grp: String(b.grp ?? '').trim(), active: b.active === false || b.active === 0 ? 0 : 1 };
+}
+async function createChannel(request, env, me) {
+  const c = chFromBody(await request.json());
+  if (!c.num) return json({ error: 'กรุณาใส่เลขช่อง' }, 400);
+  const id = 'ch_' + uid();
+  await env.DB.prepare(`INSERT INTO channels (id,num,name,grp,active) VALUES (?,?,?,?,?)`).bind(id, c.num, c.name || `ช่อง ${c.num}`, c.grp, c.active).run();
+  const row = await env.DB.prepare(`SELECT * FROM channels WHERE id=?`).bind(id).first();
+  await audit(env, request, me, 'create', 'channel', id, chLabel(row), { num: row.num, name: row.name, grp: row.grp });
+  return json({ channel: { ...row, active: !!row.active } }, 201);
+}
+async function updateChannel(id, request, env, me) {
+  const old = await env.DB.prepare(`SELECT * FROM channels WHERE id=?`).bind(id).first();
+  if (!old) return json({ error: 'ไม่พบช่อง' }, 404);
+  const c = chFromBody({ ...old, ...(await request.json()) });
+  await env.DB.prepare(`UPDATE channels SET num=?, name=?, grp=?, active=? WHERE id=?`).bind(c.num, c.name, c.grp, c.active, id).run();
+  const row = await env.DB.prepare(`SELECT * FROM channels WHERE id=?`).bind(id).first();
+  const ch = diff(old, row, ['num', 'name', 'grp', 'active']);
+  if (ch.length) await audit(env, request, me, 'update', 'channel', id, chLabel(row), ch);
+  return json({ channel: { ...row, active: !!row.active } });
+}
+async function deleteChannel(id, request, env, me) {
+  const old = await env.DB.prepare(`SELECT * FROM channels WHERE id=?`).bind(id).first();
+  await env.DB.prepare(`DELETE FROM channels WHERE id=?`).bind(id).run();
+  if (old) await audit(env, request, me, 'delete', 'channel', id, chLabel(old), { num: old.num, name: old.name, grp: old.grp });
+  return json({ success: true });
+}
+// rows: [{num,name,grp}] — update by number, add numbers that don't exist
+async function importChannels(request, env, me) {
+  const { rows } = await request.json();
+  const list = (Array.isArray(rows) ? rows : []).map(chFromBody).filter(r => r.num > 0);
+  if (!list.length) return json({ error: 'ไม่พบข้อมูลช่อง' }, 400);
+  const { results } = await env.DB.prepare(`SELECT id, num FROM channels`).all();
+  const byNum = new Map(results.map(r => [r.num, r.id]));
+  let added = 0, updated = 0; const st = [];
+  for (const r of list) {
+    const ex = byNum.get(r.num);
+    if (ex) { st.push(env.DB.prepare(`UPDATE channels SET name=?, grp=? WHERE id=?`).bind(r.name || `ช่อง ${r.num}`, r.grp, ex)); updated++; }
+    else { const nid = 'ch_' + uid() + added; st.push(env.DB.prepare(`INSERT INTO channels (id,num,name,grp,active) VALUES (?,?,?,?,1)`).bind(nid, r.num, r.name || `ช่อง ${r.num}`, r.grp)); byNum.set(r.num, nid); added++; }
+  }
+  for (let i = 0; i < st.length; i += 50) await env.DB.batch(st.slice(i, i + 50));
+  await audit(env, request, me, 'update', 'channel', 'import', 'นำเข้ารายชื่อช่อง', [{ f: 'import', from: '', to: `แก้ ${updated} · เพิ่ม ${added}` }]);
+  return json({ ok: true, added, updated });
+}
+
+async function getChecks(request, env) {
+  const u = new URL(request.url);
+  const month = u.searchParams.get('month');
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    const { results } = await env.DB.prepare(`SELECT date, status, COUNT(*) AS n FROM channel_checks WHERE date LIKE ? GROUP BY date, status`).bind(month + '%').all();
+    return json({ summary: results });
+  }
+  const date = u.searchParams.get('date');
+  if (!isDate(date)) return json({ error: 'วันที่ไม่ถูกต้อง' }, 400);
+  const { results } = await env.DB.prepare(`SELECT * FROM channel_checks WHERE date=?`).bind(date).all();
+  return json({ date, checks: results });
+}
+
+async function setCheck(date, chId, request, env, me) {
+  if (!isDate(date)) return json({ error: 'วันที่ไม่ถูกต้อง' }, 400);
+  const ch = await env.DB.prepare(`SELECT * FROM channels WHERE id=?`).bind(chId).first();
+  if (!ch) return json({ error: 'ไม่พบช่อง' }, 404);
+  const b = await request.json();
+  const status = CH_STATUS.includes(b.status) ? b.status : '';
+  const note = String(b.note ?? '').trim().slice(0, 500);
+  const old = await env.DB.prepare(`SELECT * FROM channel_checks WHERE date=? AND channel_id=?`).bind(date, chId).first();
+  if (!status) {
+    await env.DB.prepare(`DELETE FROM channel_checks WHERE date=? AND channel_id=?`).bind(date, chId).run();
+  } else {
+    await env.DB.prepare(`INSERT INTO channel_checks (date,channel_id,status,note,checked_by,checked_at) VALUES (?,?,?,?,?,?)
+      ON CONFLICT(date,channel_id) DO UPDATE SET status=excluded.status, note=excluded.note, checked_by=excluded.checked_by, checked_at=excluded.checked_at`)
+      .bind(date, chId, status, note, me.name, nowLocal()).run();
+  }
+  const changes = [];
+  if ((old?.status || '') !== status) changes.push({ f: 'chStatus', from: CH_ST_TH[old?.status || ''], to: CH_ST_TH[status] });
+  if ((old?.note || '') !== note) changes.push({ f: 'note', from: old?.note || '', to: note });
+  if (changes.length) await audit(env, request, me, 'update', 'check', `${date}:${chId}`, `${chLabel(ch)} · ${date}`, changes);
+  const row = await env.DB.prepare(`SELECT * FROM channel_checks WHERE date=? AND channel_id=?`).bind(date, chId).first();
+  return json({ check: row || null });
+}
+
+// mark every active channel that has no result yet on this date as "ok"
+async function checksAllOk(date, request, env, me) {
+  if (!isDate(date)) return json({ error: 'วันที่ไม่ถูกต้อง' }, 400);
+  const { results } = await env.DB.prepare(`SELECT c.id FROM channels c
+    LEFT JOIN channel_checks k ON k.channel_id = c.id AND k.date = ?
+    WHERE c.active = 1 AND k.channel_id IS NULL`).bind(date).all();
+  const at = nowLocal();
+  const st = results.map(r => env.DB.prepare(`INSERT OR IGNORE INTO channel_checks (date,channel_id,status,note,checked_by,checked_at) VALUES (?,?,?,?,?,?)`)
+    .bind(date, r.id, 'ok', '', me.name, at));
+  for (let i = 0; i < st.length; i += 50) await env.DB.batch(st.slice(i, i + 50));
+  if (st.length) await audit(env, request, me, 'update', 'check', `${date}:all`, `เช็คช่อง ${date}`, [{ f: 'chAllOk', from: '', to: `ตั้ง ${st.length} ช่องที่เหลือเป็นปกติ` }]);
+  const { results: checks } = await env.DB.prepare(`SELECT * FROM channel_checks WHERE date=?`).bind(date).all();
+  return json({ ok: true, count: st.length, checks });
 }
