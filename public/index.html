@@ -141,6 +141,16 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 15: rename checker ═══ */
+.sc-sub{flex-wrap:wrap}
+.sc-rn{border:1px dashed var(--rule);background:none;border-radius:20px;padding:2px 10px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--blue);cursor:pointer}
+.sc-rn:hover{border-color:var(--blue);background:var(--blue-bg)}
+.sc-rnbox{width:100%;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding:8px 10px;border-radius:12px;background:var(--blue-bg);border:1px solid var(--blue-bd);font-size:12.5px;color:var(--ink)}
+.sc-rnbox .fs{font-size:13px;padding:6px 10px;min-width:150px}
+.sc-rnbox .btn{font-size:12px;padding:6px 12px}
+/* ══ BATCH 14: proxy check ═══ */
+.sl-by{font-size:10.5px;font-weight:700;color:#7C3AED;margin-top:1px}
+.sc-proxy{font-size:12px;font-weight:600;color:#6D28D9;background:#F5F3FF;border:1px solid #DDD6FE;padding:2px 10px;border-radius:20px}
 /* ══ BATCH 13: extra checker ═══ */
 #ex-ov{z-index:1600}
 .sl-h{font-size:10.5px;font-weight:800;color:var(--faint);letter-spacing:.06em;margin:2px 2px -2px}
@@ -1202,7 +1212,7 @@ tr:hover td{background:var(--card-2)}
   <div class="modal" style="max-width:380px">
     <div class="mh"><div class="mt">เพิ่มเติม · รอบ <span id="ex-slot"></span> น.</div><button class="cx" onclick="cm('ex-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
     <div class="mb"><label class="fl" style="display:block;margin-bottom:6px">ชื่อผู้เช็ค (นอกเหนือจากผู้รับผิดชอบ)</label><select class="fsel" id="ex-sel"></select>
-      <div class="fhint" style="margin-top:6px">ใช้เมื่อมีคนอื่นมาเช็คแทนหรือเช็คเพิ่ม — ระบบจะบันทึกว่าคุณเป็นผู้บันทึกให้</div></div>
+      <div class="fhint" style="margin-top:6px">ถ้าเลือกชื่อคนอื่น ระบบจะระบุว่าคุณเป็นผู้ลงข้อมูล</div></div>
     <div class="mf" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--rule)"><button class="btn btn-out" onclick="cm('ex-ov')">ยกเลิก</button><button class="btn btn-primary" onclick="exGo()">ถัดไป</button></div>
   </div>
 </div>
@@ -1801,11 +1811,12 @@ function ckPState(slot){const t=today();if(CK.date<t)return['ไม่ได้�
 function ckExBtn(slot,duty){
   if(!can('ch.check'))return'';
   const me=currentUser?.name;
-  if(can('ch.manage'))return`<button class="sl-add" onclick="exOpen('${slot}')">+ เพิ่มเติม (คนอื่นเช็ค)</button>`;
+  if(can('ch.manage')||(can('ch.proxy')&&CK.date===today()&&ckState(slot)!=='wait'))return`<button class="sl-add" onclick="exOpen('${slot}')">+ เพิ่มเติม (คนอื่นเช็ค)</button>`;
   if(!me||duty.includes(me)||ckOf(slot,me)||CK.date!==today()||ckState(slot)==='wait')return'';
   return`<button class="sl-add" onclick="ckOpen('${slot}','${me.replace(/'/g,"\\'")}')">+ เพิ่มเติม — ${me} เช็คเอง</button>`;
 }
 function exOpen(slot){
+  if(!can('ch.manage')&&!can('ch.proxy'))return;
   const duty=ckDuty(CK.date),opts=DB.staff.map(x=>x.name).filter(n=>!duty.includes(n)&&!ckOf(slot,n));
   if(!opts.length){toast('ไม่มีพนักงานคนอื่นให้เลือก','w');return;}
   document.getElementById('ex-slot').textContent=slot;CK.exSlot=slot;
@@ -1821,7 +1832,9 @@ function ckState(slot){
 }
 const CK_STATE={done:['เช็คแล้ว','#047857'],due:['ถึงเวลาเช็ค','#B45309'],wait:['รอเวลา','#64748B'],late:['เลยเวลา ยังไม่เช็ค','#B91C1C'],miss:['ไม่ได้เช็ค','#B91C1C']};
 function ckPunct(slot,at){const m=ckMin((at||'').slice(11,16))-ckMin(slot);if(m<-15)return[`ก่อนเวลา ${-m} นาที`,'early'];if(m<=15)return['ตรงเวลา','ok'];return[`ช้า ${m} นาที`,'late'];}
-function ckCanPress(name,slot){return can('ch.check')&&(can('ch.manage')||(name===currentUser?.name&&CK.date===today()&&(!slot||ckState(slot)!=='wait')));}
+function ckCanPress(name,slot){return can('ch.check')&&(can('ch.manage')||((name===currentUser?.name||can('ch.proxy'))&&CK.date===today()&&(!slot||ckState(slot)!=='wait')));}
+const ckProxy=n=>n!==currentUser?.name;
+const ckBy=k=>k&&k.created_by&&k.created_by!==k.staff?`<div class="sl-by">✍️ ลงข้อมูลโดย ${k.created_by}</div>`:'';
 async function ckLoad(d){
   if(!d)return;CK.date=d;
   document.getElementById('ck-date').value=d;
@@ -1844,7 +1857,7 @@ function ckChState(){
   Object.keys(st).forEach(id=>{if(st[id]==='down'&&last&&!CK.checks.some(k=>k.slot===last&&k.issues.some(i=>i.ch===id&&!i.fixed)))st[id]='fixed';});
   return{st,any:!!done.length};
 }
-function ckIssues(){return CK.checks.flatMap(k=>k.issues.map(i=>({...i,slot:k.slot,staff:k.staff,at:k.checked_at}))).sort((a,b)=>a.slot.localeCompare(b.slot)||a.num-b.num);}
+function ckIssues(){return CK.checks.flatMap(k=>k.issues.map(i=>({...i,slot:k.slot,staff:k.staff,at:k.checked_at,by:k.created_by}))).sort((a,b)=>a.slot.localeCompare(b.slot)||a.num-b.num);}
 function ckRender(){
   if(!CK.date)return;
   const d=CK.date,duty=ckDuty(d),rg=ckRange(d),slots=CK.cfg.slots;
@@ -1866,13 +1879,13 @@ function ckRender(){
     return`<div class="sl-card st-${state}${slot===nowS?' now':''}">
       <div class="sl-top"><div class="sl-time">${slot}<small>น.</small></div><span class="sl-pill" style="--c:${lab[1]}">${state==='due'?'<i class="sl-dot"></i>':''}${lab[0]}</span></div>
       <div class="sl-staff"><div class="sl-h">ผู้รับผิดชอบ</div>${names.length?names.map(n=>{const k=ckOf(slot,n);const cp=ckCanPress(n,slot);const ex=!duty.includes(n);const hd=ex&&n===names.find(x=>!duty.includes(x))?'<div class="sl-h">เพิ่มเติม</div>':'';
-        if(k){const p=ckPunct(slot,k.checked_at);return`${hd}<button class="sl-btn done${ex?' ex':''}" onclick="ckOpen('${slot}','${n.replace(/'/g,"\\'")}')"><i style="background:${avCol(n)}">${n.charAt(0)}</i><span><b>${n}${ex?' <em class="sl-ex">เพิ่มเติม</em>':''}</b><small>✓ ${k.checked_at.slice(11,16)} น. · <em class="pu-${p[1]}">${p[0]}</em></small></span></button>`;}
-        if(cp)return`<button class="sl-btn go" onclick="ckOpen('${slot}','${n.replace(/'/g,"\\'")}')"><i style="background:${avCol(n)}">${n.charAt(0)}</i><span><b>${n}</b><small>แตะเพื่อบันทึกการเช็ค</small></span><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>`;
+        if(k){const p=ckPunct(slot,k.checked_at);return`${hd}<button class="sl-btn done${ex?' ex':''}" onclick="ckOpen('${slot}','${n.replace(/'/g,"\\'")}')"><i style="background:${avCol(n)}">${n.charAt(0)}</i><span><b>${n}${ex?' <em class="sl-ex">เพิ่มเติม</em>':''}</b><small>✓ ${k.checked_at.slice(11,16)} น. · <em class="pu-${p[1]}">${p[0]}</em></small>${ckBy(k)}</span></button>`;}
+        if(cp)return`<button class="sl-btn go" onclick="ckOpen('${slot}','${n.replace(/'/g,"\\'")}')"><i style="background:${avCol(n)}">${n.charAt(0)}</i><span><b>${n}</b><small>${ckProxy(n)?'แตะเพื่อบันทึกแทน':'แตะเพื่อบันทึกการเช็ค'}</small></span><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>`;
         return`<div class="sl-btn off"><i>${n.charAt(0)}</i><span><b>${n}</b><small>${state==='wait'&&n===currentUser?.name&&d===today()?`เปิดให้เช็คเวลา ${ckOpenAt(slot)} น.`:ckPState(slot)[0]}</small></span></div>`;}).join(''):'<div class="sl-none">ยังไม่ได้ตั้งเวร</div>'}${ckExBtn(slot,duty)}</div>
       <div class="sl-res">${ks.length?(sIss.length?`<div class="sl-bad">⚠ ผิดปกติ ${sIss.length} ช่อง</div><div class="sl-chs">${sIss.slice(0,12).map(i=>`<span class="${i.fixed?'fx':''}" title="${(i.problem||'').replace(/"/g,'&quot;')}">${i.num}</span>`).join('')}${sIss.length>12?`<span>+${sIss.length-12}</span>`:''}</div>`:'<div class="sl-good">✓ ปกติทุกช่อง</div>'):'<div class="sl-wait">—</div>'}</div>
     </div>`;}).join('');
   document.getElementById('ck-issues-n').textContent=`${iss.length} รายการ`;
-  document.getElementById('ck-issues').innerHTML=iss.length?iss.map(i=>`<tr class="${i.fixed?'':'od-row'}"><td class="tmono">${i.slot}</td><td><b class="tmono">${i.num}</b> ${i.name&&i.name!==`ช่อง ${i.num}`?i.name:''}</td><td>${i.problem||'—'}</td><td style="font-size:12.5px;max-width:260px">${(i.fix||'—').replace(/</g,'&lt;')}</td><td>${i.fixed?'<span class="lg-act" style="color:#047857;background:#D1FAE5">แก้ไขแล้ว</span>':'<span class="lg-act" style="color:#B91C1C;background:#FEE2E2">ยังไม่หาย</span>'}</td><td>${asgChips([i.staff])}</td></tr>`).join(''):`<tr class="empty"><td colspan="6"><div class="ei">✓</div>${CK.checks.length?'ไม่พบช่องผิดปกติ':'ยังไม่มีการเช็คในวันนี้'}</td></tr>`;
+  document.getElementById('ck-issues').innerHTML=iss.length?iss.map(i=>`<tr class="${i.fixed?'':'od-row'}"><td class="tmono">${i.slot}</td><td><b class="tmono">${i.num}</b> ${i.name&&i.name!==`ช่อง ${i.num}`?i.name:''}</td><td>${i.problem||'—'}</td><td style="font-size:12.5px;max-width:260px">${(i.fix||'—').replace(/</g,'&lt;')}</td><td>${i.fixed?'<span class="lg-act" style="color:#047857;background:#D1FAE5">แก้ไขแล้ว</span>':'<span class="lg-act" style="color:#B91C1C;background:#FEE2E2">ยังไม่หาย</span>'}</td><td>${asgChips([i.staff])}${i.by&&i.by!==i.staff?`<div class="sl-by">✍️ ลงข้อมูลโดย ${i.by}</div>`:''}</td></tr>`).join(''):`<tr class="empty"><td colspan="6"><div class="ei">✓</div>${CK.checks.length?'ไม่พบช่องผิดปกติ':'ยังไม่มีการเช็คในวันนี้'}</td></tr>`;
   const all=ckActive();
   document.getElementById('ck-ovn').textContent=`${all.length} ช่อง`;
   document.getElementById('ck-mini').innerHTML=all.map(c=>{const x=st[c.id]||(any?'ok':'none');return`<span class="ckm ${x}" title="ช่อง ${c.num} ${ckName(c)}">${c.num}</span>`;}).join('');
@@ -1887,14 +1900,33 @@ function ckOpen(slot,name){
   CK.sel={slot,name};CK.ro=!cp;
   CK.iss=Object.fromEntries((k?.issues||[]).map(i=>[i.ch,{problem:i.problem,fix:i.fix,fixed:i.fixed}]));
   document.getElementById('sc-mt').textContent=`${CK.ro?'ผลการเช็ค':'บันทึกการเช็คช่อง'} · รอบ ${slot} น.`;
-  document.getElementById('sc-sub').innerHTML=`${asgChips([name])} <span>${ckThDate(CK.date)}</span>`;
+  const who=k?.created_by&&k.created_by!==name?k.created_by:(!k&&!CK.ro&&ckProxy(name)?currentUser?.name:'');
+  const canRn=!!k&&(can('ch.manage')||(can('ch.proxy')&&CK.date===today()));
+  document.getElementById('sc-sub').innerHTML=`${asgChips([name])}${canRn?`<button class="sc-rn" onclick="rnShow()">✏️ แก้ชื่อผู้เช็ค</button>`:''} <span>${ckThDate(CK.date)}</span>${who?`<span class="sc-proxy">✍️ ${k?'ลงข้อมูลโดย':'คุณกำลังบันทึกแทน — ลงข้อมูลโดย'} <b>${who}</b></span>`:''}
+    <div class="sc-rnbox" id="sc-rnbox" style="display:none"><span>เปลี่ยนจาก <b>${name}</b> เป็น</span><select class="fs" id="sc-rnsel"></select><button class="btn btn-primary" onclick="rnSave()">บันทึกชื่อ</button><button class="btn btn-out" onclick="document.getElementById('sc-rnbox').style.display='none'">ยกเลิก</button></div>`;
   document.getElementById('sc-note').value=k?.note||'';document.getElementById('sc-note').disabled=CK.ro;
   document.getElementById('sc-q').value='';
   document.getElementById('sc-quick').style.display=CK.ro?'none':'';
   document.getElementById('sc-save').style.display=CK.ro?'none':'';
   const n=new Date(),hm=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-  document.getElementById('sc-stamp').innerHTML=k?`🕒 เช็คเมื่อ <b>${k.checked_at.slice(11,16)} น.</b> (${ckPunct(slot,k.checked_at)[0]})${k.updated_at&&k.updated_at!==k.checked_at?` · แก้ไขล่าสุด ${k.updated_at.slice(11,16)} น.`:''}${k.created_by&&k.created_by!==k.staff?` · บันทึกโดย ${k.created_by}`:''}`:`🕒 เวลาจะถูกบันทึกเมื่อกดบันทึก (ตอนนี้ ${hm} น.)`;
+  document.getElementById('sc-stamp').innerHTML=k?`🕒 เช็คเมื่อ <b>${k.checked_at.slice(11,16)} น.</b> (${ckPunct(slot,k.checked_at)[0]})${k.updated_at&&k.updated_at!==k.checked_at?` · แก้ไขล่าสุด ${k.updated_at.slice(11,16)} น.`:''}${k.created_by&&k.created_by!==k.staff?` · ลงข้อมูลโดย <b>${k.created_by}</b>`:''}${k.updated_by&&(k.updated_by!==k.created_by)&&k.updated_at!==k.checked_at?` · แก้ไขล่าสุดโดย ${k.updated_by}`:''}`:`🕒 เวลาจะถูกบันทึกเมื่อกดบันทึก (ตอนนี้ ${hm} น.)`;
   scGrid();document.getElementById('sc-ov').classList.add('open');
+}
+function rnShow(){
+  const {slot,name}=CK.sel;const duty=ckDuty(CK.date);
+  const opts=DB.staff.map(x=>x.name).filter(n=>n!==name&&!ckOf(slot,n)).sort((a,b)=>(duty.includes(b)-duty.includes(a))||a.localeCompare(b,'th'));
+  if(!opts.length){toast('ไม่มีชื่ออื่นให้เลือก (ทุกคนมีรายการในรอบนี้แล้ว)','w');return;}
+  document.getElementById('sc-rnsel').innerHTML=opts.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n}${duty.includes(n)?' (เวร)':''}</option>`).join('');
+  document.getElementById('sc-rnbox').style.display='flex';
+}
+async function rnSave(){
+  const {slot,name}=CK.sel,to=document.getElementById('sc-rnsel').value;
+  if(!to||!confirm(`เปลี่ยนชื่อผู้เช็ครอบ ${slot} จาก "${name}" เป็น "${to}"?\nเวลาที่เช็คและผลการเช็คจะยังเหมือนเดิม`))return;
+  try{
+    const r=await POST(`/api/slot-checks/${CK.date}/${encodeURIComponent(slot)}/rename`,{from:name,to});
+    CK.checks=CK.checks.filter(k=>!(k.slot===slot&&k.staff===name));CK.checks.push(r.check);
+    cm('sc-ov');ckRender();toast(`แก้ชื่อผู้เช็คเป็น ${to} แล้ว`);
+  }catch(e){toast(e.message,'e');}
 }
 function scGrid(){
   const q=(document.getElementById('sc-q').value||'').trim().toLowerCase();
@@ -2001,7 +2033,7 @@ async function ckCapture(){
   const logo=document.querySelector('.lp-logo-img')?.src||'';const n=new Date();
   const rows=slots.map(slot=>{const names=[...duty,...CK.checks.filter(k=>k.slot===slot&&!duty.includes(k.staff)).map(k=>k.staff)];const state=ckState(slot);
     return names.map((nm,i)=>{const k=ckOf(slot,nm);const p=k?ckPunct(slot,k.checked_at):null;const ni=k?k.issues.length:0;const ex=!duty.includes(nm);
-      return`<tr class="${!k&&['miss','late'].includes(state)?'od':''}">${i===0?`<td rowspan="${names.length}" class="m" style="font-size:16px;font-weight:800;vertical-align:middle">${slot}</td>`:''}<td><b>${nm}</b>${ex?' <span class="st" style="color:#6D28D9;background:#EDE9FE;font-size:11px">เพิ่มเติม</span>':''}${k&&k.created_by&&k.created_by!==nm?`<div class="ph">บันทึกโดย ${k.created_by}</div>`:''}</td><td>${k?`<b>${k.checked_at.slice(11,16)} น.</b>`:'—'}</td><td>${p?`<span class="st" style="color:${p[1]==='late'?'#B91C1C':p[1]==='early'?'#1D4ED8':'#047857'};background:${p[1]==='late'?'#FEE2E2':p[1]==='early'?'#DBEAFE':'#D1FAE5'}">${p[0]}</span>`:`${(()=>{const ps=ckPState(slot);return`<span style="color:${ps[1]};font-weight:700">${ps[0]}</span>`;})()}`}</td><td>${k?(ni?`<b style="color:#B91C1C">ผิดปกติ ${ni} ช่อง</b>: ${k.issues.map(x=>x.num).join(', ')}`:'<b style="color:#047857">✓ ปกติทุกช่อง</b>'):'—'}${k?.note?`<div class="ph">📝 ${k.note}</div>`:''}</td></tr>`;}).join('')||`<tr><td class="m">${slot}</td><td colspan="4">ยังไม่ได้ตั้งเวร</td></tr>`;}).join('');
+      return`<tr class="${!k&&['miss','late'].includes(state)?'od':''}">${i===0?`<td rowspan="${names.length}" class="m" style="font-size:16px;font-weight:800;vertical-align:middle">${slot}</td>`:''}<td><b>${nm}</b>${ex?' <span class="st" style="color:#6D28D9;background:#EDE9FE;font-size:11px">เพิ่มเติม</span>':''}${k&&k.created_by&&k.created_by!==nm?`<div class="ph">✍️ ลงข้อมูลโดย ${k.created_by}</div>`:''}</td><td>${k?`<b>${k.checked_at.slice(11,16)} น.</b>`:'—'}</td><td>${p?`<span class="st" style="color:${p[1]==='late'?'#B91C1C':p[1]==='early'?'#1D4ED8':'#047857'};background:${p[1]==='late'?'#FEE2E2':p[1]==='early'?'#DBEAFE':'#D1FAE5'}">${p[0]}</span>`:`${(()=>{const ps=ckPState(slot);return`<span style="color:${ps[1]};font-weight:700">${ps[0]}</span>`;})()}`}</td><td>${k?(ni?`<b style="color:#B91C1C">ผิดปกติ ${ni} ช่อง</b>: ${k.issues.map(x=>x.num).join(', ')}`:'<b style="color:#047857">✓ ปกติทุกช่อง</b>'):'—'}${k?.note?`<div class="ph">📝 ${k.note}</div>`:''}</td></tr>`;}).join('')||`<tr><td class="m">${slot}</td><td colspan="4">ยังไม่ได้ตั้งเวร</td></tr>`;}).join('');
   const box=document.createElement('div');box.className='cap-rpt';
   box.innerHTML=`<div class="cap-hd">${logo?`<img src="${logo}" class="cap-logo">`:''}<div style="flex:1"><div class="cap-t">รายงานการเช็คช่องสัญญาณ ห้องส่ง</div>
       <div class="cap-s">${ckThDate(d)} · เวร: ${duty.join(', ')||'—'} · บันทึกภาพเวลา ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')} น.</div></div></div>
@@ -2014,7 +2046,7 @@ async function ckCapture(){
     <table><thead><tr><th style="width:90px">รอบ</th><th>ผู้เช็ค</th><th>เวลาที่เช็ค</th><th>ความตรงเวลา</th><th>ผลการเช็ค</th></tr></thead><tbody>${rows}</tbody></table>
     ${iss.length?`<div style="font-size:17px;font-weight:900;margin:22px 0 8px">รายละเอียดช่องที่ผิดปกติ (${iss.length})</div>
     <table><thead><tr><th>รอบ</th><th>ช่อง</th><th>อาการ</th><th>การแก้ไข</th><th>สถานะ</th><th>ผู้เช็ค</th></tr></thead><tbody>
-    ${iss.map(i=>`<tr class="${i.fixed?'dn':'od'}"><td class="m">${i.slot}</td><td><b>${i.num}</b> ${i.name&&i.name!==`ช่อง ${i.num}`?i.name:''}</td><td>${i.problem||'—'}</td><td class="dt">${i.fix||'—'}</td><td><span class="st" style="color:${i.fixed?'#047857':'#B91C1C'};background:${i.fixed?'#D1FAE5':'#FEE2E2'}">${i.fixed?'แก้ไขแล้ว':'ยังไม่หาย'}</span></td><td>${i.staff}</td></tr>`).join('')}
+    ${iss.map(i=>`<tr class="${i.fixed?'dn':'od'}"><td class="m">${i.slot}</td><td><b>${i.num}</b> ${i.name&&i.name!==`ช่อง ${i.num}`?i.name:''}</td><td>${i.problem||'—'}</td><td class="dt">${i.fix||'—'}</td><td><span class="st" style="color:${i.fixed?'#047857':'#B91C1C'};background:${i.fixed?'#D1FAE5':'#FEE2E2'}">${i.fixed?'แก้ไขแล้ว':'ยังไม่หาย'}</span></td><td>${i.staff}${i.by&&i.by!==i.staff?`<div class="ph">✍️ ลงข้อมูลโดย ${i.by}</div>`:''}</td></tr>`).join('')}
     </tbody></table>`:`<div style="margin-top:18px;padding:14px;border-radius:12px;background:#ECFDF5;color:#047857;font-weight:800;text-align:center">${CK.checks.length?'✓ ไม่พบช่องผิดปกติในวันนี้':'ยังไม่มีการเช็คในวันนี้'}</div>`}
     ${sigMonitor(st,any)}
     <div class="cap-ft">Angthong Cable TV · ACTV Dispatch</div>`;
@@ -2235,7 +2267,7 @@ const PERM_GROUPS=[
   {g:'jobs',t:'งานช่าง',items:[['jobs.view','ดูรายการงาน'],['jobs.create','เพิ่ม / นำเข้างาน'],['jobs.edit','แก้ไขงาน'],['jobs.delete','ลบงาน'],['jobs.upload','แนบใบเสร็จ / ใบงาน'],['jobs.verify','ติ๊กตรวจสอบ / เปลี่ยนสถานะ']]},
   {g:'sales',t:'งานขาย',items:[['sales.view','ดูรายการขาย'],['sales.create','เพิ่ม / นำเข้ารายการ'],['sales.edit','แก้ไขรายการ'],['sales.delete','ลบรายการ'],['sales.upload','แนบใบเสร็จ']]},
   {g:'comm',t:'ค่าคอมมิชชั่น',items:[['comm.view','ดูค่าคอมของตัวเอง'],['comm.all','ดูค่าคอมของทุกคน']]},
-  {g:'ch',t:'เช็คช่องสัญญาณ',items:[['ch.view','ดูผลเช็คช่อง'],['ch.check','บันทึกผลเช็คช่อง'],['ch.manage','จัดการรายชื่อช่อง']]},
+  {g:'ch',t:'เช็คช่องสัญญาณ',items:[['ch.view','ดูผลเช็คช่อง'],['ch.check','บันทึกผลเช็คช่อง'],['ch.proxy','บันทึกการเช็คแทนผู้อื่น'],['ch.manage','จัดการรายชื่อช่อง / เวร']]},
 ];
 const PERM_LABEL=Object.fromEntries(PERM_GROUPS.flatMap(g=>g.items.map(([k,l])=>[k,g.t+': '+l])));
 let RE=[];
@@ -2281,7 +2313,7 @@ async function delRole(id){
 let LG={rows:[],total:0,eid:null,elabel:''};
 const LOG_ACT={create:['เพิ่ม','#059669','#D1FAE5'],update:['แก้ไข','#1D4ED8','#DBEAFE'],delete:['ลบ','#DC2626','#FEE2E2'],login:['เข้าระบบ','#475569','#F1F5F9'],login_fail:['เข้าระบบไม่สำเร็จ','#B45309','#FEF3C7'],pin_change:['เปลี่ยนรหัส','#7C3AED','#EDE9FE'],pin_reset:['ตั้งรหัสให้','#7C3AED','#EDE9FE']};
 const LOG_ENT={check:'เช็คช่อง',channel:'รายชื่อช่อง',job:'งานช่าง',sale:'งานขาย',staff:'พนักงาน',role:'บทบาท',auth:'ระบบ'};
-const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ',chStatus:'สถานะช่อง',note:'หมายเหตุ',chAllOk:'เช็คทั้งหมด',import:'นำเข้า',num:'เลขช่อง',grp:'กลุ่ม',active:'ใช้งาน',slots:'ช่วงเวลา',roster:'เวร',result:'ผลการเช็ค',slot:'รอบ'};
+const F_LABEL={jobNumber:'เลขงาน',reportDate:'วันที่แจ้ง',customer:'ลูกค้า',phone:'เบอร์',details:'รายละเอียด',dueDate:'กำหนดส่ง',techReport:'รายงานช่าง',status:'สถานะ',assignees:'ผู้รับงาน',completionDate:'วันที่เสร็จ',serviceFee:'ค่าบริการ',verify:'ตรวจสอบ',receiptData:'ใบเสร็จ',jobFormData:'ใบงาน',saleDate:'วันที่ขาย',amount:'มูลค่า',commType:'ประเภท',staff:'พนักงาน',name:'ชื่อ',role:'บทบาท',label:'ชื่อบทบาท','perms+':'เพิ่มสิทธิ์','perms-':'ลบสิทธิ์',perms:'สิทธิ์',pin:'รหัสผ่าน',payCycle:'รอบชำระ',chStatus:'สถานะช่อง',note:'หมายเหตุ',chAllOk:'เช็คทั้งหมด',import:'นำเข้า',num:'เลขช่อง',grp:'กลุ่ม',active:'ใช้งาน',slots:'ช่วงเวลา',roster:'เวร',result:'ผลการเช็ค',slot:'รอบ',checker:'ชื่อผู้เช็ค'};
 const ST_L={pending:'รอดำเนินการ',active:'กำลังดำเนินการ',done:'สำเร็จ'};
 function fmtV(f,v){
   if((v===''||v==null)&&f==='payCycle')return'<i class="lg-e">อัตโนมัติ</i>';
