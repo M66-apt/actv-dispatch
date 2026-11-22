@@ -36,7 +36,7 @@
  *   GET    /api/chk-config              [ch.view]   { slots, roster }      · PUT [ch.manage]
  *   GET    /api/slot-checks?date=       [ch.view]   · ?month= daily summary
  *   PUT    /api/slot-checks/:date/:slot { staff, issues:[{ch,num,name,problem,fix,fixed}], note }  [ch.check]
- *          (staff = the signed-in person, today only — ch.manage may record for others / other days)
+ *          (staff = the signed-in person, today only; anyone may add an extra check — ch.manage may record for others / other days)
  */
 
 const CORS = {
@@ -863,7 +863,7 @@ async function putSlotCheck(date, slot, request, env, me) {
   if (!boss) {
     if (staff !== me.name) return deny(me, 'บันทึกได้เฉพาะชื่อของตัวเอง');
     if (date !== todayBkk) return deny(me, 'บันทึกได้เฉพาะวันนี้');
-    if (!dutyFor(cfg, date).includes(staff)) return deny(me, 'วันนี้ไม่ใช่เวรของคุณ');
+    // คนที่ไม่ได้อยู่เวรก็เช็คเพิ่มเติมได้ (บันทึกในชื่อตัวเอง)
     const hm = nowLocal().slice(11, 16), toMin = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
     if (toMin(hm) < toMin(slot) - 15) return deny(me, `ยังไม่ถึงเวลาเช็ครอบ ${slot} (เปิดให้เช็คก่อนเวลา 15 นาที)`);
   }
