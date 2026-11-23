@@ -141,6 +141,21 @@ body{font-family:'Sarabun',system-ui,sans-serif;background:var(--canvas);color:v
 .main,.content,.section,.card{min-width:0}
 #app{max-width:100vw}
 @media(max-width:900px){.tb-left .tb-breadcrumb{display:none}.topbar{padding:0 14px}.tb-uname,.tb-urole{display:none}}
+/* ══ BATCH 16: file viewer ═══ */
+#fv-ov{z-index:1700}
+.fv-modal{max-width:1000px;width:96vw;height:92vh;display:flex;flex-direction:column;padding:0}
+.fv-modal .mh{flex-shrink:0}
+.fv-body{flex:1;overflow:auto;background:#0F172A;display:flex;align-items:center;justify-content:center;border-radius:0 0 var(--r-lg) var(--r-lg)}
+.fv-body img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;display:block}
+.fv-body.zoom{align-items:flex-start;justify-content:flex-start}
+.fv-body.zoom img{max-width:none;max-height:none;cursor:zoom-out}
+.fv-body iframe{width:100%;height:100%;border:none;background:#fff}
+.fv-col{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.fv-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid;transition:var(--fast)}
+.fv-btn.r{color:#047857;background:#ECFDF5;border-color:#A7F3D0}.fv-btn.r:hover{background:#D1FAE5}
+.fv-btn.f{color:#1D4ED8;background:#EFF6FF;border-color:#BFDBFE}.fv-btn.f:hover{background:#DBEAFE}
+.fv-btn.big{font-size:13px;padding:7px 14px;border-radius:10px}
+.fv-none{font-size:12px;padding:6px 12px;border-radius:10px;border:1px dashed var(--rule);color:var(--faint)}
 /* ══ BATCH 15: rename checker ═══ */
 .sc-sub{flex-wrap:wrap}
 .sc-rn{border:1px dashed var(--rule);background:none;border-radius:20px;padding:2px 10px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--blue);cursor:pointer}
@@ -1181,6 +1196,19 @@ tr:hover td{background:var(--card-2)}
 
 <div id="mp-pop"></div>
 
+<!-- ══ FILE VIEWER ════════════════════════════════════════ -->
+<div class="ov" id="fv-ov" onclick="coo(event,'fv-ov')">
+  <div class="modal fv-modal">
+    <div class="mh"><div class="mt" id="fv-t">ดูไฟล์</div>
+      <div style="display:flex;gap:6px;margin-left:auto;align-items:center">
+        <button class="btn btn-out" id="fv-zoom" onclick="fvZoom()" style="font-size:12px;padding:6px 10px">🔍 ขยาย</button>
+        <a class="btn btn-out" id="fv-dl" style="font-size:12px;padding:6px 10px;text-decoration:none">⬇ ดาวน์โหลด</a>
+        <button class="cx" onclick="cm('fv-ov')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div></div>
+    <div class="fv-body" id="fv-body"></div>
+  </div>
+</div>
+
 <!-- ══ SLOT CHECK ═════════════════════════════════════════ -->
 <div class="ov" id="sc-ov" onclick="coo(event,'sc-ov')">
   <div class="modal" style="max-width:900px;width:96vw">
@@ -2072,6 +2100,27 @@ async function ckCapture(){
   catch(e){toast('สร้างภาพไม่สำเร็จ: '+e.message,'e');}finally{box.remove();}
 }
 
+// ━━━━ FILE VIEWER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let FV_URL=null;
+function dataToBlobUrl(d){const[h,b]=d.split(',');const mime=(h.match(/data:([^;]+)/)||[])[1]||'application/octet-stream';const bin=atob(b);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return URL.createObjectURL(new Blob([u],{type:mime}));}
+function openFV(title,data,name){
+  if(!data){toast('ยังไม่มีไฟล์','w');return;}
+  if(FV_URL)URL.revokeObjectURL(FV_URL);
+  const isImg=/^data:image\//.test(data),isPdf=/^data:application\/pdf/.test(data);
+  FV_URL=/^data:/.test(data)?dataToBlobUrl(data):data;
+  document.getElementById('fv-t').textContent=title;
+  const dl=document.getElementById('fv-dl');dl.href=FV_URL;dl.download=name||(title+(isPdf?'.pdf':'.jpg'));
+  document.getElementById('fv-zoom').style.display=isImg?'':'none';
+  const b=document.getElementById('fv-body');b.classList.remove('zoom');
+  b.innerHTML=isImg?`<img src="${FV_URL}" alt="${title}" onclick="fvZoom()">`:isPdf?`<iframe src="${FV_URL}" title="${title}"></iframe>`:`<div style="padding:40px;text-align:center;color:var(--muted)">ไม่สามารถแสดงตัวอย่างไฟล์นี้ได้ — กดดาวน์โหลดเพื่อเปิด</div>`;
+  document.getElementById('fv-ov').classList.add('open');
+}
+function fvZoom(){const b=document.getElementById('fv-body');b.classList.toggle('zoom');document.getElementById('fv-zoom').textContent=b.classList.contains('zoom')?'🔍 พอดีจอ':'🔍 ขยาย';}
+function viewJobFile(id,kind){const j=DB.jobs.find(x=>x.id===id);if(!j)return;
+  kind==='rcpt'?openFV(`ใบเสร็จ · ${j.jobNumber||''} ${j.customer||''}`,j.receiptData,j.receiptName):openFV(`ใบงาน · ${j.jobNumber||''} ${j.customer||''}`,j.jobFormData,j.jobFormName);}
+function viewSaleFile(id){const x=DB.sales.find(y=>y.id===id);if(!x)return;openFV(`ใบเสร็จ · ${x.customer||''}`,x.receiptData,x.receiptName);}
+const fvBtn=(on,label,cls)=>`<button class="fv-btn ${cls}" onclick="event.stopPropagation();${on}">${label}</button>`;
+
 // ━━━━ ASSIGNEE CHIP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const AV_COL=['#2563EB','#D97706','#059669','#7C3AED','#DB2777','#0891B2','#DC2626','#4F46E5'];
 function avCol(n){let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))>>>0;return AV_COL[h%AV_COL.length];}
@@ -2443,7 +2492,7 @@ function renderJobs(){
     const chips=asgChips(j.assignees);
     // file attachment column
     const hasRcpt=!!j.receiptData,hasForm=!!j.jobFormData;
-    const fileCell=hasRcpt?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>ใบเสร็จ</span>`:can('jobs.upload')?`<button class="btn-upload-quick rcpt" onclick="openQuickUpload('${j.id}','rcpt')">+ ใบเสร็จ</button>`:`<span style="font-size:11px;color:var(--faint)">ยังไม่แนบ</span>`;
+    const fileCell=`<div class="fv-col">${hasRcpt?fvBtn(`viewJobFile('${j.id}','rcpt')`,'🧾 ดูใบเสร็จ','r'):''}${hasForm?fvBtn(`viewJobFile('${j.id}','form')`,'📋 ดูใบงาน','f'):''}${hasRcpt?'':(can('jobs.upload')?`<button class="btn-upload-quick rcpt" onclick="openQuickUpload('${j.id}','rcpt')">+ ใบเสร็จ</button>`:`<span style="font-size:11px;color:var(--faint)">ยังไม่แนบ</span>`)}</div>`;
     const od=overdueDays(j);
     return`<tr class="${od>0?'od-row':''}">
       <td class="tmono">${j.jobNumber||'—'}</td>
@@ -2508,7 +2557,7 @@ function hQuFile(input,type){
         ocrMatch(quFormD,jn,p=>{hn.textContent=`🔍 กำลังอ่านข้อความบนรูป... ${p}%`;}).then(res=>{if(quFormD!==mine)return;quFormOk=res.ok;hn.style.color=res.ok?'var(--green)':'var(--amber)';hn.textContent=res.ok?'✓ พบเลขงานบนรูป — จะปิดงานและติ๊กใบงานให้อัตโนมัติ':`⚠ ไม่พบเลขงาน "${jn}" บนรูป`;}).catch(()=>{hn.style.color='var(--amber)';hn.textContent='อ่านข้อความบนรูปไม่สำเร็จ';});}
       else if(jn){hn.style.color='var(--amber)';hn.textContent='ชื่อไฟล์ไม่ตรงกับเลขงาน';}
     }
-  };r.readAsDataURL(file);
+  };upLoad(file,r.onload);
 }
 async function saveQuickUpload(){
   if(!quRcptD&&!quFormD){toast('เลือกไฟล์อย่างน้อย 1 ไฟล์','e');return;}
@@ -2597,7 +2646,7 @@ function hfu(input,prevId){
     if(prevId==='job-rcpt-prev'){rcptJ=e.target.result;rcptJN=file.name;updCommPrev();}
     else{rcptS=e.target.result;rcptSN=file.name;updSComm();}
     document.getElementById(prevId).innerHTML=fprev(file.name);
-  };r.readAsDataURL(file);
+  };upLoad(file,r.onload);
 }
 function ocrNorm(t){return String(t||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
 function ocrFuzzy(t){return ocrNorm(t).replace(/O|Q|D/g,'0').replace(/[IL|]/g,'1').replace(/S/g,'5').replace(/B/g,'8').replace(/Z/g,'2').replace(/G/g,'6');}
@@ -2636,7 +2685,7 @@ function hJFU(input){
       if(res.ok)jfMark(hint,true,'ข้อความบนรูป');
       else hint.innerHTML=`<span style="color:var(--amber)">⚠ ไม่พบเลขงาน "${jn}" บนรูป — ตรวจสอบด้วยตนเอง</span>`;
     }catch(err){hint.innerHTML='<span style="color:var(--amber)">อ่านข้อความบนรูปไม่สำเร็จ — ตรวจสอบด้วยตนเอง</span>';}
-  };r.readAsDataURL(file);
+  };upLoad(file,r.onload);
 }
 async function saveJob(){
   const num=document.getElementById('job-number').value.trim();
@@ -2696,8 +2745,8 @@ function viewJob(id){
       </div>
       <div class="dsep"></div>
       <div style="display:flex;gap:8px">
-        <span style="font-size:12px;padding:5px 10px;border-radius:var(--r);border:1px solid;${j.receiptData?'background:var(--green-bg);border-color:var(--green-bd);color:var(--green)':'background:var(--card-2);border-color:var(--rule);color:var(--faint)'}">📄 ใบเสร็จ${j.receiptData?'✓':''}</span>
-        <span style="font-size:12px;padding:5px 10px;border-radius:var(--r);border:1px solid;${j.jobFormData?'background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)':'background:var(--card-2);border-color:var(--rule);color:var(--faint)'}">📋 ใบงาน${j.jobFormData?'✓':''}</span>
+        ${j.receiptData?fvBtn(`viewJobFile('${j.id}','rcpt')`,'🧾 ดูใบเสร็จ','r big'):'<span class="fv-none">🧾 ยังไม่มีใบเสร็จ</span>'}
+        ${j.jobFormData?fvBtn(`viewJobFile('${j.id}','form')`,'📋 ดูใบงาน','f big'):'<span class="fv-none">📋 ยังไม่มีใบงาน</span>'}
       </div>
     </div>
   `;
@@ -2736,7 +2785,7 @@ function renderSales(){
       <td style="font-weight:700">${s.amount?fMoney(s.amount):'<span style="color:var(--faint)">—</span>'}</td>
       <td>${tb2}</td>
       <td><span class="chip ch-blue" style="font-size:11px">${s.staff||'—'}</span></td>
-      <td>${s.receiptData?`<span style="font-size:11px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>แนบแล้ว</span>`:can('sales.upload')?`<button class="btn-sale-rcpt" onclick="openSaleReceiptUpload('${s.id}')">รอแนบ</button>`:`<span style="font-size:11px;color:var(--faint)">รอแนบ</span>`}</td>
+      <td>${s.receiptData?fvBtn(`viewSaleFile('${s.id}')`,'🧾 ดูใบเสร็จ','r'):can('sales.upload')?`<button class="btn-sale-rcpt" onclick="openSaleReceiptUpload('${s.id}')">รอแนบ</button>`:`<span style="font-size:11px;color:var(--faint)">รอแนบ</span>`}</td>
       <td>${comm!==null?`<span class="comm-val">${fMoney(comm)}</span>${payTag(salePayMonth(s),!!s.payCycle)}`:`<span class="comm-na">รอใบเสร็จ</span>`}</td>
       <td><div class="ta">
         <button class="btn btn-ghost btn-icon" data-perm="sales.edit" style="display:none" onclick="openSaleModal('${s.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
@@ -3007,7 +3056,7 @@ function openSaleReceiptUpload(saleId){
 }
 function hSruFile(inp){
   const file=inp.files[0];if(!file)return;
-  if(file.size>5*1024*1024){toast('ไฟล์ใหญ่เกิน 5MB','e');return;}
+  if(file.size>25*1024*1024){toast('ไฟล์ใหญ่เกิน 25MB','e');return;}
   const reader=new FileReader();
   reader.onload=e=>{
     sruData=e.target.result;
@@ -3016,7 +3065,7 @@ function hSruFile(inp){
     st.innerHTML=`<span style="color:var(--green);font-weight:700">✓ เลือกแล้ว</span>`;
     prev.innerHTML=sruData.startsWith('data:image')?`<img src="${sruData}" style="max-width:100%;border-radius:8px;margin-top:8px">`:`<div style="font-size:12px;color:var(--blue);margin-top:8px">📄 ${file.name}</div>`;
   };
-  reader.readAsDataURL(file);
+  upLoad(file,reader.onload);
 }
 async function saveSaleReceipt(){
   if(!sruData){toast('กรุณาเลือกไฟล์ก่อน','e');return;}
@@ -3110,7 +3159,7 @@ function vpAddImg(){
   const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
   inp.onchange=e=>{
     const file=e.target.files[0];if(!file)return;
-    compressImg(file,800,0.75,b64=>{
+    compressImg(file,800,0.75,b64=>{if(!b64){toast("เปิดรูปไม่ได้","e");return;}
       if(!Array.isArray(vpTempData))vpTempData=[];
       if(vpTempData.length>=5){toast('ภาพครบ 5 แล้ว','e');return;}
       vpTempData.push(b64);
@@ -3134,6 +3183,19 @@ function vpViewImages(){
   w.document.write(`<html><body style="margin:16px;background:#111;display:flex;flex-wrap:wrap;gap:8px">${vpTempData.map(b=>`<img src="${b}" style="height:200px;border-radius:8px">`).join('')}</body></html>`);
   w.document.close();
 }
+// ── อัปโหลดไฟล์: ย่อรูปก่อนบันทึก (ฐานข้อมูลรับได้ไม่เกิน ~2MB ต่อรายการ) ──
+const UP_MAX=1600,UP_Q=0.78,PDF_MAX=700*1024;
+function upLoad(file,onload){
+  const done=data=>onload({target:{result:data}});
+  if(/^image\//.test(file.type)&&!/gif|svg/.test(file.type)){
+    compressImg(file,UP_MAX,UP_Q,d=>{
+      if(!d){toast(`เปิดรูป ${file.name} ไม่ได้ — ลองถ่ายใหม่หรือเลือกไฟล์ JPG/PNG`,'e');return;}
+      if(d.length>1200000)compressImg(file,1200,0.7,done);else done(d);
+    });return;
+  }
+  if(file.size>PDF_MAX){toast(`ไฟล์ ${file.name} ใหญ่เกิน ${Math.round(PDF_MAX/1024)}KB — กรุณาถ่ายเป็นรูปภาพแทน หรือย่อขนาด PDF`,'e');return;}
+  const r=new FileReader();r.onload=e=>done(e.target.result);r.readAsDataURL(file);
+}
 function compressImg(file,maxSz,quality,cb){
   const r=new FileReader();r.onload=e=>{
     const img=new Image();img.onload=()=>{
@@ -3142,7 +3204,7 @@ function compressImg(file,maxSz,quality,cb){
       const c=document.createElement('canvas');c.width=w;c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
       cb(c.toDataURL('image/jpeg',quality));
-    };img.src=e.target.result;
+    };img.onerror=()=>cb(null);img.src=e.target.result;
   };r.readAsDataURL(file);
 }
 function getVPValue(){
